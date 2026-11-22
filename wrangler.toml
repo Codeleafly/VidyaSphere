@@ -1,0 +1,23 @@
+name = "vidyasphere"
+main = "worker/index.js"
+compatibility_date = "2024-01-01"
+
+[assets]
+directory = "./client"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vidyasphere-db"
+database_id = "78869fad-da13-4a9b-adad-1e3fb439b0d9"
+
+# Uncomment when R2 is enabled in Cloudflare dashboard
+# [[r2_buckets]]
+# binding = "STORAGE"
+# bucket_name = "vidyasphere-notes"
+
+[triggers]
+crons = ["0 0 * * *"]
+
+[vars]
+JWT_SECRET = "vidyasphere_edge_super_secret_key_2026_change_in_production"

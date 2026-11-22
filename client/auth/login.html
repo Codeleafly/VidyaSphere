@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | VidyaSphere</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-white text-center">
+      <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur">
+        <i data-lucide="lock" class="w-6 h-6"></i>
+      </div>
+      <h1 class="text-2xl font-bold">Welcome Back</h1>
+      <p class="text-xs text-indigo-100 mt-1">Sign in to your VidyaSphere school account</p>
+    </div>
+
+    <!-- Form -->
+    <div class="p-6 sm:p-8 space-y-5">
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+              <i data-lucide="user" class="w-5 h-5"></i>
+            </span>
+            <input type="text" id="username" required
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              placeholder="e.g. admin or rohit_10a_12" autofocus>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+              <i data-lucide="key" class="w-5 h-5"></i>
+            </span>
+            <input type="password" id="password" required
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              placeholder="••••••••">
+          </div>
+        </div>
+
+        <button type="submit" id="submit-btn"
+          class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition flex items-center justify-center gap-2">
+          <span>Sign In</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+
+      <!-- Secure Session Badge (No credentials leaked) -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-500 flex items-center justify-center gap-1.5">
+        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+        <span>Secure 256-Bit Encrypted Session</span>
+      </div>
+
+      <div class="border-t border-slate-100 pt-4 text-center space-y-2">
+        <p class="text-xs text-slate-500">
+          New Student? <a href="/auth/register.html" class="font-bold text-indigo-600 hover:underline">Apply for admission</a>
+        </p>
+        <p class="text-xs text-slate-500">
+          Already applied? <a href="/auth/status.html" class="font-bold text-indigo-600 hover:underline">Check status & activate account</a>
+        </p>
+        <p class="text-xs text-slate-500 pt-1 border-t border-slate-50">
+          <a href="/guide.html" class="inline-flex items-center gap-1 font-semibold text-violet-600 hover:underline">📖 New to VidyaSphere? Read Student Guide</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiRequest } from '/js/api.js';
+    import { saveSession } from '/js/auth.js';
+    import { showToast, initIcons } from '/js/ui.js';
+
+    initIcons();
+
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-75');
+
+      try {
+        const res = await apiRequest('/auth/login', {
+          method: 'POST',
+          body: { username, password },
+        });
+
+        saveSession(res.token, res.user);
+        showToast('Login successful! Redirecting...', 'success');
+
+        setTimeout(() => {
+          if (res.user.role === 'admin') {
+            window.location.href = '/admin/index.html';
+          } else {
+            window.location.href = '/dashboard/index.html';
+          }
+        }, 800);
+      } catch (err) {
+        showToast(err.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-75');
+      }
+    });
+  </script>
+</body>
+</html>

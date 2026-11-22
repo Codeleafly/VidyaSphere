@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Student Directory | VidyaSphere</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 overflow-x-hidden w-full">
+
+  <!-- Desktop Sidebar -->
+  <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 p-4 shrink-0 h-screen sticky top-0 justify-between">
+    <div class="space-y-6">
+      <div class="flex items-center gap-3 px-2">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="font-extrabold text-slate-900 leading-tight">VidyaSphere</h2>
+          <span class="text-xs text-slate-400 font-medium">School Edge Portal</span>
+        </div>
+      </div>
+
+      <nav class="space-y-1">
+        <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Notice Board
+        </a>
+        <a href="/dashboard/chat.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+          <i data-lucide="messages-square" class="w-5 h-5"></i> Realtime Chat
+        </a>
+        <a href="/dashboard/notes.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+          <i data-lucide="book-open" class="w-5 h-5"></i> Study Notes
+        </a>
+        <a href="/dashboard/qa.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+          <i data-lucide="message-square" class="w-5 h-5"></i> Academic Q&A
+        </a>
+        <a href="/dashboard/polls.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+          <i data-lucide="vote" class="w-5 h-5"></i> School Polls
+        </a>
+        <a href="/dashboard/students.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <i data-lucide="users" class="w-5 h-5"></i> Student Directory
+        </a>
+        <div id="admin-nav-link" class="hidden">
+          <a href="/admin/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-700 hover:bg-rose-50 font-bold text-sm transition">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i> Admin Portal
+          </a>
+        </div>
+      </nav>
+    </div>
+
+    <!-- User Profile & Logout -->
+    <div class="border-t border-slate-200 pt-4 px-2">
+      <div class="flex items-center justify-between">
+        <div class="overflow-hidden">
+          <p id="user-display-name" class="font-bold text-sm text-slate-800 truncate"></p>
+          <p id="user-display-role" class="text-xs text-slate-400 capitalize"></p>
+        </div>
+        <button id="logout-btn" title="Sign Out" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Top Header -->
+  <header class="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-3 py-2.5 flex items-center justify-between shadow-sm w-full">
+    <div class="flex items-center gap-2 overflow-hidden">
+      <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0">
+        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+      </div>
+      <span class="font-bold text-xs sm:text-sm text-slate-900 truncate">VidyaSphere</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="user-display-name-mob" class="text-[11px] font-bold text-slate-700 truncate max-w-[110px]"></span>
+      <button class="logout-btn-trigger p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Logout">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 px-1 py-1 flex items-center justify-around shadow-lg max-w-full">
+    <a href="/dashboard/index.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
+      <i data-lucide="layout-dashboard" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Notices</span>
+    </a>
+    <a href="/dashboard/chat.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
+      <i data-lucide="messages-square" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Chat</span>
+    </a>
+    <a href="/dashboard/notes.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
+      <i data-lucide="book-open" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Notes</span>
+    </a>
+    <a href="/dashboard/qa.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
+      <i data-lucide="message-square" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Q&A</span>
+    </a>
+    <a href="/dashboard/polls.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
+      <i data-lucide="vote" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Polls</span>
+    </a>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 w-full max-w-5xl mx-auto p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 overflow-x-hidden">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Student Directory & Roster</h1>
+        <p class="text-xs text-slate-500">Official student roster registered in VidyaSphere</p>
+      </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-2 w-full">
+      <div class="flex-1 relative">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+          <i data-lucide="search" class="w-4 h-4"></i>
+        </span>
+        <input type="text" id="search-input"
+          class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Search by student name or roll number...">
+      </div>
+
+      <select id="class-filter"
+        class="w-full sm:w-48 px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
+        <option value="">All Classes (1st - 12th)</option>
+        <option value="Class 1">Class 1</option>
+        <option value="Class 2">Class 2</option>
+        <option value="Class 3">Class 3</option>
+        <option value="Class 4">Class 4</option>
+        <option value="Class 5">Class 5</option>
+        <option value="Class 6">Class 6</option>
+        <option value="Class 7">Class 7</option>
+        <option value="Class 8">Class 8</option>
+        <option value="Class 9">Class 9</option>
+        <option value="Class 10">Class 10</option>
+        <option value="Class 11 (Science)">Class 11 (Science)</option>
+        <option value="Class 11 (Commerce)">Class 11 (Commerce)</option>
+        <option value="Class 11 (Arts)">Class 11 (Arts)</option>
+        <option value="Class 12 (Science)">Class 12 (Science)</option>
+        <option value="Class 12 (Commerce)">Class 12 (Commerce)</option>
+        <option value="Class 12 (Arts)">Class 12 (Arts)</option>
+      </select>
+    </div>
+
+    <!-- Student Cards / Table -->
+    <div id="students-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full">
+      <div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 text-sm">
+        Loading student roster...
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { apiRequest } from '/js/api.js';
+    import { requireAuth, logout } from '/js/auth.js';
+    import { initIcons } from '/js/ui.js';
+
+    const user = requireAuth();
+    if (user) {
+      document.getElementById('user-display-name').textContent = user.fullName || user.username;
+      document.getElementById('user-display-name-mob').textContent = user.fullName || user.username;
+      document.getElementById('user-display-role').textContent = `${user.role} ${user.className ? '• ' + user.className : ''}`;
+      if (user.role === 'admin') {
+        document.getElementById('admin-nav-link').classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('logout-btn')?.addEventListener('click', logout);
+    document.querySelectorAll('.logout-btn-trigger').forEach(btn => btn.addEventListener('click', logout));
+
+    const searchInput = document.getElementById('search-input');
+    const classFilter = document.getElementById('class-filter');
+    const container = document.getElementById('students-container');
+
+    async function loadStudents() {
+      const search = searchInput.value.trim();
+      const className = classFilter.value;
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (className) params.append('className', className);
+
+      try {
+        const res = await apiRequest(`/admin/students?${params.toString()}`);
+        const list = res.students || [];
+
+        if (list.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+              <i data-lucide="user-x" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+              <p class="text-sm font-semibold text-slate-600">No student accounts registered yet.</p>
+              <p class="text-xs text-slate-400 mt-1">Approved students will appear in this directory.</p>
+            </div>
+          `;
+          initIcons();
+          return;
+        }
+
+        container.innerHTML = list.map(student => `
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3 w-full break-words">
+            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm sm:text-base">
+              ${(student.full_name || 'S').charAt(0).toUpperCase()}
+            </div>
+            <div class="overflow-hidden flex-1">
+              <h4 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${student.full_name}</h4>
+              <p class="text-[11px] text-indigo-600 font-medium truncate">@${student.username}</p>
+              <div class="flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-xs text-slate-500">
+                <span>${student.class_name} - ${student.division}</span>
+                <span>&bull;</span>
+                <span>Roll: ${student.roll_number}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        initIcons();
+      } catch (err) {
+        container.innerHTML = `
+          <div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            <i data-lucide="info" class="w-8 h-8 mx-auto mb-2 opacity-40 text-indigo-500"></i>
+            <p class="text-sm font-medium">Student roster is available to registered school members.</p>
+          </div>
+        `;
+        initIcons();
+      }
+    }
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(window._searchTimer);
+      window._searchTimer = setTimeout(loadStudents, 300);
+    });
+
+    classFilter.addEventListener('change', loadStudents);
+
+    initIcons();
+    loadStudents();
+  </script>
+</body>
+</html>

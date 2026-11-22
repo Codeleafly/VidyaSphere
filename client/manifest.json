@@ -1,0 +1,19 @@
+{
+  "name": "VidyaSphere Digital Edge School",
+  "short_name": "VidyaSphere",
+  "description": "High-Performance Edge School Management, Academic Library & Q&A Ecosystem",
+  "start_url": "/dashboard/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🎓</text></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

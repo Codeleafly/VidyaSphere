@@ -1,0 +1,6 @@
+.dev.vars
+.wrangler/
+node_modules/
+*.log
+local.db
+local.db-journal

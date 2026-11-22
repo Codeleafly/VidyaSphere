@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Registration | VidyaSphere</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-slate-50 min-h-screen py-8 px-4 flex items-center justify-center">
+
+  <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-white text-center">
+      <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur">
+        <i data-lucide="user-plus" class="w-6 h-6"></i>
+      </div>
+      <h1 class="text-2xl font-bold">Student Admission Portal</h1>
+      <p class="text-xs text-indigo-100 mt-1">Submit your details to request school portal access</p>
+    </div>
+
+    <!-- Application Form -->
+    <div class="p-6 sm:p-8 space-y-6">
+      <form id="register-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Full Name</label>
+          <input type="text" id="fullName" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            placeholder="e.g. Rohit Sharma">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Class / Grade</label>
+            <select id="className" required
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+              <option value="">Select Class</option>
+              <optgroup label="Primary School">
+                <option value="Class 1">Class 1</option>
+                <option value="Class 2">Class 2</option>
+                <option value="Class 3">Class 3</option>
+                <option value="Class 4">Class 4</option>
+              </optgroup>
+              <optgroup label="Middle / Upper Primary">
+                <option value="Class 5">Class 5</option>
+                <option value="Class 6">Class 6</option>
+                <option value="Class 7">Class 7</option>
+                <option value="Class 8">Class 8</option>
+              </optgroup>
+              <optgroup label="Secondary (SSC / 10th)">
+                <option value="Class 9">Class 9</option>
+                <option value="Class 10">Class 10 (Board Exam)</option>
+              </optgroup>
+              <optgroup label="Higher Secondary (HSC / 11th - 12th)">
+                <option value="Class 11 (Science)">Class 11 - Science</option>
+                <option value="Class 11 (Commerce)">Class 11 - Commerce</option>
+                <option value="Class 11 (Arts)">Class 11 - Arts</option>
+                <option value="Class 12 (Science)">Class 12 - Science (HSC/CBSE)</option>
+                <option value="Class 12 (Commerce)">Class 12 - Commerce (HSC/CBSE)</option>
+                <option value="Class 12 (Arts)">Class 12 - Arts (HSC/CBSE)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Division / Section</label>
+            <input type="text" id="division" required maxlength="2"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase text-center"
+              placeholder="A, B, C">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Roll Number</label>
+            <input type="text" id="rollNumber" required
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-center"
+              placeholder="e.g. 15">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Admission Details / Notes (Optional)</label>
+          <textarea id="reason" rows="2"
+            class="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            placeholder="Academic stream, admission receipt number, etc."></textarea>
+        </div>
+
+        <button type="submit" id="submit-btn"
+          class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition flex items-center justify-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Submit Application</span>
+        </button>
+      </form>
+
+      <div class="border-t border-slate-100 pt-4 text-center">
+        <a href="/auth/login.html" class="text-xs font-bold text-indigo-600 hover:underline">
+          &larr; Back to Sign In
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal for Tracking Token -->
+  <div id="token-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-md p-4 sm:p-6 text-center space-y-3.5 shadow-2xl overflow-hidden">
+      <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+        <i data-lucide="check" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg sm:text-xl font-bold text-slate-900">Application Submitted!</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Your admission request is in the school verification queue. Save your tracking token below to check your approval status and claim your account:
+      </p>
+
+      <div class="bg-slate-100 border border-slate-300 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 overflow-hidden">
+        <code id="modal-token" class="text-xs sm:text-sm font-mono font-bold text-indigo-600 break-all select-all text-center sm:text-left"></code>
+        <button id="copy-btn" class="w-full sm:w-auto px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 flex items-center justify-center gap-1 shrink-0 shadow-sm">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+        </button>
+      </div>
+
+      <div class="pt-2 flex flex-col sm:flex-row gap-2">
+        <button id="track-btn" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-100">
+          Track Status Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiRequest } from '/js/api.js';
+    import { showToast, initIcons } from '/js/ui.js';
+
+    initIcons();
+
+    const form = document.getElementById('register-form');
+    const modal = document.getElementById('token-modal');
+    const modalToken = document.getElementById('modal-token');
+    const copyBtn = document.getElementById('copy-btn');
+    const trackBtn = document.getElementById('track-btn');
+
+    let currentToken = '';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        fullName: document.getElementById('fullName').value.trim(),
+        className: document.getElementById('className').value,
+        division: document.getElementById('division').value.trim().toUpperCase(),
+        rollNumber: document.getElementById('rollNumber').value.trim(),
+        reason: document.getElementById('reason').value.trim(),
+      };
+
+      try {
+        const res = await apiRequest('/auth/register', {
+          method: 'POST',
+          body: payload,
+        });
+
+        currentToken = res.trackingToken;
+        modalToken.textContent = currentToken;
+        localStorage.setItem('vidyasphere_tracking_token', currentToken);
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        initIcons();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(currentToken);
+      showToast('Tracking token copied to clipboard!', 'success');
+    });
+
+    trackBtn.addEventListener('click', () => {
+      window.location.href = `/auth/status.html?token=${encodeURIComponent(currentToken)}`;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VidyaSphere | Supreme Knowledge Edge Ecosystem</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <!-- Tailwind CSS CDN (0 CLI, 0 npm packages) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">VidyaSphere</span>
+          <span class="hidden sm:inline-block text-xs text-slate-400 ml-2 font-medium">Digital Edge School Core</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/guide.html" class="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition border border-violet-200">📖 Student Guide</a>
+        <a href="/auth/status.html" class="px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-indigo-600 transition">Track Status</a>
+        <a href="/auth/login.html" class="px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition">Sign In</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 flex-1">
+    <div class="text-center max-w-3xl mx-auto space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold uppercase tracking-wider">
+        <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span> Complete School Edge Ecosystem
+      </div>
+      <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
+        Modern School Management, Academic Library & Democratic Polls
+      </h1>
+      <p class="text-sm sm:text-lg text-slate-600 leading-relaxed">
+        VidyaSphere delivers high-speed digital student onboarding, verified study materials, peer Q&A help, and school election voting with zero latency.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3 w-full">
+        <a href="/auth/register.html" class="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-md shadow-indigo-200 transition flex items-center justify-center gap-2 text-sm">
+          <i data-lucide="user-plus" class="w-4 h-4"></i> New Student Admission
+        </a>
+        <a href="/auth/login.html" class="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 shadow-sm transition flex items-center justify-center gap-2 text-sm">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Student & Staff Portal
+        </a>
+      </div>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Admin Approved Roster</h3>
+        <p class="text-sm text-slate-600 mt-2">Zero email dependency. Verified registration queue with single-use activation codes.</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+          <i data-lucide="bell" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Official Notice Board</h3>
+        <p class="text-sm text-slate-600 mt-2">Class-specific and school-wide announcements with urgent and exam priority badges.</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+          <i data-lucide="book-open" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Academic Notes Library</h3>
+        <p class="text-sm text-slate-600 mt-2">Class & subject indexed notes repository with fast search and download counts.</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
+          <i data-lucide="vote" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Q&A Forum & Polls</h3>
+        <p class="text-sm text-slate-600 mt-2">Peer homework assistance with verified accepted answers and duplicate-proof voting.</p>
+      </div>
+    </div>
+
+    <!-- Live Announcements Preview -->
+    <div class="mt-16 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <i data-lucide="megaphone" class="w-5 h-5 text-indigo-600"></i>
+          <h2 class="text-xl font-bold text-slate-900">Latest School Announcements</h2>
+        </div>
+        <a href="/dashboard/index.html" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+          View All <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+      <div id="announcements-preview" class="divide-y divide-slate-100 mt-4 space-y-3">
+        <div class="py-4 text-center text-slate-400 text-sm">Loading announcements...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4">
+      VidyaSphere Global Edge Ecosystem &bull; Powered by Cloudflare Edge &bull; Termux Lightweight Edition
+    </div>
+  </footer>
+
+  <script type="module">
+    import { apiRequest } from '/js/api.js';
+    import { formatDate, initIcons } from '/js/ui.js';
+
+    initIcons();
+
+    // Load preview announcements
+    async function loadAnnouncements() {
+      const container = document.getElementById('announcements-preview');
+      try {
+        const res = await apiRequest('/announcements');
+        const list = res.announcements || [];
+        if (list.length === 0) {
+          container.innerHTML = '<div class="py-4 text-center text-slate-400 text-sm">No announcements posted yet.</div>';
+          return;
+        }
+
+        container.innerHTML = list.slice(0, 3).map(ann => {
+          const priorityBadges = {
+            urgent: 'bg-rose-100 text-rose-700',
+            exam: 'bg-amber-100 text-amber-700',
+            holiday: 'bg-purple-100 text-purple-700',
+            general: 'bg-blue-100 text-blue-700'
+          };
+          const badgeClass = priorityBadges[ann.priority] || priorityBadges.general;
+
+          return `
+            <div class="pt-3 pb-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-xs font-bold uppercase ${badgeClass}">${ann.priority}</span>
+                <span class="text-xs text-slate-400">${formatDate(ann.created_at)}</span>
+                ${ann.is_pinned ? '<span class="text-xs text-amber-600 font-semibold flex items-center gap-0.5"><i data-lucide="pin" class="w-3 h-3"></i> Pinned</span>' : ''}
+              </div>
+              <h4 class="font-bold text-slate-800 text-base">${ann.title}</h4>
+              <p class="text-sm text-slate-600 line-clamp-2 mt-1">${ann.content}</p>
+            </div>
+          `;
+        }).join('');
+        initIcons();
+      } catch (err) {
+        container.innerHTML = '<div class="py-4 text-center text-rose-500 text-sm">Notice board will be live once the local server starts.</div>';
+      }
+    }
+
+    loadAnnouncements();
+
+    // Ensure clean network performance (clear any legacy service workers)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const reg of registrations) reg.unregister();
+      }).catch(() => {});
+    }
+  </script>
+</body>
+</html>

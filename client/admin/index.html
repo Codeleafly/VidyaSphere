@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Admin Portal | VidyaSphere</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row pb-20 md:pb-0">
+
+  <!-- Desktop Sidebar -->
+  <aside class="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 p-4 shrink-0 h-screen sticky top-0 justify-between text-white">
+    <div class="space-y-6">
+      <div class="flex items-center gap-3 px-2">
+        <div class="w-10 h-10 rounded-xl bg-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-900">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="font-extrabold text-white leading-tight">VidyaSphere</h2>
+          <span class="text-xs text-rose-400 font-medium">Administration Core</span>
+        </div>
+      </div>
+
+      <nav class="space-y-1">
+        <button data-tab="applications" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800 text-white font-bold text-sm w-full text-left">
+          <i data-lucide="inbox" class="w-5 h-5 text-indigo-400"></i> Applications Queue
+        </button>
+        <button data-tab="students" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
+          <i data-lucide="users" class="w-5 h-5 text-emerald-400"></i> Student Accounts
+        </button>
+        <button data-tab="announcements" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
+          <i data-lucide="megaphone" class="w-5 h-5 text-amber-400"></i> Publish Notices
+        </button>
+        <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i> Back to Portal
+        </a>
+      </nav>
+    </div>
+
+    <!-- User & Logout -->
+    <div class="border-t border-slate-800 pt-4 px-2">
+      <div class="flex items-center justify-between">
+        <div class="overflow-hidden">
+          <p id="admin-display-name" class="font-bold text-sm text-white truncate">Administrator</p>
+          <p class="text-xs text-rose-400 font-semibold">Creator & Lead Admin</p>
+        </div>
+        <button id="logout-btn" title="Sign Out" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Topbar for Admin -->
+  <header class="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-rose-600 flex items-center justify-center text-white">
+        <i data-lucide="shield-check" class="w-5 h-5"></i>
+      </div>
+      <span class="font-bold text-sm">Admin Core</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/dashboard/index.html" class="text-xs text-slate-300 underline">Portal</a>
+      <button id="logout-btn-mob" class="text-xs text-rose-400 font-bold ml-2">Logout</button>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <!-- Quick Stats Bar -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-xs text-slate-500 font-semibold">Pending Review</p>
+        <h3 id="stat-pending" class="text-2xl font-extrabold text-amber-600 mt-1">-</h3>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-xs text-slate-500 font-semibold">Active Students</p>
+        <h3 id="stat-students" class="text-2xl font-extrabold text-emerald-600 mt-1">-</h3>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-xs text-slate-500 font-semibold">Notes Catalog</p>
+        <h3 id="stat-notes" class="text-2xl font-extrabold text-indigo-600 mt-1">-</h3>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-xs text-slate-500 font-semibold">Active Polls</p>
+        <h3 id="stat-polls" class="text-2xl font-extrabold text-purple-600 mt-1">-</h3>
+      </div>
+    </div>
+
+    <!-- TAB 1: APPLICATIONS QUEUE -->
+    <section id="tab-applications" class="admin-tab-content space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Admission Applications Queue</h2>
+          <p class="text-xs text-slate-500">Verify student identity and approve to generate single-use activation codes</p>
+        </div>
+        <select id="reg-status-filter"
+          class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-semibold bg-white focus:ring-2 focus:ring-indigo-500">
+          <option value="pending" selected>Pending Review</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="">All Applications</option>
+        </select>
+      </div>
+
+      <div id="applications-container" class="space-y-3">
+        <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+          Loading applications...
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: STUDENT ACCOUNTS MANAGEMENT -->
+    <section id="tab-students" class="admin-tab-content space-y-4 hidden">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Student Account Controls</h2>
+          <p class="text-xs text-slate-500">Suspend or re-activate student accounts</p>
+        </div>
+      </div>
+
+      <div id="admin-students-table" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-8 text-center text-slate-400">Loading student directory...</div>
+      </div>
+    </section>
+
+    <!-- TAB 3: PUBLISH NOTICE BOARD -->
+    <section id="tab-announcements" class="admin-tab-content space-y-4 hidden">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Publish Official School Announcement</h2>
+          <p class="text-xs text-slate-500">Post notices with priority levels (urgent, exam, holiday, general)</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm max-w-2xl space-y-4">
+        <form id="create-ann-form" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Notice Title</label>
+            <input type="text" id="ann-title" required
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g. Schedule for Science Practical Examinations">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Priority</label>
+              <select id="ann-priority" required
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 bg-white">
+                <option value="general">General</option>
+                <option value="urgent">Urgent Circular</option>
+                <option value="exam">Examination</option>
+                <option value="holiday">School Holiday</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Target Class</label>
+              <select id="ann-target-class" required
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 bg-white">
+                <option value="all">School-Wide (All Classes)</option>
+                <option value="Class 1">Class 1</option>
+                <option value="Class 2">Class 2</option>
+                <option value="Class 3">Class 3</option>
+                <option value="Class 4">Class 4</option>
+                <option value="Class 5">Class 5</option>
+                <option value="Class 6">Class 6</option>
+                <option value="Class 7">Class 7</option>
+                <option value="Class 8">Class 8</option>
+                <option value="Class 9">Class 9</option>
+                <option value="Class 10">Class 10</option>
+                <option value="Class 11">Class 11 (All Streams)</option>
+                <option value="Class 12">Class 12 (All Streams)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="ann-pinned" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+            <label for="ann-pinned" class="text-xs font-bold text-slate-700">Pin notice to the top of school feed</label>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Notice Content</label>
+            <textarea id="ann-content" rows="4" required
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500"
+              placeholder="Enter complete notice text..."></textarea>
+          </div>
+
+          <button type="submit"
+            class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition">
+            Publish Official Circular
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Approval Code Result Modal -->
+  <div id="approve-result-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl">
+      <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+        <i data-lucide="key" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900">Student Approved!</h3>
+      <p class="text-xs text-slate-600">
+        Share the credentials below with the student. They will use this 6-digit code to set their password.
+      </p>
+
+      <div class="bg-slate-100 border border-slate-200 rounded-xl p-4 text-left space-y-2">
+        <p class="text-xs text-slate-500">Assigned Username:</p>
+        <code id="modal-app-user" class="font-bold text-sm text-slate-800 block"></code>
+
+        <p class="text-xs text-slate-500 pt-2">6-Digit Activation Code:</p>
+        <code id="modal-app-code" class="font-mono font-extrabold text-2xl text-emerald-600 tracking-widest block text-center bg-white py-2 rounded-lg border border-emerald-300 select-all"></code>
+      </div>
+
+      <button id="close-app-modal-btn" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-sm transition">
+        Done
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiRequest } from '/js/api.js';
+    import { logout } from '/js/auth.js';
+    import { formatDate, showToast, initIcons } from '/js/ui.js';
+
+    // Strict Server-Side Verification: Verify token & role directly with backend API
+    async function verifyAdminSession() {
+      try {
+        const res = await apiRequest('/auth/me');
+        if (!res.user || res.user.role !== 'admin') {
+          alert('Access Denied: You must be an authorized School Administrator.');
+          window.location.replace('/auth/login.html');
+          return false;
+        }
+        document.getElementById('admin-display-name').textContent = res.user.fullName || res.user.username;
+        return true;
+      } catch (err) {
+        alert('Session expired or unauthorized. Please log in.');
+        window.location.replace('/auth/login.html');
+        return false;
+      }
+    }
+
+    document.getElementById('logout-btn')?.addEventListener('click', logout);
+    document.getElementById('logout-btn-mob')?.addEventListener('click', logout);
+
+    // Tab Navigation
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab-btn').forEach(b => {
+          b.className = 'admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left';
+        });
+        btn.className = 'admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800 text-white font-bold text-sm w-full text-left';
+
+        document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden');
+
+        if (btn.dataset.tab === 'applications') loadApplications();
+        if (btn.dataset.tab === 'students') loadStudentAccounts();
+      });
+    });
+
+    async function loadStats() {
+      try {
+        const res = await apiRequest('/admin/stats');
+        const s = res.stats || {};
+        document.getElementById('stat-pending').textContent = s.pendingRegistrations ?? 0;
+        document.getElementById('stat-students').textContent = s.totalStudents ?? 0;
+        document.getElementById('stat-notes').textContent = s.totalNotes ?? 0;
+        document.getElementById('stat-polls').textContent = s.totalPolls ?? 0;
+      } catch (e) {
+        console.error('Stats error', e);
+      }
+    }
+
+    // Load Applications
+    const regFilter = document.getElementById('reg-status-filter');
+    const appsContainer = document.getElementById('applications-container');
+
+    async function loadApplications() {
+      const status = regFilter.value;
+      const url = status ? `/admin/registrations?status=${status}` : '/admin/registrations';
+
+      try {
+        const res = await apiRequest(url);
+        const list = res.registrations || [];
+
+        if (list.length === 0) {
+          appsContainer.innerHTML = `
+            <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+              <i data-lucide="check-check" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+              <p class="text-sm font-medium">No applications found in this status queue.</p>
+            </div>
+          `;
+          initIcons();
+          return;
+        }
+
+        appsContainer.innerHTML = list.map(reg => {
+          const isPending = reg.review_status === 'pending';
+          const isApproved = reg.review_status === 'approved';
+
+          return `
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full break-words">
+              <div class="space-y-1 w-full sm:w-auto">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="font-bold text-slate-900 text-sm sm:text-base">${reg.full_name}</h4>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${isPending ? 'bg-amber-100 text-amber-700' : (isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700')}">
+                    ${reg.review_status}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 break-words">
+                  ${reg.class_name} - Div ${reg.division} &bull; Roll: <strong>${reg.roll_number}</strong>
+                </p>
+                <p class="text-[11px] text-slate-400 break-all font-mono">
+                  Token: <code class="text-indigo-600 font-bold">${reg.tracking_token}</code>
+                </p>
+                ${reg.reason ? `<p class="text-xs text-slate-600 italic">"${reg.reason}"</p>` : ''}
+              </div>
+
+              <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                ${isPending ? `
+                  <button class="approve-btn flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition" data-token="${reg.tracking_token}">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Approve
+                  </button>
+                  <button class="reject-btn px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition" data-token="${reg.tracking_token}">
+                    Reject
+                  </button>
+                ` : (isApproved ? `
+                  <span class="text-xs text-emerald-700 font-semibold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 truncate max-w-full">
+                    @${reg.assigned_username || 'Issued'}
+                  </span>
+                ` : `
+                  <span class="text-xs text-rose-600 bg-rose-50 px-3 py-1.5 rounded-xl">Rejected</span>
+                `)}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        initIcons();
+
+        // Wire up approve buttons
+        document.querySelectorAll('.approve-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const token = btn.dataset.token;
+            try {
+              const res = await apiRequest('/admin/approve', {
+                method: 'POST',
+                body: { trackingToken: token },
+              });
+
+              document.getElementById('modal-app-user').textContent = `@${res.assignedUsername}`;
+              document.getElementById('modal-app-code').textContent = res.activationCode;
+              document.getElementById('approve-result-modal').classList.remove('hidden');
+              document.getElementById('approve-result-modal').classList.add('flex');
+
+              loadApplications();
+              loadStats();
+              initIcons();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
+
+        // Wire up reject buttons
+        document.querySelectorAll('.reject-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const token = btn.dataset.token;
+            const reason = prompt('Enter reason for application rejection:') || 'Details did not match school records';
+            try {
+              await apiRequest('/admin/reject', {
+                method: 'POST',
+                body: { trackingToken: token, reason },
+              });
+              showToast('Application marked as rejected', 'info');
+              loadApplications();
+              loadStats();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
+
+      } catch (err) {
+        appsContainer.innerHTML = `<div class="p-6 text-center text-rose-500 bg-rose-50 rounded-2xl text-sm">${err.message}</div>`;
+      }
+    }
+
+    document.getElementById('close-app-modal-btn').addEventListener('click', () => {
+      document.getElementById('approve-result-modal').classList.add('hidden');
+      document.getElementById('approve-result-modal').classList.remove('flex');
+    });
+
+    regFilter.addEventListener('change', loadApplications);
+
+    // Load Student Accounts
+    async function loadStudentAccounts() {
+      const container = document.getElementById('admin-students-table');
+      try {
+        const res = await apiRequest('/admin/students');
+        const students = res.students || [];
+
+        if (students.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-slate-400">No active student profiles registered.</div>';
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
+                  <th class="p-3">Student Name</th>
+                  <th class="p-3">Username</th>
+                  <th class="p-3">Class</th>
+                  <th class="p-3">Roll</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${students.map(s => `
+                  <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-bold text-slate-900">${s.full_name}</td>
+                    <td class="p-3 font-mono text-indigo-600">@${s.username}</td>
+                    <td class="p-3">${s.class_name} - ${s.division}</td>
+                    <td class="p-3 font-semibold">${s.roll_number}</td>
+                    <td class="p-3">
+                      <span class="px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${s.account_status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                        ${s.account_status}
+                      </span>
+                    </td>
+                    <td class="p-3 text-right">
+                      ${s.account_status === 'active' ? `
+                        <button class="status-toggle-btn text-rose-600 font-bold hover:underline" data-id="${s.id}" data-action="suspended">
+                          Suspend
+                        </button>
+                      ` : `
+                        <button class="status-toggle-btn text-emerald-600 font-bold hover:underline" data-id="${s.id}" data-action="active">
+                          Reactivate
+                        </button>
+                      `}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        document.querySelectorAll('.status-toggle-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const studentId = btn.dataset.id;
+            const status = btn.dataset.action;
+            try {
+              await apiRequest('/admin/student-status', {
+                method: 'POST',
+                body: { studentId, status },
+              });
+              showToast(`Student marked as ${status}`, 'success');
+              loadStudentAccounts();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
+      } catch (err) {
+        container.innerHTML = `<div class="p-6 text-center text-rose-500">${err.message}</div>`;
+      }
+    }
+
+    // Publish Announcements
+    const createAnnForm = document.getElementById('create-ann-form');
+    createAnnForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await apiRequest('/admin/announcements', {
+          method: 'POST',
+          body: {
+            title: document.getElementById('ann-title').value.trim(),
+            content: document.getElementById('ann-content').value.trim(),
+            priority: document.getElementById('ann-priority').value,
+            targetClass: document.getElementById('ann-target-class').value,
+            isPinned: document.getElementById('ann-pinned').checked,
+          },
+        });
+
+        showToast('Official notice published to school board!', 'success');
+        createAnnForm.reset();
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    initIcons();
+    const isAuthorized = await verifyAdminSession();
+    if (isAuthorized) {
+      loadStats();
+      loadApplications();
+    }
+  </script>
+</body>
+</html>

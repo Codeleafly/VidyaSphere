@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VidyaSphere - Complete Student User Guide</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --primary-dark: #3730a3;
+      --secondary: #7c3aed;
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: #f8fafc;
+      color: var(--slate-800);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    /* Top Sticky Header */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 2.5rem 1.25rem 2rem;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+    }
+
+    .badge-creator {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 4px 14px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      opacity: 0.92;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .url-chip {
+      margin-top: 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-family: monospace;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      word-break: break-all;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: -20px auto 0;
+      padding: 0 1rem;
+    }
+
+    /* Quick Navigation Bar */
+    .quick-nav {
+      background: white;
+      padding: 1rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 1.75rem;
+      border: 1px solid var(--slate-200);
+    }
+
+    .nav-btn {
+      text-decoration: none;
+      color: var(--slate-700);
+      background: var(--slate-100);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: white;
+      border-radius: 20px;
+      padding: 1.75rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--slate-200);
+      scroll-margin-top: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--slate-100);
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+
+    .card-subtitle {
+      font-size: 0.82rem;
+      color: var(--slate-600);
+      font-weight: 500;
+    }
+
+    /* Step Sub-boxes */
+    .substep {
+      background: var(--slate-50);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1rem 0;
+    }
+
+    .substep-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .substep p, .substep li {
+      font-size: 0.88rem;
+      color: var(--slate-700);
+    }
+
+    ul, ol {
+      padding-left: 1.25rem;
+      margin: 0.5rem 0;
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+    }
+
+    /* Alerts */
+    .alert {
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .alert-warning {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .alert-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+
+    .alert-success {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+
+    /* Visual Screen Previews / Mockups */
+    .mockup-box {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.82rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+      border: 1px solid #334155;
+    }
+
+    .mockup-header {
+      color: #94a3b8;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 0.3rem;
+    }
+
+    .code-pill {
+      background: #e2e8f0;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    /* FAQ Accordion */
+    details {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+    }
+
+    summary {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--slate-800);
+      outline: none;
+    }
+
+    details[open] summary {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    details p {
+      font-size: 0.86rem;
+      color: var(--slate-600);
+      padding-top: 0.25rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.82rem;
+      color: var(--slate-600);
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.6rem; }
+      .section-card { padding: 1.25rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge-creator">Official Student Handout</div>
+    <h1>VidyaSphere Student Guide</h1>
+    <p>Class 1 se lekar Class 12 tak ke sabhi students ke liye platform ko zero se lekar master karne ka full step-by-step roadmap.</p>
+    <div class="url-chip">
+      🌐 Live URL: https://vidyasphere.ziprecovery2024-dbc.workers.dev
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Quick Navigation Links -->
+    <div class="quick-nav">
+      <a href="#intro" class="nav-btn">📌 Parichay</a>
+      <a href="#step1" class="nav-btn">📝 1. Registration</a>
+      <a href="#step2" class="nav-btn">⏳ 2. Status & Code</a>
+      <a href="#step3" class="nav-btn">🔑 3. Login Kaise Kare</a>
+      <a href="#step4" class="nav-btn">📢 4. Notice Board</a>
+      <a href="#step5" class="nav-btn">📚 5. Notes Library</a>
+      <a href="#step6" class="nav-btn">❓ 6. Doubt Q&A</a>
+      <a href="#step7" class="nav-btn">🗳️ 7. Voting & Polls</a>
+      <a href="#step8" class="nav-btn">💬 8. Class Chat</a>
+      <a href="#step9" class="nav-btn">📱 9. Mobile App Setup</a>
+      <a href="#faq" class="nav-btn">💡 FAQs & Help</a>
+    </div>
+
+    <!-- Intro Card -->
+    <section id="intro" class="section-card">
+      <div class="card-header">
+        <div class="step-number">✨</div>
+        <div>
+          <div class="card-title">VidyaSphere Kya Hai?</div>
+          <div class="card-subtitle">School ka Next-Generation Digital Ecosystem</div>
+        </div>
+      </div>
+      <p>VidyaSphere aapke school ka digital hub hai jahan par aapko:</p>
+      <ul>
+        <li>School ke sabhi urgent <strong>Announcements & Notice</strong> sabse pehle milte hain.</li>
+        <li>Maharashtra State Board (SSC/HSC) aur CBSE ke sabhi subjects ke <strong>Study Notes & PDFs</strong> milte hain.</li>
+        <li>Koi bhi question poochne aur classmates se solution paane ke liye <strong>Academic Q&A Forum</strong> milta hai.</li>
+        <li>School aur Class activities par apna vote dene ke liye <strong>Live Polls</strong> milte hain.</li>
+        <li>Sabhi Class 1 se Class 12 tak ke students ke liye secure <strong>Realtime Class Chat</strong> milta hai.</li>
+      </ul>
+      <div class="alert alert-info">
+        💡 <strong>Zero App Download Needed:</strong> Is website ko chalane ke liye Play Store se koi bhari app download karne ki zaroorat nahi hai. Yeh browser mein hi instant khulti hai aur phone ki memory bilkul nahi leti!
+      </div>
+    </section>
+
+    <!-- Step 1: Registration -->
+    <section id="step1" class="section-card">
+      <div class="card-header">
+        <div class="step-number">1</div>
+        <div>
+          <div class="card-title">Admission & Account Registration</div>
+          <div class="card-subtitle">Pehli baar aane par apna khata (account) kaise banayein</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Step 1.1: Registration Page Kholein</div>
+        <p>Website ke homepage par jayein aur <strong>"Apply for Admission"</strong> par click karein ya direct is link par jayein:</p>
+        <p><span class="code-pill">/auth/register</span></p>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Step 1.2: Apni Real Details Bharein</div>
+        <ul>
+          <li><strong>Full Name:</strong> Apna poora real school name likhein (Jaise: <em>Aarav Rajesh Sharma</em>).</li>
+          <li><strong>Standard (Class):</strong> Class 1 se lekar Class 12 mein se apni class select karein.</li>
+          <li><strong>Division:</strong> Apni section division chunein (A, B, C, D).</li>
+          <li><strong>Roll Number:</strong> Apna school roll number enter karein (e.g. 15).</li>
+          <li><strong>Username:</strong> Ek simple username banayein bina space ke (e.g. <em>aarav_10a</em>).</li>
+          <li><strong>Password:</strong> Ek strong password banayein jise aap yaad rakh sakein.</li>
+        </ul>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Step 1.3: Registration Tracking Token Ko Save Karein (Sabse Zaroori!)</div>
+        <p>Form submit karne ke baad screen par ek popup aayega jismein aapko ek unique token milega:</p>
+        <div class="mockup-box">
+          <div class="mockup-header">Registration Success Screen</div>
+          Registration Successful!<br>
+          Your Application Token:<br>
+          <strong style="color: #38bdf8; font-size: 1rem;">VSR-9A4B2C81</strong><br>
+          [ 📋 Copy Token Button ]
+        </div>
+        <div class="alert alert-warning">
+          ⚠️ <strong>Dhyan Dein:</strong> Is token ko copy karke kahin likh lein ya screenshot le lein. Kyunki school ki security ke liye fake accounts ko rokne ke liye, <strong>Lead Admin</strong> aapke form ko approve karenge. Approval status check karne ke liye yeh token zaroori hai!
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: Status & Activation -->
+    <section id="step2" class="section-card">
+      <div class="card-header">
+        <div class="step-number">2</div>
+        <div>
+          <div class="card-title">Application Status & Account Activation</div>
+          <div class="card-subtitle">Admin approval check karna aur 6-digit code se activate karna</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Step 2.1: Status Tracker Page Par Jayein</div>
+        <p>Website par <strong>"Check Application Status"</strong> par click karein (<span class="code-pill">/auth/status</span>).</p>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Step 2.2: Apna Token Dalein</div>
+        <p>Apna <span class="code-pill">VSR-XXXXXXXX</span> token dalein aur <strong>"Track Application"</strong> par click karein.</p>
+        <p>Screen par 3 tarah ke status dikh sakte hain:</p>
+        <ul>
+          <li>🟡 <strong>Pending Review:</strong> Lead Admin abhi aapke form ko verify kar rahe hain. Thoda intezar karein.</li>
+          <li>🟢 <strong>Approved (Activation Code Ready):</strong> Admin ne aapko approve kar diya hai aur ek <strong>6-digit Secret Code</strong> (jaise <em>A7B9X2</em>) issue ho chuka hai!</li>
+          <li>🔵 <strong>Already Active:</strong> Aapka account pehle hi activate ho chuka hai, aap direct login kar sakte hain.</li>
+        </ul>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Step 2.3: 1-Click Account Activate Karein</div>
+        <p>Jaise hi aapka status Approved hota hai, screen par <strong>"Activate Account Now"</strong> ka button dikhega. Us par click karte hi aapka account active ho jayega aur login screen par bhej diya jayega!</p>
+      </div>
+    </section>
+
+    <!-- Step 3: Login -->
+    <section id="step3" class="section-card">
+      <div class="card-header">
+        <div class="step-number">3</div>
+        <div>
+          <div class="card-title">Daily Sign In (Login Kaise Karein)</div>
+          <div class="card-subtitle">Rozana apne account mein enter hone ka tarika</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Login Credentials Enter Karein</div>
+        <ol>
+          <li><span class="code-pill">/auth/login</span> page par jayein.</li>
+          <li>Apna <strong>Username</strong> dalein (Jo aapne registration ke samay banaya tha).</li>
+          <li>Apna <strong>Password</strong> dalein.</li>
+          <li><strong>"Sign In"</strong> button par click karein.</li>
+        </ol>
+      </div>
+
+      <div class="alert alert-success">
+        🔒 <strong>256-Bit Cryptographic Security:</strong> VidyaSphere mein aapka password encrypted rehta hai aur browser mein auto-login ke liye secure random session token use hota hai. Koi doosra student aapka password chura nahi sakta!
+      </div>
+    </section>
+
+    <!-- Step 4: Notice Board -->
+    <section id="step4" class="section-card">
+      <div class="card-header">
+        <div class="step-number">4</div>
+        <div>
+          <div class="card-title">Digital Notice Board (School Announcements)</div>
+          <div class="card-subtitle">Holidays, timetable aur exam notices dekhna</div>
+        </div>
+      </div>
+      <p>Login hone ke baad sabse pehla page aapka Dashboard hota hai jahan par School Notice Board dikhta hai:</p>
+      <ul>
+        <li>🔴 <strong style="color: #ef4444;">Urgent Badges:</strong> Achanak hone wali chutti ya zaroori alert.</li>
+        <li>🟣 <strong style="color: #7c3aed;">Exam Badges:</strong> Datesheet, syllabus aur exam hall guidelines.</li>
+        <li>🟢 <strong style="color: #10b981;">Holiday Badges:</strong> Festival ya vacation holidays ki jaankari.</li>
+        <li>🔵 <strong style="color: #3b82f6;">General:</strong> Sports day, science exhibition aur annual functions.</li>
+      </ul>
+      <p>Aap upar diye gaye filter se sirf <strong>Apni Class</strong> ke notices ya poore <strong>School-wide</strong> notices dekh sakte hain.</p>
+    </section>
+
+    <!-- Step 5: Notes Library -->
+    <section id="step5" class="section-card">
+      <div class="card-header">
+        <div class="step-number">5</div>
+        <div>
+          <div class="card-title">Study Notes & Material Library</div>
+          <div class="card-subtitle">Chapters ke notes padhna aur download karna</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Notes Kaise Dhoondhein Aur Download Karein:</div>
+        <ol>
+          <li>Neeche bottom menu mein <strong>"Notes"</strong> icon par tap karein.</li>
+          <li>Apni <strong>Class</strong> select karein (Class 1 to 12).</li>
+          <li>Apna <strong>Subject</strong> chunein (CBSE & Maharashtra Board subjects jaise Mathematics, Science, Marathi, History, Geography, Physics, Chemistry, Economics etc.).</li>
+          <li>Chapter ka naam search bar mein type karein.</li>
+          <li>Note card par diye gaye <strong>"Download Note"</strong> button par tap karein. Document turant open ya download ho jayega!</li>
+        </ol>
+      </div>
+
+      <div class="substep">
+        <div class="substep-title">Apne Notes Upload Kaise Karein (Help Your Classmates):</div>
+        <p>Agar aapke paas kisi chapter ki acchi summary ya hand-written notes hain, toh aap <strong>"+ Upload Note"</strong> button par click karke title, subject aur chapter likh kar upload kar sakte hain.</p>
+      </div>
+    </section>
+
+    <!-- Step 6: Q&A Forum -->
+    <section id="step6" class="section-card">
+      <div class="card-header">
+        <div class="step-number">6</div>
+        <div>
+          <div class="card-title">Academic Q&A Discussion Forum</div>
+          <div class="card-subtitle">Doubt poochna aur doosron ke sawalon ke jawab dena</div>
+        </div>
+      </div>
+      <p>Padhai karte waqt koi question samajh nahi aa raha? Q&A forum ka use karein:</p>
+      <ul>
+        <li><strong>Ask a Question:</strong> <em>"Ask Question"</em> par tap karein, subject chunein aur apna doubt clearly likhein.</li>
+        <li><strong>Answer Others:</strong> Agar aapko kisi classmate ke sawal ka sahi jawab pata hai, toh question card khol kar apna step-by-step solution likhein.</li>
+        <li>✅ <strong>Accepted Solution:</strong> Jis student ne sawal poocha tha, agar usko aapka jawab sabse best lage toh woh green checkmark se <em>"Accept Answer"</em> mark kar sakta hai!</li>
+      </ul>
+    </section>
+
+    <!-- Step 7: Polls -->
+    <section id="step7" class="section-card">
+      <div class="card-header">
+        <div class="step-number">7</div>
+        <div>
+          <div class="card-title">School Polls & Elections</div>
+          <div class="card-subtitle">House captain election aur class surveys mein vote karna</div>
+        </div>
+      </div>
+      <p>Bottom navigation se <strong>"Polls"</strong> section mein jayein:</p>
+      <ul>
+        <li>Har active poll card mein sawal aur options dikhenge.</li>
+        <li>Apne pasand ke option ke radio circle par tap karein aur <strong>"Submit Vote"</strong> dabayein.</li>
+        <li><strong>Strict 1 Student = 1 Vote:</strong> System duplicate voting allow nahi karta. Vote submit hote hi aapko live percentage aur vote counts dikhenge!</li>
+      </ul>
+    </section>
+
+    <!-- Step 8: Chat -->
+    <section id="step8" class="section-card">
+      <div class="card-header">
+        <div class="step-number">8</div>
+        <div>
+          <div class="card-title">Realtime Class Chat</div>
+          <div class="card-subtitle">Apni class ke doston ke saath study discussion</div>
+        </div>
+      </div>
+      <p>Bottom menu se <strong>"Chat"</strong> section kholein:</p>
+      <ul>
+        <li>Yeh WhatsApp ki tarah instant messaging hai, jahan message bhejte hi sabhi online classmates ko live dikhta hai.</li>
+        <li><strong style="color: #ef4444;">Code of Conduct:</strong> Chat mein sirf padhai, homework aur school projects se judi baatein karein. Abusive ya spam messages bhejne par Lead Admin account ko suspend kar sakte hain.</li>
+      </ul>
+    </section>
+
+    <!-- Step 9: PWA Mobile Install -->
+    <section id="step9" class="section-card">
+      <div class="card-header">
+        <div class="step-number">9</div>
+        <div>
+          <div class="card-title">VidyaSphere Ko Mobile App Ki Tarah Install Karein</div>
+          <div class="card-subtitle">Phone ke Home Screen par icon laane ka 10-second tarika</div>
+        </div>
+      </div>
+      <p>Aapko bar-bar browser mein link type karne ki zaroorat nahi hai. Isko direct phone app bana lein:</p>
+      <ol>
+        <li>Apne phone ke **Chrome Browser** mein link open karein: <br><span class="code-pill">https://vidyasphere.ziprecovery2024-dbc.workers.dev</span></li>
+        <li>Upar right corner mein **3 dots (⋮)** par tap karein.</li>
+        <li>Menu mein se **"Install app"** ya **"Add to Home screen"** par tap karein.</li>
+        <li>Phone screen par VidyaSphere ka official app icon aa jayega. Ab aap ek tap mein seedha dashboard mein pahunch jayenge!</li>
+      </ol>
+    </section>
+
+    <!-- FAQs & Troubleshooting -->
+    <section id="faq" class="section-card">
+      <div class="card-header">
+        <div class="step-number">❓</div>
+        <div>
+          <div class="card-title">Frequently Asked Questions (Troubleshooting)</div>
+          <div class="card-subtitle">Kahin par phas gaye toh yahan dekhein</div>
+        </div>
+      </div>
+
+      <details open>
+        <summary>Page kholte waqt "This site can't be reached" ya loading issue aaye toh kya karein?</summary>
+        <p>India mein Jio/Airtel SIM users ke liye Chrome mein <strong>Secure DNS</strong> on karna padta hai: Chrome Settings > Privacy & security > Use secure DNS > Choose "Cloudflare (1.1.1.1)" ya "Google Public DNS" select karein. Iske baad page palkein jhapakte hi khul jayega!</p>
+      </details>
+
+      <details>
+        <summary>Agar main apna Registration Token (VSR-...) bhool gaya toh?</summary>
+        <p>Apne class teacher ya school ke <strong>Platform Creator & Lead Admin</strong> se sampark karein. Admin control panel se aapke Roll Number aur Name se aapka account manually find aur activate kar sakte hain.</p>
+      </details>
+
+      <details>
+        <summary>Kya main apna Password kisi friend ke saath share kar sakta hoon?</summary>
+        <p>Bilkul nahi! Aapke account se jo bhi vote diya jayega ya doubt poocha jayega, woh aapke naam aur roll number ke sath link hota hai. Apna password kisi ko na dein.</p>
+      </details>
+
+      <details>
+        <summary>Kya main apne phone ke mobile data (1GB/day) par isko chala sakta hoon?</summary>
+        <p>Haan! VidyaSphere ko specially <strong>Ultra Light-weight Architecture</strong> par banaya gaya hai. Yeh bohot kam internet data use karta hai aur 4G/5G par super fast chalta hai.</p>
+      </details>
+
+      <details>
+        <summary>VidyaSphere kisne banaya hai?</summary>
+        <p>VidyaSphere hamare school ke <strong>14-year-old Platform Creator & Lead Admin</strong> ne create kiya hai taaki hamare school ke har student ke paas ek modern aur super-fast digital platform ho.</p>
+      </details>
+    </section>
+
+  </div>
+
+  <footer>
+    <p><strong>VidyaSphere School Ecosystem &bull; Made with pride by Platform Creator & Lead Admin</strong></p>
+    <p style="margin-top: 4px; font-size: 0.75rem;">Strictly for School Academic Use &bull; All Rights Reserved 2026</p>
+  </footer>
+
+</body>
+</html>
