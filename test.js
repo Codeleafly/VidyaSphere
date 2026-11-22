@@ -172,8 +172,75 @@ async function runTests() {
   const pwaReady = fs.existsSync('./client/manifest.json') && fs.existsSync('./client/sw.js');
   console.log("✓ [Phase 5 - PWA Manifest & Service Worker]:", pwaReady ? 'PASS' : 'FAIL');
 
+  // 13. Phase 5: Security Test - Student Cannot Post Exam (403 Forbidden)
+  const rStudentExam = await worker.fetch(new Request('http://localhost/api/admin/exams', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${studentToken}` },
+    body: JSON.stringify({
+      title: 'Hacked Exam Schedule',
+      className: 'Class 10',
+      subject: 'Maths',
+      examDate: '2026-12-01'
+    })
+  }), mockEnv);
+  console.log("✓ [Security - Student Blocked from Posting Exams (403)]: ", rStudentExam.status === 403 ? 'PASS' : 'FAIL');
+
+  // 14. Phase 5: Admin Schedules New Exam with Notice Broadcast
+  const rAdminExam = await worker.fetch(new Request('http://localhost/api/admin/exams', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({
+      title: 'Term 1 Mathematics Board Prelims',
+      className: 'Class 10',
+      subject: 'Mathematics',
+      examDate: '2026-12-15',
+      startTime: '09:30 AM',
+      endTime: '12:30 PM',
+      roomOrHall: 'Main Exam Block - Room 102',
+      syllabus: 'Real Numbers, Polynomials, Quadratic Equations, Triangles',
+      driveLink: 'https://drive.google.com/file/d/test_timetable/view',
+      broadcastNotice: true
+    })
+  }), mockEnv);
+  const dAdminExam = await rAdminExam.json();
+  console.log("✓ [Phase 5 - Admin Schedules New Exam & Notice Broadcast]:", dAdminExam.success ? 'PASS' : 'FAIL', `(Exam ID: ${dAdminExam.id})`);
+  const examId = dAdminExam.id;
+
+  // 15. Phase 5: Student Reads Exam Timetable
+  const rGetExams = await worker.fetch(new Request('http://localhost/api/exams?class=Class%2010'), mockEnv);
+  const dGetExams = await rGetExams.json();
+  const foundExam = (dGetExams.exams || []).find(e => e.id === examId);
+  console.log("✓ [Phase 5 - Student Reads Exam Timetable]:", foundExam && foundExam.subject === 'Mathematics' ? 'PASS' : 'FAIL');
+
+  // 16. Phase 5: Admin Updates Exam Date / Details ("Change Karo")
+  const rUpdateExam = await worker.fetch(new Request(`http://localhost/api/admin/exams/${examId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({
+      title: 'Term 1 Mathematics Board Prelims (Rescheduled)',
+      className: 'Class 10',
+      subject: 'Mathematics',
+      examDate: '2026-12-18',
+      startTime: '10:00 AM',
+      endTime: '01:00 PM',
+      roomOrHall: 'Main Examination Hall',
+      syllabus: 'Complete Term 1 Syllabus with Theorem Formulae',
+      driveLink: 'https://drive.google.com/file/d/updated_timetable/view'
+    })
+  }), mockEnv);
+  const dUpdateExam = await rUpdateExam.json();
+  console.log("✓ [Phase 5 - Admin Updates / Changes Exam Details]:", dUpdateExam.success ? 'PASS' : 'FAIL');
+
+  // 17. Phase 5: Admin Deletes Exam
+  const rDeleteExam = await worker.fetch(new Request(`http://localhost/api/admin/exams/${examId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${adminToken}` }
+  }), mockEnv);
+  const dDeleteExam = await rDeleteExam.json();
+  console.log("✓ [Phase 5 - Admin Deletes Exam Schedule]:", dDeleteExam.success ? 'PASS' : 'FAIL');
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 12 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 17 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

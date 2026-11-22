@@ -11,6 +11,7 @@ import { handleNotesRoutes } from './routes/notes.js';
 import { handleQARoutes } from './routes/qa.js';
 import { handlePollsRoutes } from './routes/polls.js';
 import { handleChatRoutes } from './routes/chat.js';
+import { handleExamsRoutes } from './routes/exams.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -44,6 +45,11 @@ export default {
         // Announcements (Public read & Admin publish)
         if (path === '/api/announcements' || path.startsWith('/api/admin/announcements')) {
           return await handleAnnouncementRoutes(request, env, path, method);
+        }
+
+        // Phase 5: Examination Schedules & Timetables (Admin manage & Student read)
+        if (path === '/api/exams' || path.startsWith('/api/admin/exams')) {
+          return await handleExamsRoutes(request, env, path, method);
         }
 
         // Administrative Core

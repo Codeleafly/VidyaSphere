@@ -30,15 +30,20 @@
         <button data-tab="students" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
           <i data-lucide="users" class="w-5 h-5 text-emerald-400"></i> Student Accounts
         </button>
+        <button data-tab="exams" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
+          <i data-lucide="calendar" class="w-5 h-5 text-purple-400"></i> Exams & Timetables
+        </button>
         <button data-tab="announcements" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
           <i data-lucide="megaphone" class="w-5 h-5 text-amber-400"></i> Publish Notices
         </button>
         <button data-tab="settings" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
           <i data-lucide="settings" class="w-5 h-5 text-cyan-400"></i> Academic Year & Settings
         </button>
-        <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition">
-          <i data-lucide="arrow-left" class="w-5 h-5"></i> Back to Portal
-        </a>
+        <div class="pt-2">
+          <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white font-bold text-sm transition border border-slate-700 hover:border-indigo-500 shadow-sm">
+            <i data-lucide="layout-grid" class="w-5 h-5 text-indigo-400"></i> 🎓 Student Dashboard
+          </a>
+        </div>
       </nav>
     </div>
 
@@ -65,30 +70,36 @@
       <span class="font-bold text-sm">Admin Core</span>
     </div>
     <div class="flex items-center gap-2">
-      <a href="/dashboard/index.html" class="text-xs text-slate-300 underline">Portal</a>
-      <button id="logout-btn-mob" class="text-xs text-rose-400 font-bold ml-2">Logout</button>
+      <a href="/dashboard/index.html" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm">
+        <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Student Portal
+      </a>
+      <button id="logout-btn-mob" class="text-xs text-rose-400 font-bold ml-1">Logout</button>
     </div>
   </header>
 
   <!-- Main Content Area -->
   <main class="flex-1 max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
     <!-- Quick Stats Bar -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <p class="text-xs text-slate-500 font-semibold">Pending Review</p>
-        <h3 id="stat-pending" class="text-2xl font-extrabold text-amber-600 mt-1">-</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
+      <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-[11px] sm:text-xs text-slate-500 font-semibold">Pending Review</p>
+        <h3 id="stat-pending" class="text-xl sm:text-2xl font-extrabold text-amber-600 mt-1">-</h3>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <p class="text-xs text-slate-500 font-semibold">Active Students</p>
-        <h3 id="stat-students" class="text-2xl font-extrabold text-emerald-600 mt-1">-</h3>
+      <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-[11px] sm:text-xs text-slate-500 font-semibold">Active Students</p>
+        <h3 id="stat-students" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1">-</h3>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <p class="text-xs text-slate-500 font-semibold">Notes Catalog</p>
-        <h3 id="stat-notes" class="text-2xl font-extrabold text-indigo-600 mt-1">-</h3>
+      <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-[11px] sm:text-xs text-slate-500 font-semibold">Notes Catalog</p>
+        <h3 id="stat-notes" class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-1">-</h3>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <p class="text-xs text-slate-500 font-semibold">Active Polls</p>
-        <h3 id="stat-polls" class="text-2xl font-extrabold text-purple-600 mt-1">-</h3>
+      <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-[11px] sm:text-xs text-slate-500 font-semibold">Active Polls</p>
+        <h3 id="stat-polls" class="text-xl sm:text-2xl font-extrabold text-purple-600 mt-1">-</h3>
+      </div>
+      <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
+        <p class="text-[11px] sm:text-xs text-slate-500 font-semibold">Exams Scheduled</p>
+        <h3 id="stat-exams" class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-1">-</h3>
       </div>
     </div>
 
@@ -242,6 +253,141 @@
         </div>
       </div>
     </section>
+
+    <!-- TAB: EXAMINATIONS & TIMETABLES -->
+    <section id="tab-exams" class="admin-tab-content space-y-6 hidden">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">School Examination Manager</h2>
+          <p class="text-xs text-slate-500">Schedule, reschedule, or update exam timetables, room assignments, and syllabus guidelines.</p>
+        </div>
+      </div>
+
+      <!-- Schedule / Edit Exam Card -->
+      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm max-w-3xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 id="exam-form-heading" class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+            Schedule New Exam
+          </h3>
+          <button id="exam-cancel-edit-btn" type="button" class="hidden text-xs text-rose-600 hover:text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-lg">
+            ✕ Cancel Edit
+          </button>
+        </div>
+
+        <form id="manage-exam-form" class="space-y-4">
+          <input type="hidden" id="exam-id" value="">
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Exam Title</label>
+            <input type="text" id="exam-title" required
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-purple-500"
+              placeholder="e.g. Unit Test 1 or Semester Board Prelims 2026">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Target Class</label>
+              <select id="exam-class" required
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-purple-500 bg-white">
+                <option value="All Classes">All Classes</option>
+                <option value="Class 10">Class 10 (SSC / CBSE)</option>
+                <option value="Class 12">Class 12 (HSC / CBSE)</option>
+                <option value="Class 9">Class 9</option>
+                <option value="Class 8">Class 8</option>
+                <option value="Class 7">Class 7</option>
+                <option value="Class 6">Class 6</option>
+                <option value="Class 5">Class 5</option>
+                <option value="Class 4">Class 4</option>
+                <option value="Class 3">Class 3</option>
+                <option value="Class 2">Class 2</option>
+                <option value="Class 1">Class 1</option>
+                <option value="Class 11">Class 11</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Subject</label>
+              <input type="text" id="exam-subject" required
+                class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-purple-500"
+                placeholder="e.g. Mathematics / Science / English">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Exam Date</label>
+              <input type="date" id="exam-date" required
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-purple-500 bg-white">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Start Time</label>
+              <input type="text" id="exam-start-time"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500"
+                placeholder="e.g. 09:30 AM">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">End Time</label>
+              <input type="text" id="exam-end-time"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500"
+                placeholder="e.g. 12:30 PM">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Hall / Room Number</label>
+              <input type="text" id="exam-room"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500"
+                placeholder="e.g. Main Examination Hall / Room 104">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Google Drive Timetable / Syllabus Link (Optional)</label>
+              <input type="url" id="exam-drive-link"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 font-mono"
+                placeholder="https://drive.google.com/file/d/.../view">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Syllabus & Guidelines / Instructions</label>
+            <textarea id="exam-syllabus" rows="3"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 leading-relaxed"
+              placeholder="e.g. Chapters 1 to 5, Geometry Construction tools required, Reporting time 15 minutes before exam."></textarea>
+          </div>
+
+          <div id="exam-broadcast-wrapper" class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="exam-broadcast" class="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-500" checked>
+            <label for="exam-broadcast" class="text-xs text-slate-700 font-semibold cursor-pointer">
+              📢 Also broadcast an Urgent Exam Alert on the School Notice Board
+            </label>
+          </div>
+
+          <button type="submit" id="exam-submit-btn"
+            class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center justify-center gap-2">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+            <span id="exam-submit-text">Publish Exam Schedule</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Published Exams Table / List -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-900">Scheduled Exams Master List</h3>
+          <span id="exam-count-badge" class="text-xs text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200 font-bold">0 exams</span>
+        </div>
+
+        <div id="admin-exams-container" class="space-y-3">
+          <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            Loading scheduled exams...
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- Approval Code Result Modal -->
@@ -313,6 +459,7 @@
 
         if (btn.dataset.tab === 'applications') loadApplications();
         if (btn.dataset.tab === 'students') loadStudentAccounts();
+        if (btn.dataset.tab === 'exams') loadExamsAdmin();
       });
     });
 
@@ -324,6 +471,7 @@
         document.getElementById('stat-students').textContent = s.totalStudents ?? 0;
         document.getElementById('stat-notes').textContent = s.totalNotes ?? 0;
         document.getElementById('stat-polls').textContent = s.totalPolls ?? 0;
+        document.getElementById('stat-exams').textContent = s.totalExams ?? 0;
       } catch (e) {
         console.error('Stats error', e);
       }
@@ -588,6 +736,192 @@
         showToast(err.message, 'error');
       }
     });
+
+    // EXAMINATIONS MANAGEMENT CORE
+    let adminExamsList = [];
+    const manageExamForm = document.getElementById('manage-exam-form');
+    const examCancelEditBtn = document.getElementById('exam-cancel-edit-btn');
+    const examBroadcastWrapper = document.getElementById('exam-broadcast-wrapper');
+
+    function resetExamForm() {
+      manageExamForm.reset();
+      document.getElementById('exam-id').value = '';
+      document.getElementById('exam-form-heading').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span> Schedule New Exam';
+      document.getElementById('exam-submit-text').textContent = 'Publish Exam Schedule';
+      examCancelEditBtn.classList.add('hidden');
+      examBroadcastWrapper.classList.remove('hidden');
+    }
+
+    examCancelEditBtn?.addEventListener('click', resetExamForm);
+
+    manageExamForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const examId = document.getElementById('exam-id').value.trim();
+      const payload = {
+        title: document.getElementById('exam-title').value.trim(),
+        className: document.getElementById('exam-class').value,
+        subject: document.getElementById('exam-subject').value.trim(),
+        examDate: document.getElementById('exam-date').value,
+        startTime: document.getElementById('exam-start-time').value.trim(),
+        endTime: document.getElementById('exam-end-time').value.trim(),
+        roomOrHall: document.getElementById('exam-room').value.trim(),
+        syllabus: document.getElementById('exam-syllabus').value.trim(),
+        driveLink: document.getElementById('exam-drive-link').value.trim(),
+        broadcastNotice: document.getElementById('exam-broadcast').checked,
+      };
+
+      try {
+        if (examId) {
+          // Update existing exam
+          await apiRequest(`/admin/exams/${examId}`, {
+            method: 'PUT',
+            body: payload,
+          });
+          showToast('Exam schedule and details updated successfully!', 'success');
+        } else {
+          // Create new exam
+          await apiRequest('/admin/exams', {
+            method: 'POST',
+            body: payload,
+          });
+          showToast('New exam announced and scheduled!', 'success');
+        }
+
+        resetExamForm();
+        loadExamsAdmin();
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    async function loadExamsAdmin() {
+      const container = document.getElementById('admin-exams-container');
+      const countBadge = document.getElementById('exam-count-badge');
+      try {
+        const res = await apiRequest('/exams');
+        adminExamsList = res.exams || [];
+        countBadge.textContent = `${adminExamsList.length} scheduled`;
+
+        if (adminExamsList.length === 0) {
+          container.innerHTML = `
+            <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+              <i data-lucide="calendar-x" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+              <p class="text-sm font-semibold text-slate-600">No exams scheduled yet.</p>
+              <p class="text-xs text-slate-400 mt-1">Use the form above to announce upcoming unit tests or board exams.</p>
+            </div>
+          `;
+          initIcons();
+          return;
+        }
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        container.innerHTML = adminExamsList.map(ex => {
+          const isPassed = ex.exam_date < todayStr;
+          const isToday = ex.exam_date === todayStr;
+
+          return `
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full break-words">
+              <div class="space-y-1.5 w-full sm:w-auto">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                    isToday ? 'bg-rose-100 text-rose-700 border-rose-200' : (isPassed ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-purple-100 text-purple-700 border-purple-200')
+                  }">
+                    ${isToday ? '🔴 TODAY' : (isPassed ? 'Completed' : 'Upcoming')}
+                  </span>
+                  <span class="text-xs font-bold text-slate-900">${ex.title}</span>
+                  <span class="text-[10px] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded">
+                    ${ex.class_name}
+                  </span>
+                  <span class="text-[10px] bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded border border-indigo-100">
+                    ${ex.subject}
+                  </span>
+                </div>
+
+                <div class="text-xs text-slate-600 flex items-center gap-3 flex-wrap">
+                  <span class="font-semibold text-slate-800 flex items-center gap-1">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-purple-600"></i> ${ex.exam_date}
+                  </span>
+                  ${ex.start_time ? `<span class="flex items-center gap-1 text-slate-500"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ${ex.start_time} - ${ex.end_time || ''}</span>` : ''}
+                  ${ex.room_or_hall ? `<span class="flex items-center gap-1 text-slate-500"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> ${ex.room_or_hall}</span>` : ''}
+                </div>
+
+                ${ex.syllabus ? `<p class="text-xs text-slate-500 mt-1 line-clamp-2 italic"><strong>Syllabus:</strong> ${ex.syllabus}</p>` : ''}
+
+                ${ex.drive_link ? `
+                  <a href="${ex.drive_link}" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline mt-0.5">
+                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i> Google Drive Timetable PDF
+                  </a>
+                ` : ''}
+              </div>
+
+              <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0">
+                <button class="edit-exam-btn flex-1 sm:flex-none px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs flex items-center justify-center gap-1 transition"
+                  data-id="${ex.id}">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i> Edit
+                </button>
+                <button class="delete-exam-btn flex-1 sm:flex-none px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs flex items-center justify-center gap-1 transition"
+                  data-id="${ex.id}" data-title="${ex.title}">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        initIcons();
+
+        // Wire Edit buttons
+        document.querySelectorAll('.edit-exam-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const ex = adminExamsList.find(item => item.id === id);
+            if (!ex) return;
+
+            document.getElementById('exam-id').value = ex.id;
+            document.getElementById('exam-title').value = ex.title || '';
+            document.getElementById('exam-class').value = ex.class_name || 'All Classes';
+            document.getElementById('exam-subject').value = ex.subject || '';
+            document.getElementById('exam-date').value = ex.exam_date || '';
+            document.getElementById('exam-start-time').value = ex.start_time || '';
+            document.getElementById('exam-end-time').value = ex.end_time || '';
+            document.getElementById('exam-room').value = ex.room_or_hall || '';
+            document.getElementById('exam-syllabus').value = ex.syllabus || '';
+            document.getElementById('exam-drive-link').value = ex.drive_link || '';
+
+            document.getElementById('exam-form-heading').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> ✏️ Edit Exam Schedule & Details';
+            document.getElementById('exam-submit-text').textContent = 'Update Exam Details';
+            examCancelEditBtn.classList.remove('hidden');
+            examBroadcastWrapper.classList.add('hidden');
+
+            manageExamForm.scrollIntoView({ behavior: 'smooth' });
+          });
+        });
+
+        // Wire Delete buttons
+        document.querySelectorAll('.delete-exam-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            const title = btn.dataset.title || 'this exam';
+            if (!confirm(`Are you sure you want to delete the scheduled exam: "${title}"?`)) return;
+
+            try {
+              await apiRequest(`/admin/exams/${id}`, { method: 'DELETE' });
+              showToast('Exam schedule deleted successfully', 'info');
+              loadExamsAdmin();
+              loadStats();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
+
+      } catch (err) {
+        container.innerHTML = `<div class="p-6 text-center text-rose-500 bg-rose-50 rounded-2xl text-sm">${err.message}</div>`;
+      }
+    }
 
     initIcons();
     const isAuthorized = await verifyAdminSession();

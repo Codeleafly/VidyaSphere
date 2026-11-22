@@ -193,12 +193,13 @@ export async function handleAdminRoutes(request, env, path, method) {
 
   // GET /api/admin/stats - Quick overview dashboard stats
   if (path === '/api/admin/stats' && method === 'GET') {
-    const [pendingRegs, totalStudents, totalNotes, totalQuestions, activePolls] = await Promise.all([
+    const [pendingRegs, totalStudents, totalNotes, totalQuestions, activePolls, totalExams] = await Promise.all([
       env.DB.prepare(`SELECT COUNT(*) as count FROM registrations WHERE review_status = 'pending'`).first(),
       env.DB.prepare(`SELECT COUNT(*) as count FROM profiles WHERE role = 'student'`).first(),
       env.DB.prepare(`SELECT COUNT(*) as count FROM notes`).first(),
       env.DB.prepare(`SELECT COUNT(*) as count FROM questions`).first(),
       env.DB.prepare(`SELECT COUNT(*) as count FROM polls`).first(),
+      env.DB.prepare(`SELECT COUNT(*) as count FROM exams`).first().catch(() => ({ count: 0 })),
     ]);
 
     return successResponse({
@@ -208,6 +209,7 @@ export async function handleAdminRoutes(request, env, path, method) {
         totalNotes: totalNotes ? totalNotes.count : 0,
         totalQuestions: totalQuestions ? totalQuestions.count : 0,
         totalPolls: activePolls ? activePolls.count : 0,
+        totalExams: totalExams ? totalExams.count : 0,
       }
     });
   }

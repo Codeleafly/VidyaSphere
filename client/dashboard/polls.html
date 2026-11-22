@@ -29,6 +29,9 @@
         <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
           <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Notice Board
         </a>
+        <a href="/dashboard/exams.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+          <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i> Exams & Timetable
+        </a>
         <a href="/dashboard/chat.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
           <i data-lucide="messages-square" class="w-5 h-5"></i> Realtime Chat
         </a>
@@ -75,7 +78,10 @@
       <span class="font-bold text-xs sm:text-sm text-slate-900 truncate">VidyaSphere</span>
     </div>
     <div class="flex items-center gap-2">
-      <span id="user-display-name-mob" class="text-[11px] font-bold text-slate-700 truncate max-w-[110px]"></span>
+      <a href="/admin/index.html" class="admin-mobile-switch hidden px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Admin
+      </a>
+      <span id="user-display-name-mob" class="text-[11px] font-bold text-slate-700 truncate max-w-[90px]"></span>
       <button class="logout-btn-trigger p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Logout">
         <i data-lucide="log-out" class="w-4 h-4"></i>
       </button>
@@ -171,6 +177,7 @@
       document.getElementById('user-display-role').textContent = `${user.role} ${user.className ? '• ' + user.className : ''}`;
       if (user.role === 'admin') {
         document.getElementById('admin-nav-link').classList.remove('hidden');
+        document.querySelectorAll('.admin-mobile-switch').forEach(el => el.classList.remove('hidden'));
       }
     }
 

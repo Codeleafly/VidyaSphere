@@ -188,3 +188,22 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (sender_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
+
+-- PHASE 5: Official Examination Schedules & Timetables
+CREATE TABLE IF NOT EXISTS exams (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    class_name TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    exam_date TEXT NOT NULL,
+    start_time TEXT,
+    end_time TEXT,
+    room_or_hall TEXT,
+    syllabus TEXT,
+    drive_link TEXT,
+    academic_year TEXT NOT NULL DEFAULT '2026-2027',
+    created_by TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES profiles(id)
+);
