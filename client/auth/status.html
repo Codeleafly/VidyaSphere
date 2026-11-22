@@ -169,7 +169,22 @@
             claimSection.classList.remove('hidden');
             assignedUsernameEl.textContent = res.activation.assignedUsername;
           } else {
-            detailHtml += `<p class="text-slate-500">Account has already been claimed. You can <a href="/auth/login.html" class="underline font-bold text-indigo-600">log in directly</a>.</p>`;
+            const uName = (res.activation && res.activation.assignedUsername) ? res.activation.assignedUsername : 'Check with Lead Admin';
+            detailHtml += `
+              <div class="mt-2 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+                <p class="text-xs text-emerald-800 font-bold flex items-center gap-1.5">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> Account Already Activated & Ready!
+                </p>
+                <p class="text-xs text-slate-700">
+                  Your Login Username: <code class="font-mono font-bold bg-white px-2 py-1 rounded border border-emerald-300 text-indigo-700 select-all">${uName}</code>
+                </p>
+                <div class="pt-1">
+                  <a href="/auth/login.html" class="inline-flex items-center gap-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-sm transition">
+                    👉 Go to Sign In
+                  </a>
+                </div>
+              </div>
+            `;
             claimSection.classList.add('hidden');
           }
         } else if (res.reviewStatus === 'rejected') {

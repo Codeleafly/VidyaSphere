@@ -83,7 +83,7 @@ export async function handleAuthRoutes(request, env, path, method) {
     if (reg.review_status === 'approved') {
       const codeRecord = await env.DB.prepare(
         `SELECT id, assigned_username, expires_at, is_used FROM activation_codes 
-         WHERE tracking_token = ? AND is_used = 0 
+         WHERE tracking_token = ? 
          ORDER BY created_at DESC LIMIT 1`
       )
         .bind(token.trim())
@@ -93,7 +93,8 @@ export async function handleAuthRoutes(request, env, path, method) {
         activationInfo = {
           assignedUsername: codeRecord.assigned_username,
           expiresAt: codeRecord.expires_at,
-          canActivate: true,
+          canActivate: codeRecord.is_used === 0,
+          isUsed: codeRecord.is_used === 1,
         };
       }
     }

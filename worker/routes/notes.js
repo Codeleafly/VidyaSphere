@@ -7,6 +7,18 @@ import { jsonResponse, errorResponse, successResponse, corsHeaders } from '../ut
 import { generateId } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
 
+function arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  const chunkSize = 8192;
+  for (let i = 0; i < len; i += chunkSize) {
+    const chunk = bytes.subarray(i, Math.min(i + chunkSize, len));
+    binary += String.fromCharCode.apply(null, chunk);
+  }
+  return btoa(binary);
+}
+
 export async function handleNotesRoutes(request, env, path, method) {
   // GET /api/notes - Filter and search notes
   if (path === '/api/notes' && method === 'GET') {
@@ -104,19 +116,7 @@ export async function handleNotesRoutes(request, env, path, method) {
       const noteId = generateId('note', 8);
       const r2Key = `notes/${noteId}_${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
 
-      // Upload to R2 bucket if STORAGE binding exists
-      if (env.STORAGE) {
-        await env.STORAGE.put(r2Key, fileBuffer, {
-          httpMetadata: {
-            contentType: fileType,
-          },
-          customMetadata: {
-            uploaderId: auth.user.id,
-            title: title.trim(),
-          },
-        });
-      }
-
+      // 1. Insert parent record in notes table first
       await env.DB.prepare(
         `INSERT INTO notes (id, uploader_id, title, description, class_name, subject, chapter, r2_key, file_type, file_size, moderation_status)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved')`
@@ -134,6 +134,36 @@ export async function handleNotesRoutes(request, env, path, method) {
           fileSize
         )
         .run();
+
+      // 2. Always store actual file chunks in D1 database for reliable offline/R2-free downloading
+      try {
+        const base64Data = arrayBufferToBase64(fileBuffer);
+        const CHUNK_SIZE = 60000;
+        const chunkQueries = [];
+        let chunkIdx = 0;
+        for (let i = 0; i < base64Data.length; i += CHUNK_SIZE) {
+          chunkQueries.push(
+            env.DB.prepare(
+              `INSERT INTO note_files (note_id, chunk_index, chunk_data) VALUES (?, ?, ?)`
+            ).bind(noteId, chunkIdx++, base64Data.slice(i, i + CHUNK_SIZE))
+          );
+        }
+        for (let i = 0; i < chunkQueries.length; i += 20) {
+          await env.DB.batch(chunkQueries.slice(i, i + 20));
+        }
+      } catch (err) {
+        console.error('Note chunk storage error:', err);
+      }
+
+      // 3. Upload to R2 bucket if STORAGE binding exists
+      if (env.STORAGE) {
+        try {
+          await env.STORAGE.put(r2Key, fileBuffer, {
+            httpMetadata: { contentType: fileType },
+            customMetadata: { uploaderId: auth.user.id, title: title.trim() },
+          });
+        } catch (e) { /* ignore R2 errors */ }
+      }
 
       return successResponse({ id: noteId, title, r2Key }, 'Note uploaded successfully', 201);
     } catch (err) {
@@ -157,21 +187,50 @@ export async function handleNotesRoutes(request, env, path, method) {
       `UPDATE notes SET download_count = download_count + 1 WHERE id = ?`
     ).bind(noteId).run();
 
-    // Stream from R2 if bucket exists
+    const ext = (note.file_type && note.file_type.includes('image')) ? 'jpg' : 'pdf';
+    const cleanFilename = `${note.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.${ext}`;
+
+    // Priority 1: Check in-database chunk storage (D1)
+    try {
+      const { results: chunks } = await env.DB.prepare(
+        `SELECT chunk_data FROM note_files WHERE note_id = ? ORDER BY chunk_index ASC`
+      ).bind(noteId).all();
+
+      if (chunks && chunks.length > 0) {
+        const fullBase64 = chunks.map(c => c.chunk_data).join('');
+        const binary = atob(fullBase64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+
+        return new Response(bytes, {
+          headers: {
+            'Content-Type': note.file_type || 'application/pdf',
+            'Content-Disposition': `inline; filename="${cleanFilename}"`,
+            ...corsHeaders(),
+          },
+        });
+      }
+    } catch (dbErr) {
+      console.error('Error reading note chunks from D1:', dbErr);
+    }
+
+    // Priority 2: Stream from R2 if bucket exists
     if (env.STORAGE) {
       const object = await env.STORAGE.get(note.r2_key);
       if (object) {
         const headers = new Headers();
         object.writeHttpMetadata(headers);
         headers.set('etag', object.httpEtag);
-        headers.set('Content-Disposition', `inline; filename="${note.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.${note.file_type.includes('image') ? 'jpg' : 'pdf'}"`);
+        headers.set('Content-Disposition', `inline; filename="${cleanFilename}"`);
         Object.entries(corsHeaders()).forEach(([k, v]) => headers.set(k, v));
 
         return new Response(object.body, { headers });
       }
     }
 
-    // Graceful mock content if R2 local binding is absent
+    // Fallback if older mock note without uploaded file
     const sampleContent = `VidyaSphere Note: ${note.title}\nClass: ${note.class_name} | Subject: ${note.subject} | Chapter: ${note.chapter}\nDescription: ${note.description}\n\n[End of study document]`;
     return new Response(sampleContent, {
       headers: {
@@ -198,6 +257,10 @@ export async function handleNotesRoutes(request, env, path, method) {
     if (env.STORAGE && note.r2_key) {
       try { await env.STORAGE.delete(note.r2_key); } catch (e) { /* ignore */ }
     }
+
+    try {
+      await env.DB.prepare(`DELETE FROM note_files WHERE note_id = ?`).bind(noteId).run();
+    } catch (e) { /* ignore */ }
 
     await env.DB.prepare(`DELETE FROM notes WHERE id = ?`).bind(noteId).run();
     return successResponse({}, 'Note deleted successfully');

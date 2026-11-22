@@ -92,6 +92,15 @@ CREATE TABLE IF NOT EXISTS notes (
     FOREIGN KEY (uploader_id) REFERENCES profiles(id)
 );
 
+-- PHASE 2: In-Database Chunk Storage for Real PDF/Document Serving (R2 Independent)
+CREATE TABLE IF NOT EXISTS note_files (
+    note_id TEXT NOT NULL,
+    chunk_index INTEGER NOT NULL DEFAULT 0,
+    chunk_data TEXT NOT NULL,
+    PRIMARY KEY (note_id, chunk_index),
+    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+);
+
 -- PHASE 2: Note Flagging & Reports
 CREATE TABLE IF NOT EXISTS note_reports (
     id TEXT PRIMARY KEY,
