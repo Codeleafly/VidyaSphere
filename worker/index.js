@@ -122,7 +122,9 @@ export default {
       await env.DB.batch([
         env.DB.prepare(`DELETE FROM sessions WHERE expires_at < CURRENT_TIMESTAMP`),
         env.DB.prepare(`DELETE FROM rate_limits WHERE reset_at < ?`).bind(now),
-        env.DB.prepare(`DELETE FROM activation_codes WHERE expires_at < CURRENT_TIMESTAMP AND is_used = 0`)
+        env.DB.prepare(`DELETE FROM activation_codes WHERE expires_at < CURRENT_TIMESTAMP AND is_used = 0`),
+        env.DB.prepare(`DELETE FROM note_files WHERE note_id IN (SELECT id FROM notes WHERE note_type = 'file' AND expires_at IS NOT NULL AND expires_at < CURRENT_TIMESTAMP)`),
+        env.DB.prepare(`DELETE FROM notes WHERE note_type = 'file' AND expires_at IS NOT NULL AND expires_at < CURRENT_TIMESTAMP`)
       ]);
       console.log('Daily Edge Cron Maintenance complete: purged expired sessions & rate limits.');
     } catch (err) {

@@ -33,6 +33,9 @@
         <button data-tab="announcements" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
           <i data-lucide="megaphone" class="w-5 h-5 text-amber-400"></i> Publish Notices
         </button>
+        <button data-tab="settings" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
+          <i data-lucide="settings" class="w-5 h-5 text-cyan-400"></i> Academic Year & Settings
+        </button>
         <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition">
           <i data-lucide="arrow-left" class="w-5 h-5"></i> Back to Portal
         </a>
@@ -194,6 +197,49 @@
             Publish Official Circular
           </button>
         </form>
+      </div>
+    </section>
+
+    <!-- SECTION: Settings & Academic Year -->
+    <section id="tab-settings" class="admin-tab-content hidden space-y-4">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Academic Year & Storage Policy</h3>
+          <p class="text-xs text-slate-500">Configure current academic session and cloud resource lifespan</p>
+        </div>
+
+        <form id="academic-year-form" class="space-y-4 max-w-md">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Active Academic Year</label>
+            <input type="text" id="set-academic-year" required
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g. 2026-2027">
+            <p class="text-[11px] text-slate-400 mt-1">Google Drive study notes will remain active for this complete academic year.</p>
+          </div>
+
+          <button type="submit" id="save-settings-btn"
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition">
+            Save Academic Year
+          </button>
+        </form>
+
+        <div class="pt-4 border-t border-slate-100 space-y-3">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Storage & Expiration Policy Rules:</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+              <p class="font-bold flex items-center gap-1.5"><i data-lucide="cloud" class="w-4 h-4 text-emerald-600"></i> Google Drive Notes (Amar):</p>
+              <p class="text-[11px] text-emerald-700 leading-relaxed">
+                Uses <strong>0 bytes of Cloudflare storage</strong>. Valid throughout the full active academic session.
+              </p>
+            </div>
+            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+              <p class="font-bold flex items-center gap-1.5"><i data-lucide="file-clock" class="w-4 h-4 text-amber-600"></i> Direct Uploads (Auto-Purged):</p>
+              <p class="text-[11px] text-amber-700 leading-relaxed">
+                Direct files auto-expire in <strong>30 days</strong> via daily edge cron to guarantee the free tier plan is never exceeded.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -516,11 +562,39 @@
       }
     });
 
+    // Load and Save Settings (Academic Year)
+    async function loadSettings() {
+      try {
+        const res = await apiRequest('/admin/settings');
+        if (res.settings && res.settings.academic_year) {
+          document.getElementById('set-academic-year').value = res.settings.academic_year;
+        }
+      } catch (err) {
+        console.error('Failed to load settings:', err);
+      }
+    }
+
+    const academicYearForm = document.getElementById('academic-year-form');
+    academicYearForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const val = document.getElementById('set-academic-year').value.trim();
+      try {
+        await apiRequest('/admin/settings', {
+          method: 'POST',
+          body: { key: 'academic_year', value: val }
+        });
+        showToast(`Active Academic Year updated to ${val}!`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
     initIcons();
     const isAuthorized = await verifyAdminSession();
     if (isAuthorized) {
       loadStats();
       loadApplications();
+      loadSettings();
     }
   </script>
 </body>

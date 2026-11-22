@@ -14,3 +14,7 @@ VALUES (
     'admin',
     'active'
 );
+
+-- Default Platform Settings
+INSERT OR IGNORE INTO school_settings (key, value)
+VALUES ('academic_year', '2026-2027');

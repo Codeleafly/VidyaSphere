@@ -84,13 +84,24 @@ CREATE TABLE IF NOT EXISTS notes (
     class_name TEXT NOT NULL,
     subject TEXT NOT NULL,
     chapter TEXT,
-    r2_key TEXT NOT NULL,
-    file_type TEXT NOT NULL,
-    file_size INTEGER NOT NULL,
+    note_type TEXT NOT NULL DEFAULT 'file' CHECK(note_type IN ('file', 'drive_link')),
+    drive_url TEXT,
+    academic_year TEXT NOT NULL DEFAULT '2026-2027',
+    expires_at DATETIME,
+    r2_key TEXT,
+    file_type TEXT DEFAULT 'application/pdf',
+    file_size INTEGER DEFAULT 0,
     moderation_status TEXT NOT NULL DEFAULT 'approved' CHECK(moderation_status IN ('pending', 'approved', 'flagged', 'rejected')),
     download_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (uploader_id) REFERENCES profiles(id)
+);
+
+-- General Platform & School Settings (e.g. Current Academic Year)
+CREATE TABLE IF NOT EXISTS school_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- PHASE 2: In-Database Chunk Storage for Real PDF/Document Serving (R2 Independent)

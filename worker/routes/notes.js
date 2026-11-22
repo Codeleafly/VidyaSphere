@@ -66,7 +66,15 @@ export async function handleNotesRoutes(request, env, path, method) {
 
     try {
       const contentType = request.headers.get('content-type') || '';
-      let title, description, className, subject, chapter, fileBuffer, fileType, fileName, fileSize;
+      let title, description, className, subject, chapter, noteType, driveUrl;
+      let fileBuffer = null, fileType = 'application/pdf', fileName = 'document.pdf', fileSize = 0;
+
+      // Fetch active academic year from school settings (default 2026-2027)
+      let activeAcademicYear = '2026-2027';
+      try {
+        const yearRow = await env.DB.prepare(`SELECT value FROM school_settings WHERE key = 'academic_year'`).first();
+        if (yearRow && yearRow.value) activeAcademicYear = yearRow.value;
+      } catch (e) { /* ignore */ }
 
       if (contentType.includes('multipart/form-data')) {
         const formData = await request.formData();
@@ -75,51 +83,79 @@ export async function handleNotesRoutes(request, env, path, method) {
         className = formData.get('className');
         subject = formData.get('subject');
         chapter = formData.get('chapter') || '';
+        noteType = formData.get('noteType') || 'file'; // 'drive_link' | 'file'
+        driveUrl = formData.get('driveUrl') || '';
         const file = formData.get('file');
 
-        if (!title || !className || !subject || !file) {
-          return errorResponse('Title, Class, Subject, and File are required');
+        if (!title || !className || !subject) {
+          return errorResponse('Title, Class, and Subject are required');
         }
 
-        fileName = file.name || 'document.pdf';
-        fileType = file.type || 'application/pdf';
-        fileBuffer = await file.arrayBuffer();
-        fileSize = fileBuffer.byteLength;
+        if (noteType === 'drive_link') {
+          if (!driveUrl || !driveUrl.startsWith('http')) {
+            return errorResponse('A valid public Google Drive / cloud URL is required');
+          }
+        } else {
+          if (!file) {
+            return errorResponse('File is required for direct upload');
+          }
+          fileName = file.name || 'document.pdf';
+          fileType = file.type || 'application/pdf';
+          fileBuffer = await file.arrayBuffer();
+          fileSize = fileBuffer.byteLength;
+        }
       } else {
-        // Fallback JSON upload (e.g. Base64 payload or metadata)
+        // Fallback JSON upload
         const body = await request.json();
         title = body.title;
         description = body.description || '';
         className = body.className;
         subject = body.subject;
         chapter = body.chapter || '';
+        noteType = body.noteType || (body.driveUrl ? 'drive_link' : 'file');
+        driveUrl = body.driveUrl || '';
         fileName = body.fileName || 'note.pdf';
         fileType = body.fileType || 'application/pdf';
 
-        if (body.fileBase64) {
-          const binary = atob(body.fileBase64);
-          fileBuffer = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) fileBuffer[i] = binary.charCodeAt(i);
-          fileSize = fileBuffer.byteLength;
+        if (!title || !className || !subject) {
+          return errorResponse('Title, Class, and Subject are required');
+        }
+
+        if (noteType === 'drive_link') {
+          if (!driveUrl || !driveUrl.startsWith('http')) {
+            return errorResponse('A valid public Google Drive / cloud URL is required');
+          }
         } else {
-          // Placeholder 1KB buffer for testing if no file sent
-          fileBuffer = new TextEncoder().encode(`VidyaSphere Note: ${title}\nClass: ${className}\nSubject: ${subject}\nChapter: ${chapter}\n\n[Study material content stored securely]`);
-          fileSize = fileBuffer.byteLength;
+          if (body.fileBase64) {
+            const binary = atob(body.fileBase64);
+            fileBuffer = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) fileBuffer[i] = binary.charCodeAt(i);
+            fileSize = fileBuffer.byteLength;
+          } else {
+            fileBuffer = new TextEncoder().encode(`VidyaSphere Note: ${title}\nClass: ${className}\nSubject: ${subject}\n\n[Study material content]`);
+            fileSize = fileBuffer.byteLength;
+          }
         }
       }
 
-      // Max 15MB size limit
+      // Max 15MB size limit for direct files
       if (fileSize > 15 * 1024 * 1024) {
         return errorResponse('File size exceeds the 15MB limit');
       }
 
       const noteId = generateId('note', 8);
-      const r2Key = `notes/${noteId}_${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+      const r2Key = noteType === 'drive_link' ? null : `notes/${noteId}_${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+
+      // Drive links are permanent for the full academic year (no expiration)
+      // Direct file uploads expire in 30 days to protect Cloudflare free limits
+      const expiresAt = noteType === 'drive_link'
+        ? null
+        : new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
 
       // 1. Insert parent record in notes table first
       await env.DB.prepare(
-        `INSERT INTO notes (id, uploader_id, title, description, class_name, subject, chapter, r2_key, file_type, file_size, moderation_status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved')`
+        `INSERT INTO notes (id, uploader_id, title, description, class_name, subject, chapter, note_type, drive_url, academic_year, expires_at, r2_key, file_type, file_size, moderation_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved')`
       )
         .bind(
           noteId,
@@ -129,49 +165,62 @@ export async function handleNotesRoutes(request, env, path, method) {
           className.trim(),
           subject.trim(),
           chapter.trim(),
+          noteType,
+          driveUrl ? driveUrl.trim() : null,
+          activeAcademicYear,
+          expiresAt,
           r2Key,
           fileType,
           fileSize
         )
         .run();
 
-      // 2. Always store actual file chunks in D1 database for reliable offline/R2-free downloading
-      try {
-        const base64Data = arrayBufferToBase64(fileBuffer);
-        const CHUNK_SIZE = 60000;
-        const chunkQueries = [];
-        let chunkIdx = 0;
-        for (let i = 0; i < base64Data.length; i += CHUNK_SIZE) {
-          chunkQueries.push(
-            env.DB.prepare(
-              `INSERT INTO note_files (note_id, chunk_index, chunk_data) VALUES (?, ?, ?)`
-            ).bind(noteId, chunkIdx++, base64Data.slice(i, i + CHUNK_SIZE))
-          );
-        }
-        for (let i = 0; i < chunkQueries.length; i += 20) {
-          await env.DB.batch(chunkQueries.slice(i, i + 20));
-        }
-      } catch (err) {
-        console.error('Note chunk storage error:', err);
-      }
-
-      // 3. Upload to R2 bucket if STORAGE binding exists
-      if (env.STORAGE) {
+      // 2. If direct file, store actual file chunks in D1 database
+      if (fileBuffer && noteType === 'file') {
         try {
-          await env.STORAGE.put(r2Key, fileBuffer, {
-            httpMetadata: { contentType: fileType },
-            customMetadata: { uploaderId: auth.user.id, title: title.trim() },
-          });
-        } catch (e) { /* ignore R2 errors */ }
+          const base64Data = arrayBufferToBase64(fileBuffer);
+          const CHUNK_SIZE = 60000;
+          const chunkQueries = [];
+          let chunkIdx = 0;
+          for (let i = 0; i < base64Data.length; i += CHUNK_SIZE) {
+            chunkQueries.push(
+              env.DB.prepare(
+                `INSERT INTO note_files (note_id, chunk_index, chunk_data) VALUES (?, ?, ?)`
+              ).bind(noteId, chunkIdx++, base64Data.slice(i, i + CHUNK_SIZE))
+            );
+          }
+          for (let i = 0; i < chunkQueries.length; i += 20) {
+            await env.DB.batch(chunkQueries.slice(i, i + 20));
+          }
+        } catch (err) {
+          console.error('Note chunk storage error:', err);
+        }
+
+        // 3. Optional R2 upload if STORAGE binding exists
+        if (env.STORAGE && r2Key) {
+          try {
+            await env.STORAGE.put(r2Key, fileBuffer, {
+              httpMetadata: { contentType: fileType },
+              customMetadata: { uploaderId: auth.user.id, title: title.trim() },
+            });
+          } catch (e) { /* ignore R2 errors */ }
+        }
       }
 
-      return successResponse({ id: noteId, title, r2Key }, 'Note uploaded successfully', 201);
+      return successResponse({
+        id: noteId,
+        title,
+        noteType,
+        driveUrl: driveUrl || null,
+        academicYear: activeAcademicYear,
+        expiresAt
+      }, noteType === 'drive_link' ? 'Google Drive material linked successfully (Permanent for Academic Year)!' : 'Note uploaded successfully (Valid for 30 days)!', 201);
     } catch (err) {
       return errorResponse(`Upload error: ${err.message}`, 500);
     }
   }
 
-  // GET /api/notes/:id/file - Stream file and increment download count
+  // GET /api/notes/:id/file - Stream file or redirect to Google Drive
   if (path.startsWith('/api/notes/') && path.endsWith('/file') && method === 'GET') {
     const parts = path.split('/');
     const noteId = parts[3];
@@ -186,6 +235,11 @@ export async function handleNotesRoutes(request, env, path, method) {
     await env.DB.prepare(
       `UPDATE notes SET download_count = download_count + 1 WHERE id = ?`
     ).bind(noteId).run();
+
+    // If it's a Google Drive link, redirect immediately to the drive URL!
+    if (note.note_type === 'drive_link' && note.drive_url) {
+      return Response.redirect(note.drive_url, 302);
+    }
 
     const ext = (note.file_type && note.file_type.includes('image')) ? 'jpg' : 'pdf';
     const cleanFilename = `${note.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.${ext}`;

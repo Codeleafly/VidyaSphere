@@ -212,5 +212,31 @@ export async function handleAdminRoutes(request, env, path, method) {
     });
   }
 
+  // GET /api/admin/settings - View school settings
+  if (path === '/api/admin/settings' && method === 'GET') {
+    const { results } = await env.DB.prepare(`SELECT * FROM school_settings`).all();
+    const settingsMap = {};
+    (results || []).forEach(r => { settingsMap[r.key] = r.value; });
+    return successResponse({ settings: settingsMap });
+  }
+
+  // POST /api/admin/settings - Update school settings (e.g. academic_year)
+  if (path === '/api/admin/settings' && method === 'POST') {
+    try {
+      const body = await request.json();
+      const { key, value } = body;
+      if (!key || !value) return errorResponse('key and value are required');
+
+      await env.DB.prepare(
+        `INSERT INTO school_settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`
+      ).bind(key.trim(), value.trim()).run();
+
+      return successResponse({ key, value }, `Setting '${key}' updated to '${value}'`);
+    } catch (err) {
+      return errorResponse(`Settings error: ${err.message}`, 500);
+    }
+  }
+
   return errorResponse('Admin route not found', 404);
 }
