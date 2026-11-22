@@ -5,6 +5,7 @@
 import { jsonResponse, errorResponse, successResponse } from '../utils/response.js';
 import { generateId, generateActivationCode, sha256 } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
+import { sendActivationEmail } from '../utils/email.js';
 
 export async function handleAdminRoutes(request, env, path, method) {
   // All admin routes require admin role
@@ -74,11 +75,33 @@ export async function handleAdminRoutes(request, env, path, method) {
         ).bind(generateId('log', 8), auth.user.id, `Approved ${reg.full_name} (${assignedUsername})`),
       ]);
 
+      // If optional student email was provided, dispatch activation email with username and 6-digit access code
+      let emailResult = null;
+      if (reg.email) {
+        try {
+          emailResult = await sendActivationEmail(env, {
+            email: reg.email,
+            fullName: reg.full_name,
+            username: assignedUsername,
+            code: rawCode,
+            trackingToken,
+          });
+        } catch (mailErr) {
+          console.error('Email dispatch error on approve:', mailErr);
+        }
+      }
+
+      const emailMsg = reg.email
+        ? ` & access details emailed to ${reg.email}`
+        : '';
+
       return successResponse({
         assignedUsername,
         activationCode: rawCode,
         expiresAt,
-      }, `Registration approved! Activation code generated.`);
+        email: reg.email || null,
+        emailDispatched: emailResult ? emailResult.success : false,
+      }, `Registration approved! Activation code generated${emailMsg}.`);
     } catch (err) {
       return errorResponse(`Approve error: ${err.message}`, 500);
     }

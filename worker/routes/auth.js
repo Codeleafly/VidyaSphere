@@ -28,19 +28,20 @@ export async function handleAuthRoutes(request, env, path, method) {
       }
 
       const body = await request.json();
-      const { fullName, className, division, rollNumber, reason } = body;
+      const { fullName, className, division, rollNumber, email, reason } = body;
 
       if (!fullName || !className || !division || !rollNumber) {
         return errorResponse('Missing required fields: fullName, className, division, rollNumber');
       }
 
+      const cleanEmail = email ? email.trim().toLowerCase() : null;
       const trackingToken = generateId('track', 12);
 
       await env.DB.prepare(
-        `INSERT INTO registrations (tracking_token, full_name, class_name, division, roll_number, reason, review_status)
-         VALUES (?, ?, ?, ?, ?, ?, 'pending')`
+        `INSERT INTO registrations (tracking_token, full_name, class_name, division, roll_number, email, reason, review_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`
       )
-        .bind(trackingToken, fullName.trim(), className.trim(), division.trim().toUpperCase(), rollNumber.trim(), (reason || '').trim())
+        .bind(trackingToken, fullName.trim(), className.trim(), division.trim().toUpperCase(), rollNumber.trim(), cleanEmail, (reason || '').trim())
         .run();
 
       return successResponse(
@@ -50,7 +51,8 @@ export async function handleAuthRoutes(request, env, path, method) {
           fullName: fullName.trim(),
           className: className.trim(),
           division: division.trim().toUpperCase(),
-          rollNumber: rollNumber.trim()
+          rollNumber: rollNumber.trim(),
+          email: cleanEmail
         },
         'Registration submitted successfully! Please save your tracking token to check status.',
         201
@@ -105,6 +107,7 @@ export async function handleAuthRoutes(request, env, path, method) {
       className: reg.class_name,
       division: reg.division,
       rollNumber: reg.roll_number,
+      email: reg.email,
       reviewStatus: reg.review_status,
       reviewReason: reg.review_reason,
       createdAt: reg.created_at,

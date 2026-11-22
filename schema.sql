@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     class_name TEXT NOT NULL,
     division TEXT NOT NULL,
     roll_number TEXT NOT NULL,
+    email TEXT,
     reason TEXT,
     review_status TEXT NOT NULL DEFAULT 'pending' CHECK(review_status IN ('pending', 'approved', 'rejected')),
     review_reason TEXT,
