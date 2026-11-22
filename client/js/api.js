@@ -34,12 +34,22 @@ export async function apiRequest(endpoint, options = {}) {
     if (contentType.includes('application/json')) {
       const data = await response.json();
       if (!response.ok) {
+        if (response.status === 401 && !window.location.pathname.startsWith('/auth/')) {
+          localStorage.removeItem('vidyasphere_token');
+          localStorage.removeItem('vidyasphere_user');
+          window.location.replace('/auth/login.html');
+        }
         throw new Error(data.error || `HTTP error ${response.status}`);
       }
       return data;
     }
 
     if (!response.ok) {
+      if (response.status === 401 && !window.location.pathname.startsWith('/auth/')) {
+        localStorage.removeItem('vidyasphere_token');
+        localStorage.removeItem('vidyasphere_user');
+        window.location.replace('/auth/login.html');
+      }
       const text = await response.text();
       throw new Error(text || `HTTP error ${response.status}`);
     }

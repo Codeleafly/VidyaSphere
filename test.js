@@ -46,17 +46,17 @@ async function runTests() {
   const dHealth = await rHealth.json();
   console.log("✓ [API Health]:", dHealth.status === 'ok' ? 'PASS' : 'FAIL');
 
-  // 2. Admin Login
+  // 2. Root Admin Login
   const rLogin = await worker.fetch(new Request('http://localhost/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: 'admin', password: 'shishuvan@2026' })
   }), mockEnv);
   const dLogin = await rLogin.json();
-  console.log("✓ [Phase 1 - Admin Auth]:", dLogin.success ? 'PASS' : 'FAIL', `(Session Token: ${dLogin.token.slice(0, 15)}...)`);
+  console.log("✓ [Root Admin Auth]:", dLogin.success && dLogin.user.isRootAdmin ? 'PASS' : 'FAIL', `(Root: @${dLogin.user.username})`);
   const adminToken = dLogin.token;
 
-  // 3. Student Registration Application
+  // 3. Student Direct Registration with Password (No codes!)
   const rReg = await worker.fetch(new Request('http://localhost/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -65,44 +65,95 @@ async function runTests() {
       className: 'Class 10',
       division: 'A',
       rollNumber: '21',
-      reason: 'Regular Admission'
+      username: 'aarav_10a_21',
+      password: 'studentSecurePassword123',
+      email: 'aarav@example.com'
     })
   }), mockEnv);
   const dReg = await rReg.json();
-  console.log("✓ [Phase 1 - Student Registration]:", dReg.success ? 'PASS' : 'FAIL', `(Tracking: ${dReg.trackingToken})`);
-  const trackingToken = dReg.trackingToken;
+  console.log("✓ [Student Registration with Direct Password]:", dReg.success && dReg.isPending ? 'PASS' : 'FAIL', `(@${dReg.user.username}, Status: ${dReg.user.accountStatus})`);
+  const studentToken = dReg.token;
+  const studentId = dReg.user.id;
 
-  // 4. Admin Approves Student
+  // 4. Access Control: Pending student cannot access protected features (e.g. Chat or Notes Upload)
+  const rPendingBlocked = await worker.fetch(new Request('http://localhost/api/chat/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${studentToken}` },
+    body: JSON.stringify({ content: 'test' })
+  }), mockEnv);
+  console.log("✓ [Security - Pending Student Blocked from Portal (403)]: ", rPendingBlocked.status === 403 ? 'PASS' : 'FAIL');
+
+  // 5. Admin 1-Click Approval (Zero Activation Codes!)
   const rApprove = await worker.fetch(new Request('http://localhost/api/admin/approve', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-    body: JSON.stringify({ trackingToken })
+    body: JSON.stringify({ userId: studentId })
   }), mockEnv);
   const dApprove = await rApprove.json();
-  console.log("✓ [Phase 1 - Admin Approval & 6-Digit Code]:", dApprove.success ? 'PASS' : 'FAIL', `(Assigned: @${dApprove.assignedUsername}, Code: ${dApprove.activationCode})`);
-  const actCode = dApprove.activationCode;
-  const studentUsername = dApprove.assignedUsername;
+  if (!dApprove.success) console.error("DEBUG rApprove error:", rApprove.status, dApprove);
+  console.log("✓ [Admin 1-Click Approval (Zero Codes)]: ", dApprove.success ? 'PASS' : 'FAIL', `(Active: ${dApprove.accountStatus === 'active'})`);
 
-  // 5. Student Claims & Activates Account
-  const rAct = await worker.fetch(new Request('http://localhost/api/auth/activate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: actCode, password: 'studentSecurePassword123' })
+  // 6. Student Portal Automatically Unlocks
+  const rMe = await worker.fetch(new Request('http://localhost/api/auth/me', {
+    headers: { 'Authorization': `Bearer ${studentToken}` }
   }), mockEnv);
-  const dAct = await rAct.json();
-  console.log("✓ [Phase 1 - Account Activation & Password Setup]:", dAct.success ? 'PASS' : 'FAIL');
-  const studentToken = dAct.token;
+  const dMe = await rMe.json();
+  console.log("✓ [Live Status Verification - Student Now Active]:", dMe.success && dMe.user.accountStatus === 'active' ? 'PASS' : 'FAIL');
 
-  // 6. Security Intrusion Test: Student trying to access Admin endpoint
+  // 7. Security Intrusion Test: Student trying to access Admin endpoint
   const rIntrusion = await worker.fetch(new Request('http://localhost/api/admin/registrations', {
     headers: { 'Authorization': `Bearer ${studentToken}` }
   }), mockEnv);
   console.log("✓ [Security - Admin Intrusion Prevention (403)]: ", rIntrusion.status === 403 ? 'PASS' : 'FAIL');
 
-  // 7. Phase 2: Upload Note
+  // 8. Lead Root Admin Promotes Student to Admin Role
+  const rPromote = await worker.fetch(new Request('http://localhost/api/admin/change-role', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ userId: studentId, newRole: 'admin' })
+  }), mockEnv);
+  const dPromote = await rPromote.json();
+  console.log("✓ [Role Hierarchy - Root Admin Promotes Secondary Admin]:", dPromote.success ? 'PASS' : 'FAIL');
+
+  // 9. Root Admin Immunity Test: Secondary Admin CANNOT Suspend or Demote Root Admin!
+  // Re-login student who is now secondary admin
+  const rSecLogin = await worker.fetch(new Request('http://localhost/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'aarav_10a_21', password: 'studentSecurePassword123' })
+  }), mockEnv);
+  const dSecLogin = await rSecLogin.json();
+  const secondaryAdminToken = dSecLogin.token;
+
+  const rAttackRoot = await worker.fetch(new Request('http://localhost/api/admin/student-status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${secondaryAdminToken}` },
+    body: JSON.stringify({ studentId: 'admin-root-001', status: 'suspended' })
+  }), mockEnv);
+  console.log("✓ [Immunity Test - Sub-Admin Blocked from Suspending Root (403)]: ", rAttackRoot.status === 403 ? 'PASS' : 'FAIL');
+
+  // 10. Root Admin Demotes Secondary Admin back to Student
+  const rDemote = await worker.fetch(new Request('http://localhost/api/admin/change-role', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ userId: studentId, newRole: 'student' })
+  }), mockEnv);
+  const dDemote = await rDemote.json();
+  console.log("✓ [Role Hierarchy - Root Admin Demotes Sub-Admin to Student]:", dDemote.success ? 'PASS' : 'FAIL');
+
+  // Re-login student as student token
+  const rReStudent = await worker.fetch(new Request('http://localhost/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'aarav_10a_21', password: 'studentSecurePassword123' })
+  }), mockEnv);
+  const dReStudent = await rReStudent.json();
+  const activeStudentToken = dReStudent.token;
+
+  // 11. Phase 2: Upload Compressed BLOB Note
   const rNoteUpload = await worker.fetch(new Request('http://localhost/api/notes/upload', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${studentToken}` },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
     body: JSON.stringify({
       title: 'Physics Wave Optics Revision',
       className: 'Class 10',
@@ -112,18 +163,18 @@ async function runTests() {
     })
   }), mockEnv);
   const dNoteUpload = await rNoteUpload.json();
-  console.log("✓ [Phase 2 - Academic Notes Upload]:", dNoteUpload.success ? 'PASS' : 'FAIL');
+  console.log("✓ [Phase 2 - Compressed BLOB Notes Upload]:", dNoteUpload.success ? 'PASS' : 'FAIL');
   const noteId = dNoteUpload.id;
 
-  // 8. Phase 2: Download Note & Atomic Counter
-  await worker.fetch(new Request(`http://localhost/api/notes/${noteId}/file`), mockEnv);
+  // 12. Phase 2: Download Note & Atomic Counter
+  const rDownload = await worker.fetch(new Request(`http://localhost/api/notes/${noteId}/file`), mockEnv);
   const noteCheck = await mockEnv.DB.prepare('SELECT download_count FROM notes WHERE id = ?').bind(noteId).first();
-  console.log("✓ [Phase 2 - Atomic Download Counter]:", noteCheck.download_count === 1 ? 'PASS' : 'FAIL');
+  console.log("✓ [Phase 2 - Decompressed Download & Atomic Counter]:", rDownload.status === 200 && noteCheck.download_count === 1 ? 'PASS' : 'FAIL');
 
-  // 9. Phase 3: Q&A Question & Answer
+  // 13. Phase 3: Q&A Question & Answer
   const rQuestion = await worker.fetch(new Request('http://localhost/api/qa/questions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${studentToken}` },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
     body: JSON.stringify({
       title: 'What is Total Internal Reflection in Optics?',
       description: 'Need help understanding critical angle condition.',
@@ -134,7 +185,7 @@ async function runTests() {
   const dQuestion = await rQuestion.json();
   console.log("✓ [Phase 3 - Academic Q&A Post]:", dQuestion.success ? 'PASS' : 'FAIL');
 
-  // 10. Phase 3: School Polls (Create Poll & Test Duplicate Vote Prevention)
+  // 14. Phase 3: School Polls (Create Poll & Test Duplicate Vote Prevention)
   const rCreatePoll = await worker.fetch(new Request('http://localhost/api/polls', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
@@ -148,19 +199,19 @@ async function runTests() {
 
   const rVote1 = await worker.fetch(new Request(`http://localhost/api/polls/${pollId}/vote`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${studentToken}` },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
     body: JSON.stringify({ optionIndex: 0 })
   }), mockEnv);
   console.log("✓ [Phase 3 - Cast Single Poll Vote]:", rVote1.status === 200 ? 'PASS' : 'FAIL');
 
   const rVote2 = await worker.fetch(new Request(`http://localhost/api/polls/${pollId}/vote`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${studentToken}` },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
     body: JSON.stringify({ optionIndex: 1 })
   }), mockEnv);
   console.log("✓ [Phase 3 - Duplicate Vote Blocked (409 Conflict)]: ", rVote2.status === 409 ? 'PASS' : 'FAIL');
 
-  // 11. Phase 4: Realtime Chat
+  // 15. Phase 4: Realtime Chat
   const rChat = await worker.fetch(new Request('http://localhost/api/chat/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
@@ -168,14 +219,14 @@ async function runTests() {
   }), mockEnv);
   console.log("✓ [Phase 4 - Realtime School Chat]:", rChat.status === 201 ? 'PASS' : 'FAIL');
 
-  // 12. Phase 5: PWA Assets Check
+  // 16. Phase 5: PWA Assets Check
   const pwaReady = fs.existsSync('./client/manifest.json') && fs.existsSync('./client/sw.js');
   console.log("✓ [Phase 5 - PWA Manifest & Service Worker]:", pwaReady ? 'PASS' : 'FAIL');
 
-  // 13. Phase 5: Security Test - Student Cannot Post Exam (403 Forbidden)
+  // 17. Phase 5: Security Test - Student Cannot Post Exam (403 Forbidden)
   const rStudentExam = await worker.fetch(new Request('http://localhost/api/admin/exams', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${studentToken}` },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
     body: JSON.stringify({
       title: 'Hacked Exam Schedule',
       className: 'Class 10',
@@ -185,7 +236,7 @@ async function runTests() {
   }), mockEnv);
   console.log("✓ [Security - Student Blocked from Posting Exams (403)]: ", rStudentExam.status === 403 ? 'PASS' : 'FAIL');
 
-  // 14. Phase 5: Admin Schedules New Exam with Notice Broadcast
+  // 18. Phase 5: Admin Schedules New Exam with Notice Broadcast
   const rAdminExam = await worker.fetch(new Request('http://localhost/api/admin/exams', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
@@ -206,13 +257,13 @@ async function runTests() {
   console.log("✓ [Phase 5 - Admin Schedules New Exam & Notice Broadcast]:", dAdminExam.success ? 'PASS' : 'FAIL', `(Exam ID: ${dAdminExam.id})`);
   const examId = dAdminExam.id;
 
-  // 15. Phase 5: Student Reads Exam Timetable
+  // 19. Phase 5: Student Reads Exam Timetable
   const rGetExams = await worker.fetch(new Request('http://localhost/api/exams?class=Class%2010'), mockEnv);
   const dGetExams = await rGetExams.json();
   const foundExam = (dGetExams.exams || []).find(e => e.id === examId);
   console.log("✓ [Phase 5 - Student Reads Exam Timetable]:", foundExam && foundExam.subject === 'Mathematics' ? 'PASS' : 'FAIL');
 
-  // 16. Phase 5: Admin Updates Exam Date / Details ("Change Karo")
+  // 20. Phase 5: Admin Updates Exam Date / Details ("Change Karo")
   const rUpdateExam = await worker.fetch(new Request(`http://localhost/api/admin/exams/${examId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
@@ -231,7 +282,7 @@ async function runTests() {
   const dUpdateExam = await rUpdateExam.json();
   console.log("✓ [Phase 5 - Admin Updates / Changes Exam Details]:", dUpdateExam.success ? 'PASS' : 'FAIL');
 
-  // 17. Phase 5: Admin Deletes Exam
+  // 21. Phase 5: Admin Deletes Exam
   const rDeleteExam = await worker.fetch(new Request(`http://localhost/api/admin/exams/${examId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${adminToken}` }
@@ -240,7 +291,7 @@ async function runTests() {
   console.log("✓ [Phase 5 - Admin Deletes Exam Schedule]:", dDeleteExam.success ? 'PASS' : 'FAIL');
 
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 17 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 21 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

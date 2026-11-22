@@ -1,19 +1,23 @@
--- VIDYASPHERE DATABASE SCHEMA (PHASES 1 - 3)
+-- VIDYASPHERE DATABASE SCHEMA (PHASES 1 - 5)
 -- Pure SQLite / Cloudflare D1 Compatible
 
--- PHASE 1: User Profiles & Identity
+-- PHASE 1: User Profiles & Identity (Integrated Registration + Direct Password Setup)
 CREATE TABLE IF NOT EXISTS profiles (
     id TEXT PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     salt TEXT NOT NULL,
     full_name TEXT NOT NULL,
-    class_name TEXT,
-    division TEXT,
-    roll_number TEXT,
+    class_name TEXT NOT NULL,
+    division TEXT NOT NULL,
+    roll_number TEXT NOT NULL,
+    email TEXT,
     role TEXT NOT NULL DEFAULT 'student' CHECK(role IN ('student', 'teacher', 'admin')),
-    account_status TEXT NOT NULL DEFAULT 'active' CHECK(account_status IN ('active', 'suspended', 'pending')),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    account_status TEXT NOT NULL DEFAULT 'pending' CHECK(account_status IN ('pending', 'active', 'suspended', 'rejected')),
+    is_root_admin INTEGER DEFAULT 0,
+    rejection_reason TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- PHASE 1: High-Entropy Server-Side Sessions Table
@@ -24,33 +28,6 @@ CREATE TABLE IF NOT EXISTS sessions (
     expires_at DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
-);
-
--- PHASE 1: Student Admission / Registration Queue
-CREATE TABLE IF NOT EXISTS registrations (
-    tracking_token TEXT PRIMARY KEY,
-    full_name TEXT NOT NULL,
-    class_name TEXT NOT NULL,
-    division TEXT NOT NULL,
-    roll_number TEXT NOT NULL,
-    email TEXT,
-    reason TEXT,
-    review_status TEXT NOT NULL DEFAULT 'pending' CHECK(review_status IN ('pending', 'approved', 'rejected')),
-    review_reason TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- PHASE 1: Single-Use Account Activation Codes
-CREATE TABLE IF NOT EXISTS activation_codes (
-    id TEXT PRIMARY KEY,
-    code_hash TEXT UNIQUE NOT NULL,
-    tracking_token TEXT NOT NULL,
-    assigned_username TEXT NOT NULL,
-    expires_at DATETIME NOT NULL,
-    is_used INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (tracking_token) REFERENCES registrations(tracking_token)
 );
 
 -- PHASE 1: School Official Announcements / Notice Board
@@ -104,11 +81,11 @@ CREATE TABLE IF NOT EXISTS school_settings (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- PHASE 2: In-Database Chunk Storage for Real PDF/Document Serving (R2 Independent)
+-- PHASE 2: In-Database Chunk Storage with Binary BLOB & Compression
 CREATE TABLE IF NOT EXISTS note_files (
     note_id TEXT NOT NULL,
     chunk_index INTEGER NOT NULL DEFAULT 0,
-    chunk_data TEXT NOT NULL,
+    chunk_data BLOB NOT NULL,
     PRIMARY KEY (note_id, chunk_index),
     FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
 );

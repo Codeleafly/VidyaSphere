@@ -27,7 +27,7 @@ export async function handleChatRoutes(request, env, path, method) {
 
     // Authenticate token against sessions table
     const session = await env.DB.prepare(
-      `SELECT s.user_id, p.username, p.full_name, p.role, p.class_name, p.division
+      `SELECT s.user_id, p.username, p.full_name, p.role, p.class_name, p.division, p.is_root_admin
        FROM sessions s
        JOIN profiles p ON s.user_id = p.id
        WHERE s.token = ? AND s.expires_at > CURRENT_TIMESTAMP`
@@ -64,6 +64,7 @@ export async function handleChatRoutes(request, env, path, method) {
               senderId: session.user_id,
               senderName: session.full_name,
               senderRole: session.role,
+              isRootAdmin: session.is_root_admin === 1,
               channel,
               content,
               createdAt: new Date().toISOString(),
@@ -107,7 +108,7 @@ export async function handleChatRoutes(request, env, path, method) {
     const channel = url.searchParams.get('channel') || 'school';
 
     const { results } = await env.DB.prepare(
-      `SELECT m.*, p.full_name as sender_name, p.role as sender_role, p.class_name
+      `SELECT m.*, p.full_name as sender_name, p.role as sender_role, p.class_name, p.is_root_admin
        FROM messages m
        JOIN profiles p ON m.sender_id = p.id
        WHERE m.channel = ?
@@ -142,6 +143,7 @@ export async function handleChatRoutes(request, env, path, method) {
           id,
           senderName: auth.user.fullName,
           senderRole: auth.user.role,
+          isRootAdmin: auth.user.isRootAdmin || false,
           channel,
           content: content.trim(),
           createdAt: new Date().toISOString(),

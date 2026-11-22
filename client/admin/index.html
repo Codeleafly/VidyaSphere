@@ -426,6 +426,7 @@
     import { formatDate, showToast, initIcons } from '/js/ui.js';
 
     // Strict Server-Side Verification: Verify token & role directly with backend API
+    let currentAdminUser = null;
     async function verifyAdminSession() {
       try {
         const res = await apiRequest('/auth/me');
@@ -434,7 +435,9 @@
           window.location.replace('/auth/login.html');
           return false;
         }
-        document.getElementById('admin-display-name').textContent = res.user.fullName || res.user.username;
+        currentAdminUser = res.user;
+        const displayName = res.user.fullName || res.user.username;
+        document.getElementById('admin-display-name').textContent = displayName;
         return true;
       } catch (err) {
         alert('Session expired or unauthorized. Please log in.');
@@ -501,39 +504,41 @@
         }
 
         appsContainer.innerHTML = list.map(reg => {
-          const isPending = reg.review_status === 'pending';
-          const isApproved = reg.review_status === 'approved';
+          const isPending = reg.account_status === 'pending';
+          const isApproved = reg.account_status === 'active';
 
           return `
             <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full break-words">
               <div class="space-y-1 w-full sm:w-auto">
                 <div class="flex items-center gap-2 flex-wrap">
                   <h4 class="font-bold text-slate-900 text-sm sm:text-base">${reg.full_name}</h4>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${isPending ? 'bg-amber-100 text-amber-700' : (isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700')}">
-                    ${reg.review_status}
+                  <span class="font-mono text-xs text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">@${reg.username}</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${isPending ? 'bg-amber-100 text-amber-700 border border-amber-200' : (isApproved ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200')}">
+                    ${reg.account_status}
                   </span>
                 </div>
                 <p class="text-xs text-slate-500 break-words">
                   ${reg.class_name} - Div ${reg.division} &bull; Roll: <strong>${reg.roll_number}</strong>
                 </p>
                 ${reg.email ? `<p class="text-[11px] text-indigo-600 font-semibold flex items-center gap-1"><i data-lucide="mail" class="w-3 h-3"></i> ${reg.email}</p>` : ''}
-                <p class="text-[11px] text-slate-400 break-all font-mono">
-                  Token: <code class="text-indigo-600 font-bold">${reg.tracking_token}</code>
+                <p class="text-[11px] text-slate-400">
+                  Applied: ${formatDate(reg.created_at)}
                 </p>
-                ${reg.reason ? `<p class="text-xs text-slate-600 italic">"${reg.reason}"</p>` : ''}
               </div>
 
               <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
                 ${isPending ? `
-                  <button class="approve-btn flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition" data-token="${reg.tracking_token}">
+                  <button class="approve-btn flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition"
+                    data-id="${reg.id}" data-username="${reg.username}">
                     <i data-lucide="check" class="w-3.5 h-3.5"></i> Approve
                   </button>
-                  <button class="reject-btn px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition" data-token="${reg.tracking_token}">
+                  <button class="reject-btn px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition"
+                    data-id="${reg.id}">
                     Reject
                   </button>
                 ` : (isApproved ? `
-                  <span class="text-xs text-emerald-700 font-semibold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 truncate max-w-full">
-                    @${reg.assigned_username || 'Issued'}
+                  <span class="text-xs text-emerald-700 font-semibold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                    Active Student
                   </span>
                 ` : `
                   <span class="text-xs text-rose-600 bg-rose-50 px-3 py-1.5 rounded-xl">Rejected</span>
@@ -545,34 +550,20 @@
 
         initIcons();
 
-        // Wire up approve buttons
+        // Wire up 1-click approve buttons (Zero Codes!)
         document.querySelectorAll('.approve-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
-            const token = btn.dataset.token;
+            const id = btn.dataset.id;
+            const uname = btn.dataset.username;
             try {
               const res = await apiRequest('/admin/approve', {
                 method: 'POST',
-                body: { trackingToken: token },
+                body: { userId: id },
               });
 
-              document.getElementById('modal-app-user').textContent = `@${res.assignedUsername}`;
-              document.getElementById('modal-app-code').textContent = res.activationCode;
-
-              const emailBox = document.getElementById('modal-app-email-box');
-              const emailText = document.getElementById('modal-app-email-text');
-              if (res.email) {
-                emailBox.classList.remove('hidden');
-                emailText.textContent = `Username & access code sent to ${res.email}!`;
-              } else {
-                emailBox.classList.add('hidden');
-              }
-
-              document.getElementById('approve-result-modal').classList.remove('hidden');
-              document.getElementById('approve-result-modal').classList.add('flex');
-
+              showToast(`Student @${uname} approved! Portal unlocked.`, 'success');
               loadApplications();
               loadStats();
-              initIcons();
             } catch (err) {
               showToast(err.message, 'error');
             }
@@ -582,12 +573,12 @@
         // Wire up reject buttons
         document.querySelectorAll('.reject-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
-            const token = btn.dataset.token;
+            const id = btn.dataset.id;
             const reason = prompt('Enter reason for application rejection:') || 'Details did not match school records';
             try {
               await apiRequest('/admin/reject', {
                 method: 'POST',
-                body: { trackingToken: token, reason },
+                body: { userId: id, reason },
               });
               showToast('Application marked as rejected', 'info');
               loadApplications();
@@ -603,14 +594,9 @@
       }
     }
 
-    document.getElementById('close-app-modal-btn').addEventListener('click', () => {
-      document.getElementById('approve-result-modal').classList.add('hidden');
-      document.getElementById('approve-result-modal').classList.remove('flex');
-    });
-
     regFilter.addEventListener('change', loadApplications);
 
-    // Load Student Accounts
+    // Load Student Accounts & Role Management
     async function loadStudentAccounts() {
       const container = document.getElementById('admin-students-table');
       try {
@@ -622,44 +608,74 @@
           return;
         }
 
+        const isViewerRootAdmin = currentAdminUser?.isRootAdmin;
+
         container.innerHTML = `
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
                 <tr class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
-                  <th class="p-3">Student Name</th>
+                  <th class="p-3">User / Name</th>
                   <th class="p-3">Username</th>
                   <th class="p-3">Class</th>
-                  <th class="p-3">Roll</th>
+                  <th class="p-3">Role</th>
                   <th class="p-3">Status</th>
                   <th class="p-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                ${students.map(s => `
-                  <tr class="hover:bg-slate-50">
-                    <td class="p-3 font-bold text-slate-900">${s.full_name}</td>
-                    <td class="p-3 font-mono text-indigo-600">@${s.username}</td>
-                    <td class="p-3">${s.class_name} - ${s.division}</td>
-                    <td class="p-3 font-semibold">${s.roll_number}</td>
-                    <td class="p-3">
-                      <span class="px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${s.account_status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                        ${s.account_status}
-                      </span>
-                    </td>
-                    <td class="p-3 text-right">
-                      ${s.account_status === 'active' ? `
-                        <button class="status-toggle-btn text-rose-600 font-bold hover:underline" data-id="${s.id}" data-action="suspended">
-                          Suspend
-                        </button>
-                      ` : `
-                        <button class="status-toggle-btn text-emerald-600 font-bold hover:underline" data-id="${s.id}" data-action="active">
-                          Reactivate
-                        </button>
-                      `}
-                    </td>
-                  </tr>
-                `).join('')}
+                ${students.map(s => {
+                  const isThisRootAdmin = s.is_root_admin === 1 || s.username === 'admin';
+                  const isThisAdmin = s.role === 'admin';
+
+                  return `
+                    <tr class="hover:bg-slate-50 ${isThisRootAdmin ? 'bg-amber-50/40' : ''}">
+                      <td class="p-3 font-bold text-slate-900">${s.full_name}</td>
+                      <td class="p-3 font-mono text-indigo-600">@${s.username}</td>
+                      <td class="p-3">${s.class_name || 'HQ'} - ${s.division || 'A'}</td>
+                      <td class="p-3">
+                        ${isThisRootAdmin ? `
+                          <span class="px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-300 inline-flex items-center gap-1 shadow-xs">
+                            👑 Lead Admin (Root)
+                          </span>
+                        ` : (isThisAdmin ? `
+                          <span class="px-2 py-0.5 rounded-full font-bold uppercase text-[10px] bg-rose-100 text-rose-700 border border-rose-200 inline-flex items-center gap-1">
+                            🛡️ Admin
+                          </span>
+                        ` : `
+                          <span class="px-2 py-0.5 rounded-full font-semibold text-[10px] bg-slate-100 text-slate-600">
+                            Student
+                          </span>
+                        `)}
+                      </td>
+                      <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${s.account_status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                          ${s.account_status}
+                        </span>
+                      </td>
+                      <td class="p-3 text-right space-x-2">
+                        ${isThisRootAdmin ? `
+                          <span class="text-[11px] text-amber-700 font-bold italic">Protected</span>
+                        ` : `
+                          <button class="status-toggle-btn text-rose-600 font-bold hover:underline" data-id="${s.id}" data-action="${s.account_status === 'active' ? 'suspended' : 'active'}">
+                            ${s.account_status === 'active' ? 'Suspend' : 'Reactivate'}
+                          </button>
+                          ${isViewerRootAdmin ? `
+                            ${isThisAdmin ? `
+                              <button class="role-toggle-btn text-slate-500 font-bold hover:underline ml-1" data-id="${s.id}" data-role="student" title="Demote to regular student">
+                                Demote
+                              </button>
+                            ` : `
+                              <button class="role-toggle-btn text-purple-600 font-bold hover:underline ml-1" data-id="${s.id}" data-role="admin" title="Promote to school administrator">
+                                Promote to Admin
+                              </button>
+                            `}
+                          ` : ''}
+                        `}
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
               </tbody>
             </table>
           </div>
@@ -674,13 +690,39 @@
                 method: 'POST',
                 body: { studentId, status },
               });
-              showToast(`Student marked as ${status}`, 'success');
+              showToast(`Account status updated to ${status}`, 'success');
               loadStudentAccounts();
             } catch (err) {
               showToast(err.message, 'error');
             }
           });
         });
+
+        // Wire role promote/demote buttons
+        document.querySelectorAll('.role-toggle-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const userId = btn.dataset.id;
+            const newRole = btn.dataset.role;
+            const confirmMsg = newRole === 'admin'
+              ? 'Are you sure you want to promote this user to Admin? They will have administrative permissions.'
+              : 'Are you sure you want to demote this admin back to Student?';
+
+            if (!confirm(confirmMsg)) return;
+
+            try {
+              const res = await apiRequest('/admin/change-role', {
+                method: 'POST',
+                body: { userId, newRole },
+              });
+              showToast(res.message || 'User role updated successfully', 'success');
+              loadStudentAccounts();
+              loadStats();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
+
       } catch (err) {
         container.innerHTML = `<div class="p-6 text-center text-rose-500">${err.message}</div>`;
       }

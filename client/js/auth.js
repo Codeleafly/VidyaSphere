@@ -1,5 +1,6 @@
 /**
- * Auth State & Session Management
+ * Auth State & Session Management for VidyaSphere
+ * Pure Vanilla JS
  */
 
 export function getToken() {
@@ -15,14 +16,26 @@ export function getUser() {
   }
 }
 
-export function saveSession(token, user) {
+export const getAuthToken = getToken;
+export const getCurrentUser = getUser;
+
+export function setAuthToken(token) {
   localStorage.setItem('vidyasphere_token', token);
+}
+
+export function setCurrentUser(user) {
   localStorage.setItem('vidyasphere_user', JSON.stringify(user));
+}
+
+export function saveSession(token, user) {
+  setAuthToken(token);
+  setCurrentUser(user);
 }
 
 export function clearSession() {
   localStorage.removeItem('vidyasphere_token');
   localStorage.removeItem('vidyasphere_user');
+  localStorage.removeItem('vidyasphere_tracking_token');
 }
 
 export async function logout() {
@@ -36,23 +49,39 @@ export async function logout() {
     } catch (e) { /* ignore */ }
   }
   clearSession();
-  window.location.href = '/auth/login.html';
+  window.location.replace('/auth/login.html');
 }
 
 export function requireAuth() {
   const token = getToken();
   if (!token) {
-    window.location.href = `/auth/login.html?redirect=${encodeURIComponent(window.location.pathname)}`;
+    window.location.replace(`/auth/login.html?redirect=${encodeURIComponent(window.location.pathname)}`);
     return null;
   }
-  return getUser();
+
+  const user = getUser();
+  if (!user) {
+    clearSession();
+    window.location.replace('/auth/login.html');
+    return null;
+  }
+
+  // If user account is pending approval, redirect to waiting room
+  if (user.accountStatus === 'pending' && !window.location.pathname.includes('/auth/pending')) {
+    window.location.replace('/auth/pending.html');
+    return null;
+  }
+
+  return user;
 }
 
 export function requireAdmin() {
   const user = requireAuth();
-  if (user && user.role !== 'admin') {
+  if (!user) return null;
+
+  if (user.role !== 'admin') {
     alert('Access restricted to School Administration only.');
-    window.location.href = '/dashboard/index.html';
+    window.location.replace('/dashboard/index.html');
     return null;
   }
   return user;

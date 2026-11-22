@@ -100,14 +100,31 @@ export default {
         assetUrl.pathname = `${targetPath}.html`;
         const htmlRes = await env.ASSETS.fetch(new Request(assetUrl.toString(), request));
         if (htmlRes.status !== 404) {
-          return htmlRes;
+          const headers = new Headers(htmlRes.headers);
+          headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+          headers.set('Pragma', 'no-cache');
+          headers.set('Expires', '0');
+          return new Response(htmlRes.body, { status: htmlRes.status, headers });
         }
 
         assetUrl.pathname = `${targetPath}/index.html`;
         const dirIndexRes = await env.ASSETS.fetch(new Request(assetUrl.toString(), request));
         if (dirIndexRes.status !== 404) {
-          return dirIndexRes;
+          const headers = new Headers(dirIndexRes.headers);
+          headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+          headers.set('Pragma', 'no-cache');
+          headers.set('Expires', '0');
+          return new Response(dirIndexRes.body, { status: dirIndexRes.status, headers });
         }
+      }
+
+      // If serving an HTML file, prevent stale browser caching
+      if (res.headers.get('content-type')?.includes('text/html')) {
+        const headers = new Headers(res.headers);
+        headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        headers.set('Pragma', 'no-cache');
+        headers.set('Expires', '0');
+        return new Response(res.body, { status: res.status, headers });
       }
 
       return res;
@@ -121,14 +138,13 @@ export default {
     );
   },
 
-  // Production Cron Scheduled Event (Purge expired sessions, rate limits & tokens)
+  // Production Cron Scheduled Event (Purge expired sessions, rate limits & notes)
   async scheduled(event, env, ctx) {
     const now = Math.floor(Date.now() / 1000);
     try {
       await env.DB.batch([
         env.DB.prepare(`DELETE FROM sessions WHERE expires_at < CURRENT_TIMESTAMP`),
         env.DB.prepare(`DELETE FROM rate_limits WHERE reset_at < ?`).bind(now),
-        env.DB.prepare(`DELETE FROM activation_codes WHERE expires_at < CURRENT_TIMESTAMP AND is_used = 0`),
         env.DB.prepare(`DELETE FROM note_files WHERE note_id IN (SELECT id FROM notes WHERE note_type = 'file' AND expires_at IS NOT NULL AND expires_at < CURRENT_TIMESTAMP)`),
         env.DB.prepare(`DELETE FROM notes WHERE note_type = 'file' AND expires_at IS NOT NULL AND expires_at < CURRENT_TIMESTAMP`)
       ]);

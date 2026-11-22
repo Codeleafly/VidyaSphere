@@ -1,9 +1,10 @@
 /**
  * Admin Routes: Approvals, Student Roster, Account Controls, Statistics
+ * Streamlined code-free instant approval system
  */
 
 import { jsonResponse, errorResponse, successResponse } from '../utils/response.js';
-import { generateId, generateActivationCode, sha256 } from '../auth/crypto.js';
+import { generateId } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
 import { sendActivationEmail } from '../utils/email.js';
 
@@ -12,96 +13,77 @@ export async function handleAdminRoutes(request, env, path, method) {
   const auth = await authenticate(request, env, ['admin']);
   if (auth.error) return auth.error;
 
-  // GET /api/admin/registrations?status=pending|approved|rejected
-  if (path === '/api/admin/registrations' && method === 'GET') {
+  // GET /api/admin/registrations or /api/admin/applications
+  if ((path === '/api/admin/registrations' || path === '/api/admin/applications') && method === 'GET') {
     const url = new URL(request.url);
     const status = url.searchParams.get('status');
 
     let query = `
-      SELECT r.*, ac.assigned_username, ac.is_used as code_used
-      FROM registrations r
-      LEFT JOIN activation_codes ac ON r.tracking_token = ac.tracking_token
+      SELECT id, username, full_name, class_name, division, roll_number, email, role,
+             account_status, account_status as review_status, rejection_reason, created_at
+      FROM profiles
+      WHERE role = 'student'
     `;
     const params = [];
 
     if (status) {
-      query += ` WHERE r.review_status = ?`;
+      query += ` AND account_status = ?`;
       params.push(status);
     }
 
-    query += ` ORDER BY r.created_at DESC`;
+    query += ` ORDER BY created_at DESC`;
 
     const { results } = await env.DB.prepare(query).bind(...params).all();
     return successResponse({ registrations: results || [] });
   }
 
-  // POST /api/admin/approve - Approve registration and generate activation code
+  // POST /api/admin/approve - 1-Click Approval (Zero Access Codes Required)
   if (path === '/api/admin/approve' && method === 'POST') {
     try {
       const body = await request.json();
-      const { trackingToken } = body;
+      const targetId = body.userId || body.trackingToken || body.id;
 
-      if (!trackingToken) return errorResponse('trackingToken is required');
+      if (!targetId) return errorResponse('userId is required', 400);
 
-      const reg = await env.DB.prepare(
-        `SELECT * FROM registrations WHERE tracking_token = ?`
-      ).bind(trackingToken).first();
+      const student = await env.DB.prepare(
+        `SELECT id, username, full_name, email, account_status FROM profiles WHERE (id = ? OR username = ?) AND role = 'student'`
+      ).bind(targetId, targetId).first();
 
-      if (!reg) return errorResponse('Registration not found', 404);
-
-      // Generate a clean username e.g. "rohit_10a_12"
-      const cleanName = reg.full_name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
-      const cleanClass = reg.class_name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const assignedUsername = `${cleanName}_${cleanClass}${reg.division.toLowerCase()}_${reg.roll_number}`;
-
-      const rawCode = generateActivationCode(6);
-      const codeHash = await sha256(rawCode);
-      const codeId = generateId('code', 8);
-
-      // 7 days expiration for activation code
-      const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
+      if (!student) return errorResponse('Student record not found', 404);
 
       await env.DB.batch([
         env.DB.prepare(
-          `UPDATE registrations SET review_status = 'approved', updated_at = CURRENT_TIMESTAMP WHERE tracking_token = ?`
-        ).bind(trackingToken),
-        env.DB.prepare(
-          `INSERT INTO activation_codes (id, code_hash, tracking_token, assigned_username, expires_at, is_used)
-           VALUES (?, ?, ?, ?, ?, 0)`
-        ).bind(codeId, codeHash, trackingToken, assignedUsername, expiresAt),
+          `UPDATE profiles SET account_status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+        ).bind(student.id),
         env.DB.prepare(
           `INSERT INTO audit_logs (id, action, actor_id, details)
            VALUES (?, 'APPROVE_STUDENT', ?, ?)`
-        ).bind(generateId('log', 8), auth.user.id, `Approved ${reg.full_name} (${assignedUsername})`),
+        ).bind(generateId('log', 8), auth.user.id, `Approved student ${student.full_name} (@${student.username})`),
       ]);
 
-      // If optional student email was provided, dispatch activation email with username and 6-digit access code
+      // If email provided, send instant activation confirmation
       let emailResult = null;
-      if (reg.email) {
+      if (student.email) {
         try {
           emailResult = await sendActivationEmail(env, {
-            email: reg.email,
-            fullName: reg.full_name,
-            username: assignedUsername,
-            code: rawCode,
-            trackingToken,
+            email: student.email,
+            fullName: student.full_name,
+            username: student.username,
+            code: 'APPROVED',
+            trackingToken: student.id,
           });
         } catch (mailErr) {
           console.error('Email dispatch error on approve:', mailErr);
         }
       }
 
-      const emailMsg = reg.email
-        ? ` & access details emailed to ${reg.email}`
-        : '';
-
       return successResponse({
-        assignedUsername,
-        activationCode: rawCode,
-        expiresAt,
-        email: reg.email || null,
+        id: student.id,
+        username: student.username,
+        accountStatus: 'active',
+        email: student.email || null,
         emailDispatched: emailResult ? emailResult.success : false,
-      }, `Registration approved! Activation code generated${emailMsg}.`);
+      }, `Student @${student.username} successfully approved! Portal is now unlocked for them.`);
     } catch (err) {
       return errorResponse(`Approve error: ${err.message}`, 500);
     }
@@ -111,28 +93,29 @@ export async function handleAdminRoutes(request, env, path, method) {
   if (path === '/api/admin/reject' && method === 'POST') {
     try {
       const body = await request.json();
-      const { trackingToken, reason } = body;
+      const targetId = body.userId || body.trackingToken || body.id;
+      const reason = body.reason || 'Application details did not match school records';
 
-      if (!trackingToken) return errorResponse('trackingToken is required');
+      if (!targetId) return errorResponse('userId is required', 400);
 
       await env.DB.batch([
         env.DB.prepare(
-          `UPDATE registrations SET review_status = 'rejected', review_reason = ?, updated_at = CURRENT_TIMESTAMP
-           WHERE tracking_token = ?`
-        ).bind(reason || 'Application details did not match school records', trackingToken),
+          `UPDATE profiles SET account_status = 'rejected', rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
+           WHERE id = ? OR username = ?`
+        ).bind(reason, targetId, targetId),
         env.DB.prepare(
           `INSERT INTO audit_logs (id, action, actor_id, details)
            VALUES (?, 'REJECT_STUDENT', ?, ?)`
-        ).bind(generateId('log', 8), auth.user.id, `Rejected token ${trackingToken}: ${reason}`),
+        ).bind(generateId('log', 8), auth.user.id, `Rejected student ${targetId}: ${reason}`),
       ]);
 
-      return successResponse({}, 'Registration marked as rejected');
+      return successResponse({}, 'Student admission application marked as rejected');
     } catch (err) {
       return errorResponse(`Reject error: ${err.message}`, 500);
     }
   }
 
-  // GET /api/admin/students - Search and filter roster
+  // GET /api/admin/students - Search and filter roster (students and sub-admins)
   if (path === '/api/admin/students' && method === 'GET') {
     const url = new URL(request.url);
     const search = url.searchParams.get('search') || '';
@@ -140,9 +123,9 @@ export async function handleAdminRoutes(request, env, path, method) {
     const status = url.searchParams.get('status') || '';
 
     let query = `
-      SELECT id, username, full_name, class_name, division, roll_number, role, account_status, created_at
+      SELECT id, username, full_name, class_name, division, roll_number, email, role, account_status, is_root_admin, created_at
       FROM profiles
-      WHERE role = 'student'
+      WHERE 1=1
     `;
     const params = [];
 
@@ -159,25 +142,36 @@ export async function handleAdminRoutes(request, env, path, method) {
       params.push(status);
     }
 
-    query += ` ORDER BY class_name ASC, division ASC, CAST(roll_number AS INTEGER) ASC`;
+    query += ` ORDER BY is_root_admin DESC, role DESC, class_name ASC, division ASC, CAST(roll_number AS INTEGER) ASC`;
 
     const { results } = await env.DB.prepare(query).bind(...params).all();
     return successResponse({ students: results || [] });
   }
 
-  // POST /api/admin/student-status - Suspend or activate a student
+  // POST /api/admin/student-status - Suspend or activate an account (Root Admin protected)
   if (path === '/api/admin/student-status' && method === 'POST') {
     try {
       const body = await request.json();
       const { studentId, status } = body;
 
       if (!studentId || !['active', 'suspended'].includes(status)) {
-        return errorResponse('Valid studentId and status (active|suspended) required');
+        return errorResponse('Valid studentId and status (active|suspended) required', 400);
+      }
+
+      const target = await env.DB.prepare(
+        `SELECT id, username, is_root_admin FROM profiles WHERE id = ?`
+      ).bind(studentId).first();
+
+      if (!target) return errorResponse('User not found', 404);
+
+      // ROOT ADMIN IMMUNITY: Secondary admins cannot suspend Root Admin!
+      if (target.is_root_admin === 1 || target.username === 'admin') {
+        return errorResponse('Forbidden: Root Lead Admin is permanently protected and cannot be suspended or disabled.', 403);
       }
 
       await env.DB.batch([
         env.DB.prepare(
-          `UPDATE profiles SET account_status = ? WHERE id = ?`
+          `UPDATE profiles SET account_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
         ).bind(status, studentId),
         env.DB.prepare(
           `INSERT INTO audit_logs (id, action, actor_id, details)
@@ -185,17 +179,59 @@ export async function handleAdminRoutes(request, env, path, method) {
         ).bind(generateId('log', 8), auth.user.id, `Set status to ${status} for ${studentId}`),
       ]);
 
-      return successResponse({ studentId, status }, `Student status updated to ${status}`);
+      return successResponse({ studentId, status }, `Account status updated to ${status}`);
     } catch (err) {
       return errorResponse(`Status update error: ${err.message}`, 500);
     }
   }
 
+  // POST /api/admin/change-role - Lead Admin promotes user to Admin or Teacher (Root Admin only)
+  if (path === '/api/admin/change-role' && method === 'POST') {
+    try {
+      const body = await request.json();
+      const { userId, newRole } = body;
+
+      if (!userId || !['student', 'teacher', 'admin'].includes(newRole)) {
+        return errorResponse('Valid userId and newRole (student|teacher|admin) are required', 400);
+      }
+
+      // ONLY Root Lead Admin can promote or demote someone to Admin!
+      if (!auth.user.isRootAdmin) {
+        return errorResponse('Forbidden: Only the Lead Root Admin (@admin) has authority to promote or modify admin privileges.', 403);
+      }
+
+      const target = await env.DB.prepare(
+        `SELECT id, username, is_root_admin FROM profiles WHERE id = ?`
+      ).bind(userId).first();
+
+      if (!target) return errorResponse('Target user not found', 404);
+
+      // Target cannot be Root Admin
+      if (target.is_root_admin === 1 || target.username === 'admin') {
+        return errorResponse('Forbidden: Lead Root Admin role cannot be modified or demoted.', 403);
+      }
+
+      await env.DB.batch([
+        env.DB.prepare(
+          `UPDATE profiles SET role = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+        ).bind(newRole, userId),
+        env.DB.prepare(
+          `INSERT INTO audit_logs (id, action, actor_id, details)
+           VALUES (?, 'ROLE_PROMOTED', ?, ?)`
+        ).bind(generateId('log', 8), auth.user.id, `Changed role of @${target.username} to ${newRole}`),
+      ]);
+
+      return successResponse({ userId, newRole }, `User @${target.username} has been updated to ${newRole}!`);
+    } catch (err) {
+      return errorResponse(`Change role error: ${err.message}`, 500);
+    }
+  }
+
   // GET /api/admin/stats - Quick overview dashboard stats
   if (path === '/api/admin/stats' && method === 'GET') {
-    const [pendingRegs, totalStudents, totalNotes, totalQuestions, activePolls, totalExams] = await Promise.all([
-      env.DB.prepare(`SELECT COUNT(*) as count FROM registrations WHERE review_status = 'pending'`).first(),
-      env.DB.prepare(`SELECT COUNT(*) as count FROM profiles WHERE role = 'student'`).first(),
+    const [pendingStudents, totalStudents, totalNotes, totalQuestions, activePolls, totalExams] = await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) as count FROM profiles WHERE role = 'student' AND account_status = 'pending'`).first(),
+      env.DB.prepare(`SELECT COUNT(*) as count FROM profiles WHERE role = 'student' AND account_status = 'active'`).first(),
       env.DB.prepare(`SELECT COUNT(*) as count FROM notes`).first(),
       env.DB.prepare(`SELECT COUNT(*) as count FROM questions`).first(),
       env.DB.prepare(`SELECT COUNT(*) as count FROM polls`).first(),
@@ -204,7 +240,7 @@ export async function handleAdminRoutes(request, env, path, method) {
 
     return successResponse({
       stats: {
-        pendingRegistrations: pendingRegs ? pendingRegs.count : 0,
+        pendingRegistrations: pendingStudents ? pendingStudents.count : 0,
         totalStudents: totalStudents ? totalStudents.count : 0,
         totalNotes: totalNotes ? totalNotes.count : 0,
         totalQuestions: totalQuestions ? totalQuestions.count : 0,

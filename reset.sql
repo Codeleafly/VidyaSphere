@@ -1,6 +1,7 @@
 -- VIDYASPHERE DATABASE CLEAN RESET SCRIPT
 -- Completely wipes all test tables and records for a 100% fresh start
 
+DROP TABLE IF EXISTS exams;
 DROP TABLE IF EXISTS school_settings;
 DROP TABLE IF EXISTS note_files;
 DROP TABLE IF EXISTS note_reports;
