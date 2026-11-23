@@ -52,6 +52,24 @@ export async function logout() {
   window.location.replace('/auth/login.html');
 }
 
+export function redirectIfLoggedIn() {
+  const token = getToken();
+  const user = getUser();
+  if (token && user) {
+    if (user.accountStatus === 'pending') {
+      window.location.replace('/auth/pending.html');
+      return true;
+    }
+    if (user.role === 'admin') {
+      window.location.replace('/admin/index.html');
+      return true;
+    }
+    window.location.replace('/dashboard/index.html');
+    return true;
+  }
+  return false;
+}
+
 export function requireAuth() {
   const token = getToken();
   if (!token) {
