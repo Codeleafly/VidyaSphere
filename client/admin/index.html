@@ -461,6 +461,30 @@
     </div>
   </div>
 
+  <!-- Mobile Bottom Navigation Bar for Admin Core -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-1 py-1 flex items-center justify-around shadow-2xl">
+    <button data-tab="applications" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-400 font-bold text-[9px] truncate">
+      <i data-lucide="inbox" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Requests</span>
+    </button>
+    <button data-tab="students" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
+      <i data-lucide="shield-check" class="w-4 h-4 mb-0.5 text-rose-400"></i>
+      <span class="truncate">Roles</span>
+    </button>
+    <button data-tab="exams" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
+      <i data-lucide="calendar" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Exams</span>
+    </button>
+    <button data-tab="announcements" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
+      <i data-lucide="megaphone" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Notices</span>
+    </button>
+    <button data-tab="settings" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
+      <i data-lucide="settings" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Settings</span>
+    </button>
+  </nav>
+
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { logout } from '/js/auth.js';
@@ -927,16 +951,6 @@
         showToast(err.message, 'error');
       }
     });
-            } catch (err) {
-              showToast(err.message, 'error');
-            }
-          });
-        });
-
-      } catch (err) {
-        container.innerHTML = `<div class="p-6 text-center text-rose-500">${err.message}</div>`;
-      }
-    }
 
     // Publish Announcements
     const createAnnForm = document.getElementById('create-ann-form');
@@ -1183,29 +1197,5 @@
       loadSettings();
     }
   </script>
-
-  <!-- Mobile Bottom Navigation Bar for Admin Core -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-1 py-1 flex items-center justify-around shadow-2xl">
-    <button data-tab="applications" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-400 font-bold text-[9px] truncate">
-      <i data-lucide="inbox" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Requests</span>
-    </button>
-    <button data-tab="students" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
-      <i data-lucide="shield-check" class="w-4 h-4 mb-0.5 text-rose-400"></i>
-      <span class="truncate">Roles</span>
-    </button>
-    <button data-tab="exams" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
-      <i data-lucide="calendar" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Exams</span>
-    </button>
-    <button data-tab="announcements" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
-      <i data-lucide="megaphone" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notices</span>
-    </button>
-    <button data-tab="settings" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
-      <i data-lucide="settings" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Settings</span>
-    </button>
-  </nav>
 </body>
 </html>
