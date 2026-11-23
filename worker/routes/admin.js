@@ -42,23 +42,24 @@ export async function handleAdminRoutes(request, env, path, method) {
     try {
       const body = await request.json();
       const targetId = body.userId || body.trackingToken || body.id;
+      const targetRole = (body.role === 'admin' && (auth.user.isRootAdmin || auth.user.username === 'admin')) ? 'admin' : 'student';
 
       if (!targetId) return errorResponse('userId is required', 400);
 
       const student = await env.DB.prepare(
-        `SELECT id, username, full_name, email, account_status FROM profiles WHERE (id = ? OR username = ?) AND role = 'student'`
+        `SELECT id, username, full_name, email, account_status FROM profiles WHERE id = ? OR username = ?`
       ).bind(targetId, targetId).first();
 
       if (!student) return errorResponse('Student record not found', 404);
 
       await env.DB.batch([
         env.DB.prepare(
-          `UPDATE profiles SET account_status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = ?`
-        ).bind(student.id),
+          `UPDATE profiles SET account_status = 'active', role = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+        ).bind(targetRole, student.id),
         env.DB.prepare(
           `INSERT INTO audit_logs (id, action, actor_id, details)
            VALUES (?, 'APPROVE_STUDENT', ?, ?)`
-        ).bind(generateId('log', 8), auth.user.id, `Approved student ${student.full_name} (@${student.username})`),
+        ).bind(generateId('log', 8), auth.user.id, `Approved student ${student.full_name} (@${student.username}) with role ${targetRole}`),
       ]);
 
       // If email provided, send instant activation confirmation
@@ -81,9 +82,10 @@ export async function handleAdminRoutes(request, env, path, method) {
         id: student.id,
         username: student.username,
         accountStatus: 'active',
+        role: targetRole,
         email: student.email || null,
         emailDispatched: emailResult ? emailResult.success : false,
-      }, `Student @${student.username} successfully approved! Portal is now unlocked for them.`);
+      }, `Student @${student.username} successfully approved${targetRole === 'admin' ? ' as Secondary Admin' : ''}! Portal is now unlocked for them.`);
     } catch (err) {
       return errorResponse(`Approve error: ${err.message}`, 500);
     }
@@ -196,13 +198,14 @@ export async function handleAdminRoutes(request, env, path, method) {
       }
 
       // ONLY Root Lead Admin can promote or demote someone to Admin!
-      if (!auth.user.isRootAdmin) {
+      const isCallerRoot = auth.user.isRootAdmin || auth.user.username === 'admin';
+      if (!isCallerRoot) {
         return errorResponse('Forbidden: Only the Lead Root Admin (@admin) has authority to promote or modify admin privileges.', 403);
       }
 
       const target = await env.DB.prepare(
-        `SELECT id, username, is_root_admin FROM profiles WHERE id = ?`
-      ).bind(userId).first();
+        `SELECT id, username, is_root_admin FROM profiles WHERE id = ? OR username = ?`
+      ).bind(userId, userId).first();
 
       if (!target) return errorResponse('Target user not found', 404);
 
@@ -214,14 +217,14 @@ export async function handleAdminRoutes(request, env, path, method) {
       await env.DB.batch([
         env.DB.prepare(
           `UPDATE profiles SET role = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
-        ).bind(newRole, userId),
+        ).bind(newRole, target.id),
         env.DB.prepare(
           `INSERT INTO audit_logs (id, action, actor_id, details)
            VALUES (?, 'ROLE_PROMOTED', ?, ?)`
         ).bind(generateId('log', 8), auth.user.id, `Changed role of @${target.username} to ${newRole}`),
       ]);
 
-      return successResponse({ userId, newRole }, `User @${target.username} has been updated to ${newRole}!`);
+      return successResponse({ userId: target.id, newRole }, `User @${target.username} has been updated to ${newRole}!`);
     } catch (err) {
       return errorResponse(`Change role error: ${err.message}`, 500);
     }

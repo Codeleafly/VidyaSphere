@@ -28,7 +28,7 @@
           <i data-lucide="inbox" class="w-5 h-5 text-indigo-400"></i> Applications Queue
         </button>
         <button data-tab="students" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
-          <i data-lucide="users" class="w-5 h-5 text-emerald-400"></i> Student Accounts
+          <i data-lucide="shield-check" class="w-5 h-5 text-rose-400"></i> Students & Roles
         </button>
         <button data-tab="exams" class="admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left">
           <i data-lucide="calendar" class="w-5 h-5 text-purple-400"></i> Exams & Timetables
@@ -76,6 +76,25 @@
       <button id="logout-btn-mob" class="text-xs text-rose-400 font-bold ml-1">Logout</button>
     </div>
   </header>
+
+  <!-- Mobile Tab Bar (Horizontal Scrollable Tabs for Android/Mobile Phones) -->
+  <div class="md:hidden sticky top-0 z-30 bg-slate-900 border-b border-slate-800 px-2 py-2 flex items-center gap-1.5 overflow-x-auto shadow-md">
+    <button data-tab="applications" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shrink-0 shadow-sm">
+      <i data-lucide="inbox" class="w-3.5 h-3.5"></i> Applications
+    </button>
+    <button data-tab="students" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0">
+      <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-400"></i> Students & Roles
+    </button>
+    <button data-tab="exams" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0">
+      <i data-lucide="calendar" class="w-3.5 h-3.5 text-purple-400"></i> Exams
+    </button>
+    <button data-tab="announcements" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0">
+      <i data-lucide="megaphone" class="w-3.5 h-3.5 text-amber-400"></i> Notices
+    </button>
+    <button data-tab="settings" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0">
+      <i data-lucide="settings" class="w-3.5 h-3.5 text-cyan-400"></i> Settings
+    </button>
+  </div>
 
   <!-- Main Content Area -->
   <main class="flex-1 max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
@@ -126,17 +145,39 @@
       </div>
     </section>
 
-    <!-- TAB 2: STUDENT ACCOUNTS MANAGEMENT -->
+    <!-- TAB 2: STUDENT ACCOUNTS & ROLE MANAGEMENT -->
     <section id="tab-students" class="admin-tab-content space-y-4 hidden">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Student Account Controls</h2>
-          <p class="text-xs text-slate-500">Suspend or re-activate student accounts</p>
+          <h2 class="text-xl font-bold text-slate-900">Student Accounts & Admin Roles</h2>
+          <p class="text-xs text-slate-500">Promote students to Secondary Admin, demote admins back to student, or manage account access.</p>
         </div>
       </div>
 
-      <div id="admin-students-table" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-8 text-center text-slate-400">Loading student directory...</div>
+      <!-- Quick Secondary Admin Promoter (Lead Admin Authority) -->
+      <div id="quick-promoter-box" class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 p-4 sm:p-5 rounded-2xl text-white shadow-md space-y-3 border border-purple-700/50">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold shadow-sm">
+            <i data-lucide="crown" class="w-4 h-4 text-amber-950"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm sm:text-base text-white">👑 Lead Admin Role Manager</h3>
+            <p class="text-[11px] text-purple-200">Directly promote any active student to Secondary Admin with full administrative privileges</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+          <select id="quick-promote-select" class="flex-1 px-3.5 py-2.5 rounded-xl bg-white text-slate-800 text-xs font-semibold focus:ring-2 focus:ring-amber-400 border border-slate-300">
+            <option value="">Select an active student to promote...</option>
+          </select>
+          <button id="quick-promote-btn" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs flex items-center justify-center gap-1.5 transition shadow-sm shrink-0">
+            <i data-lucide="shield-plus" class="w-4 h-4"></i> Make Secondary Admin
+          </button>
+        </div>
+      </div>
+
+      <div id="admin-students-table" class="space-y-3">
+        <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">Loading student directory...</div>
       </div>
     </section>
 
@@ -449,21 +490,49 @@
     document.getElementById('logout-btn')?.addEventListener('click', logout);
     document.getElementById('logout-btn-mob')?.addEventListener('click', logout);
 
-    // Tab Navigation
-    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.admin-tab-btn').forEach(b => {
-          b.className = 'admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left';
-        });
-        btn.className = 'admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800 text-white font-bold text-sm w-full text-left';
-
-        document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
-        document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden');
-
-        if (btn.dataset.tab === 'applications') loadApplications();
-        if (btn.dataset.tab === 'students') loadStudentAccounts();
-        if (btn.dataset.tab === 'exams') loadExamsAdmin();
+    // Tab Navigation Switcher (Synchronizes Desktop Sidebar, Mobile Top Pills & Mobile Bottom Nav)
+    function switchTab(tabId) {
+      // 1. Desktop sidebar
+      document.querySelectorAll('aside .admin-tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.className = 'admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800 text-white font-bold text-sm w-full text-left';
+        } else {
+          btn.className = 'admin-tab-btn flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold text-sm transition w-full text-left';
+        }
       });
+
+      // 2. Mobile top scroll bar pills
+      document.querySelectorAll('.md\\:hidden .admin-tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.className = 'admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shrink-0 shadow-sm';
+        } else {
+          btn.className = 'admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0';
+        }
+      });
+
+      // 3. Mobile bottom nav bar buttons
+      document.querySelectorAll('.admin-bottom-tab').forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.className = 'admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-400 font-bold text-[9px] truncate';
+        } else {
+          btn.className = 'admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate';
+        }
+      });
+
+      // 4. Show/Hide tab content sections
+      document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
+      const activeSection = document.getElementById(`tab-${tabId}`);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      // 5. Trigger section data loaders
+      if (tabId === 'applications') loadApplications();
+      if (tabId === 'students') loadStudentAccounts();
+      if (tabId === 'exams') loadExamsAdmin();
+      if (tabId === 'settings') loadSettings();
+    }
+
+    document.querySelectorAll('.admin-tab-btn, .admin-bottom-tab').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
     async function loadStats() {
@@ -503,6 +572,8 @@
           return;
         }
 
+        const isViewerRootAdmin = currentAdminUser?.isRootAdmin || currentAdminUser?.username === 'admin';
+
         appsContainer.innerHTML = list.map(reg => {
           const isPending = reg.account_status === 'pending';
           const isApproved = reg.account_status === 'active';
@@ -526,19 +597,25 @@
                 </p>
               </div>
 
-              <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+              <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 flex-wrap">
                 ${isPending ? `
-                  <button class="approve-btn flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition"
-                    data-id="${reg.id}" data-username="${reg.username}">
-                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Approve
+                  <button class="approve-btn flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition"
+                    data-id="${reg.id}" data-username="${reg.username}" data-role="student" title="Approve student with normal portal access">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Approve Student
                   </button>
+                  ${isViewerRootAdmin ? `
+                    <button class="approve-btn flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition"
+                      data-id="${reg.id}" data-username="${reg.username}" data-role="admin" title="Approve and promote directly to Secondary Admin">
+                      <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-300"></i> Approve as Admin 👑
+                    </button>
+                  ` : ''}
                   <button class="reject-btn px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition"
                     data-id="${reg.id}">
                     Reject
                   </button>
                 ` : (isApproved ? `
                   <span class="text-xs text-emerald-700 font-semibold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                    Active Student
+                    Active ${reg.role === 'admin' ? '🛡️ Admin' : 'Student'}
                   </span>
                 ` : `
                   <span class="text-xs text-rose-600 bg-rose-50 px-3 py-1.5 rounded-xl">Rejected</span>
@@ -550,20 +627,23 @@
 
         initIcons();
 
-        // Wire up 1-click approve buttons (Zero Codes!)
+        // Wire up approve buttons (Support regular student or direct admin approval)
         document.querySelectorAll('.approve-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
             const id = btn.dataset.id;
             const uname = btn.dataset.username;
+            const role = btn.dataset.role || 'student';
+            const roleLabel = role === 'admin' ? 'Secondary Admin' : 'Student';
             try {
               const res = await apiRequest('/admin/approve', {
                 method: 'POST',
-                body: { userId: id },
+                body: { userId: id, role },
               });
 
-              showToast(`Student @${uname} approved! Portal unlocked.`, 'success');
+              showToast(`User @${uname} approved as ${roleLabel}! Portal unlocked.`, 'success');
               loadApplications();
               loadStats();
+              loadStudentAccounts();
             } catch (err) {
               showToast(err.message, 'error');
             }
@@ -599,19 +679,100 @@
     // Load Student Accounts & Role Management
     async function loadStudentAccounts() {
       const container = document.getElementById('admin-students-table');
+      const quickSelect = document.getElementById('quick-promote-select');
       try {
         const res = await apiRequest('/admin/students');
         const students = res.students || [];
 
+        // Populate Quick Promoter Dropdown with non-root students
+        if (quickSelect) {
+          const eligibleStudents = students.filter(s => s.is_root_admin !== 1 && s.username !== 'admin' && s.role !== 'admin' && s.account_status === 'active');
+          if (eligibleStudents.length === 0) {
+            quickSelect.innerHTML = '<option value="">No eligible non-admin students available to promote</option>';
+          } else {
+            quickSelect.innerHTML = '<option value="">-- Choose student to promote as Secondary Admin --</option>' +
+              eligibleStudents.map(s => `<option value="${s.id}">👑 ${s.full_name} (@${s.username}) - ${s.class_name} Div ${s.division}</option>`).join('');
+          }
+        }
+
         if (students.length === 0) {
-          container.innerHTML = '<div class="p-8 text-center text-slate-400">No active student profiles registered.</div>';
+          container.innerHTML = '<div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">No active student profiles registered.</div>';
           return;
         }
 
-        const isViewerRootAdmin = currentAdminUser?.isRootAdmin;
+        const isViewerRootAdmin = currentAdminUser?.isRootAdmin || currentAdminUser?.username === 'admin';
 
-        container.innerHTML = `
-          <div class="overflow-x-auto">
+        // 1. Mobile Cards View
+        const mobileCardsHtml = students.map(s => {
+          const isThisRootAdmin = s.is_root_admin === 1 || s.username === 'admin';
+          const isThisAdmin = s.role === 'admin';
+
+          return `
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 ${isThisRootAdmin ? 'border-amber-300 bg-amber-50/20' : ''}">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h4 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                    ${s.full_name}
+                    ${isThisRootAdmin ? '<span class="text-[9px] font-black uppercase bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">👑 Root</span>' : ''}
+                  </h4>
+                  <p class="font-mono text-xs text-indigo-600 font-semibold">@${s.username}</p>
+                </div>
+                <div>
+                  ${isThisRootAdmin ? `
+                    <span class="px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-300">
+                      👑 Lead Admin
+                    </span>
+                  ` : (isThisAdmin ? `
+                    <span class="px-2 py-0.5 rounded-full font-bold uppercase text-[10px] bg-rose-100 text-rose-700 border border-rose-200">
+                      🛡️ Sec. Admin
+                    </span>
+                  ` : `
+                    <span class="px-2 py-0.5 rounded-full font-semibold text-[10px] bg-slate-100 text-slate-600">
+                      Student
+                    </span>
+                  `)}
+                </div>
+              </div>
+
+              <div class="text-xs text-slate-500 flex items-center justify-between border-t border-slate-100 pt-2">
+                <span>${s.class_name || 'HQ'} - Div ${s.division || 'A'} &bull; Roll: <strong>${s.roll_number || '01'}</strong></span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.account_status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                  ${s.account_status}
+                </span>
+              </div>
+
+              <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
+                ${isThisRootAdmin ? `
+                  <span class="w-full text-center py-2 text-xs font-black text-amber-700 bg-amber-50 rounded-xl border border-amber-200">
+                    👑 Lead Founder Admin (Protected)
+                  </span>
+                ` : `
+                  ${isViewerRootAdmin ? `
+                    ${isThisAdmin ? `
+                      <button class="role-toggle-btn flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-1 transition"
+                        data-id="${s.id}" data-role="student" data-username="${s.username}">
+                        <i data-lucide="user-minus" class="w-3.5 h-3.5"></i> Demote to Student
+                      </button>
+                    ` : `
+                      <button class="role-toggle-btn flex-1 py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition"
+                        data-id="${s.id}" data-role="admin" data-username="${s.username}">
+                        <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-300"></i> Promote to Admin 👑
+                      </button>
+                    `}
+                  ` : ''}
+                  <button class="status-toggle-btn py-2 px-3 rounded-xl text-xs font-bold transition ${s.account_status === 'active' ? 'bg-rose-50 text-rose-600 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}"
+                    data-id="${s.id}" data-action="${s.account_status === 'active' ? 'suspended' : 'active'}">
+                    ${s.account_status === 'active' ? 'Suspend' : 'Reactivate'}
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // 2. Desktop Table View
+        const desktopTableHtml = `
+          <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200 shadow-sm">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
                 <tr class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
@@ -640,7 +801,7 @@
                           </span>
                         ` : (isThisAdmin ? `
                           <span class="px-2 py-0.5 rounded-full font-bold uppercase text-[10px] bg-rose-100 text-rose-700 border border-rose-200 inline-flex items-center gap-1">
-                            🛡️ Admin
+                            🛡️ Secondary Admin
                           </span>
                         ` : `
                           <span class="px-2 py-0.5 rounded-full font-semibold text-[10px] bg-slate-100 text-slate-600">
@@ -655,19 +816,19 @@
                       </td>
                       <td class="p-3 text-right space-x-2">
                         ${isThisRootAdmin ? `
-                          <span class="text-[11px] text-amber-700 font-bold italic">Protected</span>
+                          <span class="text-[11px] text-amber-700 font-bold italic">Protected 👑</span>
                         ` : `
                           <button class="status-toggle-btn text-rose-600 font-bold hover:underline" data-id="${s.id}" data-action="${s.account_status === 'active' ? 'suspended' : 'active'}">
                             ${s.account_status === 'active' ? 'Suspend' : 'Reactivate'}
                           </button>
                           ${isViewerRootAdmin ? `
                             ${isThisAdmin ? `
-                              <button class="role-toggle-btn text-slate-500 font-bold hover:underline ml-1" data-id="${s.id}" data-role="student" title="Demote to regular student">
-                                Demote
+                              <button class="role-toggle-btn px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold ml-1 transition" data-id="${s.id}" data-role="student" data-username="${s.username}" title="Demote to regular student">
+                                Demote to Student
                               </button>
                             ` : `
-                              <button class="role-toggle-btn text-purple-600 font-bold hover:underline ml-1" data-id="${s.id}" data-role="admin" title="Promote to school administrator">
-                                Promote to Admin
+                              <button class="role-toggle-btn px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold ml-1 shadow-sm transition" data-id="${s.id}" data-role="admin" data-username="${s.username}" title="Promote to Secondary Admin">
+                                Promote to Admin 👑
                               </button>
                             `}
                           ` : ''}
@@ -681,6 +842,20 @@
           </div>
         `;
 
+        container.innerHTML = `
+          <!-- Mobile Cards View (Visible on phones) -->
+          <div class="block md:hidden space-y-3">
+            ${mobileCardsHtml}
+          </div>
+          <!-- Desktop Table View (Visible on tablet/PC) -->
+          <div class="hidden md:block">
+            ${desktopTableHtml}
+          </div>
+        `;
+
+        initIcons();
+
+        // Wire status toggle
         document.querySelectorAll('.status-toggle-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
             const studentId = btn.dataset.id;
@@ -703,9 +878,10 @@
           btn.addEventListener('click', async () => {
             const userId = btn.dataset.id;
             const newRole = btn.dataset.role;
+            const username = btn.dataset.username || 'this user';
             const confirmMsg = newRole === 'admin'
-              ? 'Are you sure you want to promote this user to Admin? They will have administrative permissions.'
-              : 'Are you sure you want to demote this admin back to Student?';
+              ? `Are you sure you want to promote @${username} to Secondary Admin? They will receive administrative privileges.`
+              : `Are you sure you want to demote @${username} back to Student?`;
 
             if (!confirm(confirmMsg)) return;
 
@@ -714,9 +890,43 @@
                 method: 'POST',
                 body: { userId, newRole },
               });
-              showToast(res.message || 'User role updated successfully', 'success');
+              showToast(res.message || `User @${username} role updated!`, 'success');
               loadStudentAccounts();
               loadStats();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
+
+      } catch (err) {
+        container.innerHTML = `<div class="p-6 text-center text-rose-500 bg-rose-50 rounded-2xl text-sm">${err.message}</div>`;
+      }
+    }
+
+    // Wire Quick Promoter Button
+    document.getElementById('quick-promote-btn')?.addEventListener('click', async () => {
+      const select = document.getElementById('quick-promote-select');
+      const userId = select.value;
+      if (!userId) {
+        showToast('Please select an active student from the dropdown first.', 'error');
+        return;
+      }
+      const selectedOptionText = select.options[select.selectedIndex]?.text || '';
+      if (!confirm(`Are you sure you want to promote ${selectedOptionText} to Secondary Admin?`)) return;
+
+      try {
+        const res = await apiRequest('/admin/change-role', {
+          method: 'POST',
+          body: { userId, newRole: 'admin' },
+        });
+        showToast(res.message || 'User successfully promoted to Secondary Admin!', 'success');
+        loadStudentAccounts();
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
             } catch (err) {
               showToast(err.message, 'error');
             }
@@ -973,5 +1183,29 @@
       loadSettings();
     }
   </script>
+
+  <!-- Mobile Bottom Navigation Bar for Admin Core -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-1 py-1 flex items-center justify-around shadow-2xl">
+    <button data-tab="applications" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-400 font-bold text-[9px] truncate">
+      <i data-lucide="inbox" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Requests</span>
+    </button>
+    <button data-tab="students" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
+      <i data-lucide="shield-check" class="w-4 h-4 mb-0.5 text-rose-400"></i>
+      <span class="truncate">Roles</span>
+    </button>
+    <button data-tab="exams" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
+      <i data-lucide="calendar" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Exams</span>
+    </button>
+    <button data-tab="announcements" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
+      <i data-lucide="megaphone" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Notices</span>
+    </button>
+    <button data-tab="settings" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[9px] truncate">
+      <i data-lucide="settings" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Settings</span>
+    </button>
+  </nav>
 </body>
 </html>
