@@ -156,14 +156,31 @@ CREATE TABLE IF NOT EXISTS rate_limits (
     reset_at INTEGER NOT NULL
 );
 
--- PHASE 4: Realtime School & Class Chat Messages
+-- PHASE 4: Realtime School & Class Chat Messages (Ephemeral 7-Day Auto-Purge)
 CREATE TABLE IF NOT EXISTS messages (
     id TEXT PRIMARY KEY,
     sender_id TEXT NOT NULL,
     channel TEXT NOT NULL DEFAULT 'school',
     content TEXT NOT NULL,
+    is_edited INTEGER DEFAULT 0,
+    has_attachment INTEGER DEFAULT 0,
+    attachment_name TEXT,
+    attachment_type TEXT,
+    attachment_size INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (sender_id) REFERENCES profiles(id) ON DELETE CASCADE
+);
+
+-- PHASE 4: Compressed In-Database Binary Storage for Chat Attachments (Scientific Lossless Gzip)
+CREATE TABLE IF NOT EXISTS message_attachments (
+    message_id TEXT PRIMARY KEY,
+    file_name TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    file_size INTEGER NOT NULL,
+    compressed_data BLOB NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
 );
 
 -- PHASE 4: Direct Message Consent & Conversations (Permission-Based Direct Messaging)

@@ -1,15 +1,30 @@
 /**
  * Phase 4: Realtime Student-to-Student Chat Engine
- * Supports:
+ * Features:
  * 1. Public Class & School Hub Channels
  * 2. Consent-First 1-on-1 Direct Messages (Permission required before chatting)
  * 3. Custom Study Groups
- * 4. WebSocket realtime streaming with fallback REST messaging
+ * 4. Ephemeral 7-Day Auto-Purge (Messages & attachments auto-expire after 7 days)
+ * 5. Edit & Delete Sent Messages (Full student control)
+ * 6. Scientific Lossless Gzip Compressed File Attachments (Images, PDFs, Study Materials)
+ * 7. Zero-Waste Lazy Download Architecture (Files download ONLY on explicit demand)
  */
 
-import { jsonResponse, errorResponse, successResponse } from '../utils/response.js';
+import { jsonResponse, errorResponse, successResponse, corsHeaders } from '../utils/response.js';
 import { generateId } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
+
+// Native Gzip Compression using Web Standards CompressionStream (Shrinks PDFs, text, and data losslessly)
+async function compressData(arrayBuffer) {
+  const stream = new Response(arrayBuffer).body.pipeThrough(new CompressionStream('gzip'));
+  return await new Response(stream).arrayBuffer();
+}
+
+// Native Gzip Decompression using Web Standards DecompressionStream (Restores 100% original bytes)
+async function decompressData(compressedArrayBuffer) {
+  const stream = new Response(compressedArrayBuffer).body.pipeThrough(new DecompressionStream('gzip'));
+  return await new Response(stream).arrayBuffer();
+}
 
 // In-memory active WebSocket connections map for Edge runtime broadcasting
 const activeSockets = new Map(); // ws -> session
@@ -97,6 +112,8 @@ export async function handleChatRoutes(request, env, path, method) {
               isRootAdmin: session.is_root_admin === 1,
               channel,
               content,
+              isEdited: 0,
+              hasAttachment: 0,
               createdAt: new Date().toISOString(),
             }
           });
@@ -144,8 +161,8 @@ export async function handleChatRoutes(request, env, path, method) {
       SELECT dc.id, dc.user1_id, dc.user2_id, dc.status, dc.requested_by, dc.created_at, dc.updated_at,
              p1.username as u1_username, p1.full_name as u1_name, p1.class_name as u1_class, p1.is_root_admin as u1_root,
              p2.username as u2_username, p2.full_name as u2_name, p2.class_name as u2_class, p2.is_root_admin as u2_root,
-             (SELECT content FROM messages WHERE channel = ('dm_' || dc.id) ORDER BY created_at DESC LIMIT 1) as last_message,
-             (SELECT created_at FROM messages WHERE channel = ('dm_' || dc.id) ORDER BY created_at DESC LIMIT 1) as last_message_time
+             (SELECT content FROM messages WHERE channel = ('dm_' || dc.id) AND created_at >= datetime('now', '-7 days') ORDER BY created_at DESC LIMIT 1) as last_message,
+             (SELECT created_at FROM messages WHERE channel = ('dm_' || dc.id) AND created_at >= datetime('now', '-7 days') ORDER BY created_at DESC LIMIT 1) as last_message_time
       FROM direct_chats dc
       JOIN profiles p1 ON dc.user1_id = p1.id
       JOIN profiles p2 ON dc.user2_id = p2.id
@@ -200,7 +217,6 @@ export async function handleChatRoutes(request, env, path, method) {
         return errorResponse('You cannot start a direct chat with yourself', 400);
       }
 
-      // Sort IDs so uniqueness constraint always checks the exact pair
       const [u1, u2] = [auth.user.id, target.id].sort();
 
       const existing = await env.DB.prepare(
@@ -214,7 +230,6 @@ export async function handleChatRoutes(request, env, path, method) {
         if (existing.status === 'pending') {
           return successResponse({ id: existing.id, status: 'pending', partner: target }, 'Chat request is already pending authorization');
         }
-        // If rejected previously, allow re-requesting
         await env.DB.prepare(
           `UPDATE direct_chats SET status = 'pending', requested_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
         ).bind(auth.user.id, existing.id).run();
@@ -333,7 +348,7 @@ export async function handleChatRoutes(request, env, path, method) {
     }
   }
 
-  // 7. GET /api/chat/messages - Fetch recent messages for a channel
+  // 7. GET /api/chat/messages - Fetch messages for channel (Strict Ephemeral 7-Day Window)
   if (path === '/api/chat/messages' && method === 'GET') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
@@ -369,29 +384,66 @@ export async function handleChatRoutes(request, env, path, method) {
       }
     }
 
-    const { results } = await env.DB.prepare(
-      `SELECT m.*, p.full_name as sender_name, p.role as sender_role, p.class_name, p.is_root_admin
-       FROM messages m
-       JOIN profiles p ON m.sender_id = p.id
-       WHERE m.channel = ?
-       ORDER BY m.created_at DESC LIMIT 60`
-    ).bind(channel).all();
+    // Strict 7-Day Auto-Purge window: Messages older than 7 days are automatically excluded
+    const { results } = await env.DB.prepare(`
+      SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.has_attachment,
+             m.attachment_name, m.attachment_type, m.attachment_size, m.created_at, m.updated_at,
+             p.full_name as sender_name, p.role as sender_role, p.class_name, p.is_root_admin
+      FROM messages m
+      JOIN profiles p ON m.sender_id = p.id
+      WHERE m.channel = ? AND m.created_at >= datetime('now', '-7 days')
+      ORDER BY m.created_at DESC LIMIT 80
+    `).bind(channel).all();
 
     const messages = (results || []).reverse();
     return successResponse({ messages });
   }
 
-  // 8. POST /api/chat/messages - Send message via REST
+  // 8. POST /api/chat/messages - Send message with optional Compressed Study Attachment
   if (path === '/api/chat/messages' && method === 'POST') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
 
     try {
-      const body = await request.json();
-      const { content, channel = 'school' } = body;
+      const contentType = request.headers.get('content-type') || '';
+      let content = '', channel = 'school';
+      let fileBuffer = null, fileName = null, fileType = null, fileSize = 0;
 
-      if (!content || !content.trim()) {
-        return errorResponse('Message content cannot be empty', 400);
+      if (contentType.includes('multipart/form-data')) {
+        const formData = await request.formData();
+        content = (formData.get('content') || '').toString().trim();
+        channel = (formData.get('channel') || 'school').toString().trim();
+        const file = formData.get('file');
+
+        if (file && typeof file === 'object' && file.name) {
+          fileName = file.name;
+          fileType = file.type || 'application/octet-stream';
+          fileBuffer = await file.arrayBuffer();
+          fileSize = fileBuffer.byteLength;
+        }
+      } else {
+        const body = await request.json();
+        content = (body.content || '').trim();
+        channel = (body.channel || 'school').trim();
+
+        if (body.fileBase64 && body.fileName) {
+          fileName = body.fileName;
+          fileType = body.fileType || 'application/octet-stream';
+          const binary = atob(body.fileBase64);
+          const u8 = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) u8[i] = binary.charCodeAt(i);
+          fileBuffer = u8.buffer;
+          fileSize = fileBuffer.byteLength;
+        }
+      }
+
+      if (!content && !fileBuffer) {
+        return errorResponse('Message content or file attachment is required', 400);
+      }
+
+      // Max 10MB attachment limit for chat to protect mobile edge storage
+      if (fileSize > 10 * 1024 * 1024) {
+        return errorResponse('Chat file attachment exceeds the 10MB limit. For large textbooks, use Google Drive in the Notes section.', 400);
       }
 
       // Direct message security verification
@@ -412,7 +464,6 @@ export async function handleChatRoutes(request, env, path, method) {
           return errorResponse('Cannot send message. Chat invitation was declined.', 403);
         }
 
-        // Update direct chat timestamp
         await env.DB.prepare(`UPDATE direct_chats SET updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(dmId).run();
       } else if (channel.startsWith('grp_')) {
         const grpId = channel.replace('grp_', '');
@@ -425,27 +476,184 @@ export async function handleChatRoutes(request, env, path, method) {
         }
       }
 
-      const id = generateId('msg', 8);
+      const msgId = generateId('msg', 8);
+      const hasAttachment = fileBuffer ? 1 : 0;
 
-      await env.DB.prepare(
-        `INSERT INTO messages (id, sender_id, channel, content) VALUES (?, ?, ?, ?)`
-      ).bind(id, auth.user.id, channel, content.trim()).run();
+      // Persist parent message
+      await env.DB.prepare(`
+        INSERT INTO messages (id, sender_id, channel, content, is_edited, has_attachment, attachment_name, attachment_type, attachment_size)
+        VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)
+      `).bind(
+        msgId,
+        auth.user.id,
+        channel,
+        content || (fileName ? `Shared attachment: ${fileName}` : ''),
+        hasAttachment,
+        fileName || null,
+        fileType || null,
+        fileSize || 0
+      ).run();
 
-      return successResponse(
-        {
-          id,
-          senderName: auth.user.fullName,
-          senderRole: auth.user.role,
-          isRootAdmin: auth.user.isRootAdmin || false,
-          channel,
-          content: content.trim(),
-          createdAt: new Date().toISOString(),
-        },
-        'Message sent',
-        201
-      );
+      // If attachment exists: apply scientific lossless Gzip compression before storing
+      if (fileBuffer) {
+        const compressed = await compressData(fileBuffer);
+        const compressedBytes = new Uint8Array(compressed);
+
+        await env.DB.prepare(`
+          INSERT INTO message_attachments (message_id, file_name, file_type, file_size, compressed_data)
+          VALUES (?, ?, ?, ?, ?)
+        `).bind(msgId, fileName, fileType, fileSize, compressedBytes).run();
+      }
+
+      const responsePayload = {
+        id: msgId,
+        senderName: auth.user.fullName,
+        senderRole: auth.user.role,
+        isRootAdmin: auth.user.isRootAdmin || false,
+        channel,
+        content: content || (fileName ? `Shared attachment: ${fileName}` : ''),
+        isEdited: 0,
+        hasAttachment,
+        attachmentName: fileName || null,
+        attachmentType: fileType || null,
+        attachmentSize: fileSize || 0,
+        createdAt: new Date().toISOString(),
+      };
+
+      return successResponse(responsePayload, 'Message sent', 201);
     } catch (err) {
       return errorResponse(`Chat send error: ${err.message}`, 500);
+    }
+  }
+
+  // 9. PUT /api/chat/messages/:id - Edit sent message (Sender or Admin only)
+  if (path.startsWith('/api/chat/messages/') && !path.includes('/attachments') && method === 'PUT') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const msgId = parts[4];
+
+    try {
+      const body = await request.json();
+      const { content } = body;
+
+      if (!content || !content.trim()) {
+        return errorResponse('Updated message content cannot be empty', 400);
+      }
+
+      const existing = await env.DB.prepare(`SELECT * FROM messages WHERE id = ?`).bind(msgId).first();
+      if (!existing) return errorResponse('Message not found', 404);
+
+      if (existing.sender_id !== auth.user.id && auth.user.role !== 'admin') {
+        return errorResponse('Forbidden: You can only edit your own messages', 403);
+      }
+
+      // Check if message is older than 7 days
+      const createdAt = new Date(existing.created_at);
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+      if (createdAt < sevenDaysAgo) {
+        return errorResponse('Expired messages older than 7 days cannot be edited', 400);
+      }
+
+      await env.DB.prepare(`
+        UPDATE messages
+        SET content = ?, is_edited = 1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).bind(content.trim(), msgId).run();
+
+      return successResponse({ id: msgId, content: content.trim(), isEdited: 1 }, 'Message updated successfully');
+    } catch (err) {
+      return errorResponse(`Message edit failed: ${err.message}`, 500);
+    }
+  }
+
+  // 10. DELETE /api/chat/messages/:id - Delete sent message (Sender or Admin only)
+  if (path.startsWith('/api/chat/messages/') && !path.includes('/attachments') && method === 'DELETE') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const msgId = parts[4];
+
+    try {
+      const existing = await env.DB.prepare(`SELECT * FROM messages WHERE id = ?`).bind(msgId).first();
+      if (!existing) return errorResponse('Message not found', 404);
+
+      if (existing.sender_id !== auth.user.id && auth.user.role !== 'admin') {
+        return errorResponse('Forbidden: You can only delete your own messages', 403);
+      }
+
+      // Cascade delete attachment chunks
+      await env.DB.batch([
+        env.DB.prepare(`DELETE FROM message_attachments WHERE message_id = ?`).bind(msgId),
+        env.DB.prepare(`DELETE FROM messages WHERE id = ?`).bind(msgId)
+      ]);
+
+      return successResponse({ id: msgId }, 'Message deleted successfully');
+    } catch (err) {
+      return errorResponse(`Message deletion failed: ${err.message}`, 500);
+    }
+  }
+
+  // 11. GET /api/chat/attachments/:messageId - On-Demand Lazy Download (Zero Quality Loss)
+  if (path.startsWith('/api/chat/attachments/') && method === 'GET') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const msgId = parts[4];
+
+    // Verify parent message exists & channel access
+    const msg = await env.DB.prepare(`SELECT * FROM messages WHERE id = ?`).bind(msgId).first();
+    if (!msg) return errorResponse('Attachment message not found or expired', 404);
+
+    if (msg.channel.startsWith('dm_')) {
+      const dmId = msg.channel.replace('dm_', '');
+      const dm = await env.DB.prepare(`SELECT * FROM direct_chats WHERE id = ?`).bind(dmId).first();
+      if (!dm || (dm.user1_id !== auth.user.id && dm.user2_id !== auth.user.id)) {
+        return errorResponse('Access denied to private attachment', 403);
+      }
+    }
+
+    const attachment = await env.DB.prepare(`SELECT * FROM message_attachments WHERE message_id = ?`).bind(msgId).first();
+    if (!attachment) return errorResponse('File attachment not found or already purged', 404);
+
+    try {
+      let rawData = attachment.compressed_data;
+      let u8;
+      if (rawData instanceof Uint8Array) {
+        u8 = rawData;
+      } else if (ArrayBuffer.isView(rawData)) {
+        u8 = new Uint8Array(rawData.buffer, rawData.byteOffset, rawData.byteLength);
+      } else if (typeof rawData === 'string') {
+        const bin = atob(rawData);
+        u8 = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      } else {
+        u8 = new Uint8Array(rawData);
+      }
+
+      // Lossless decompression using native DecompressionStream
+      let outputBuffer;
+      if (u8.length >= 2 && u8[0] === 0x1f && u8[1] === 0x8b) {
+        outputBuffer = await decompressData(u8.buffer);
+      } else {
+        outputBuffer = u8.buffer;
+      }
+
+      const cleanFilename = (attachment.file_name || 'download').replace(/[^a-zA-Z0-9._-]/g, '_');
+
+      return new Response(outputBuffer, {
+        headers: {
+          'Content-Type': attachment.file_type || 'application/octet-stream',
+          'Content-Disposition': `inline; filename="${cleanFilename}"`,
+          'Cache-Control': 'public, max-age=86400',
+          ...corsHeaders(),
+        }
+      });
+    } catch (decompErr) {
+      return errorResponse(`Decompression error: ${decompErr.message}`, 500);
     }
   }
 

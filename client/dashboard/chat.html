@@ -118,7 +118,7 @@
   <!-- Main Content Area: Split View for Channels/DMs & Chat Feed -->
   <main class="flex-1 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-6 flex flex-col md:flex-row gap-3 h-[calc(100vh-4rem)] md:h-screen overflow-hidden">
     
-    <!-- Conversations / Channels Sidebar (Collapsible / Switchable) -->
+    <!-- Conversations / Channels Sidebar -->
     <div id="channels-panel" class="w-full md:w-72 bg-white rounded-2xl border border-slate-200 p-3 flex flex-col shrink-0 h-48 md:h-full overflow-hidden shadow-sm">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
@@ -132,7 +132,7 @@
       <!-- Navigation Tabs: Channels / DMs / Groups -->
       <div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl my-2 text-[10px] font-bold">
         <button class="chat-tab-btn active py-1 rounded-lg bg-white text-indigo-600 shadow-xs" data-target="channels-list">Hub</button>
-        <button class="chat-tab-btn py-1 rounded-lg text-slate-600 hover:text-slate-900" data-target="dms-list">DMs <span id="dm-badge" class="hidden w-2 h-2 rounded-full bg-rose-500 inline-block align-middle ml-0.5"></span></button>
+        <button class="chat-tab-btn py-1 rounded-lg text-slate-600 hover:text-slate-900" data-target="dms-list">DMs</button>
         <button class="chat-tab-btn py-1 rounded-lg text-slate-600 hover:text-slate-900" data-target="groups-list">Groups</button>
       </div>
 
@@ -199,13 +199,16 @@
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
               <span id="connection-status">Live Connected</span>
               <span class="mx-1">•</span>
-              <span id="chat-subtitle" class="truncate">Public school stream</span>
+              <span id="chat-subtitle" class="truncate">Messages auto-purge after 7 days</span>
             </div>
           </div>
         </div>
 
         <!-- Top Right Actions -->
         <div class="flex items-center gap-2">
+          <span class="hidden sm:inline-flex items-center gap-1 text-[10px] bg-slate-100 text-slate-500 font-medium px-2 py-1 rounded-lg">
+            <i data-lucide="clock" class="w-3 h-3 text-amber-500"></i> 7-Day Auto Purge
+          </span>
           <button id="refresh-chat-btn" title="Refresh messages" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
             <i data-lucide="rotate-cw" class="w-4 h-4"></i>
           </button>
@@ -236,11 +239,29 @@
       </div>
 
       <!-- Bottom Chat Input Bar -->
-      <div class="p-2.5 sm:p-3 border-t border-slate-200 bg-white shrink-0">
-        <form id="chat-form" class="flex gap-2">
+      <div class="p-2.5 sm:p-3 border-t border-slate-200 bg-white shrink-0 space-y-2">
+        <!-- Selected Attachment Preview Pill -->
+        <div id="attachment-preview-bar" class="hidden flex items-center justify-between text-xs bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-1.5">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i>
+            <span id="attachment-name-text" class="font-bold text-indigo-900 truncate"></span>
+            <span id="attachment-size-text" class="text-[10px] text-indigo-500 shrink-0"></span>
+          </div>
+          <button type="button" id="remove-attachment-btn" class="text-slate-400 hover:text-rose-600 font-bold text-sm px-1 leading-none">&times;</button>
+        </div>
+
+        <form id="chat-form" class="flex items-center gap-2">
+          <!-- Attachment Button & Hidden File Input -->
+          <input type="file" id="chat-file-input" class="hidden" accept="image/*,application/pdf,.doc,.docx,.txt">
+          <button type="button" id="attach-btn" title="Attach image, PDF or study material (Max 10MB)"
+            class="p-2 text-slate-400 hover:text-indigo-600 rounded-xl hover:bg-slate-100 transition shrink-0">
+            <i data-lucide="paperclip" class="w-4 h-4"></i>
+          </button>
+
           <input type="text" id="chat-input" required autocomplete="off"
             class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
             placeholder="Type your message...">
+
           <button type="submit" id="send-btn"
             class="px-4 sm:px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shrink-0 shadow-sm shadow-indigo-100">
             <span>Send</span>
@@ -250,6 +271,23 @@
       </div>
     </div>
   </main>
+
+  <!-- Edit Message Modal -->
+  <div id="edit-msg-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-4 space-y-3 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+        <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-indigo-600"></i> Edit Message
+        </h3>
+        <button id="close-edit-modal" class="text-slate-400 hover:text-slate-600 text-lg font-bold leading-none">&times;</button>
+      </div>
+      <textarea id="edit-msg-input" rows="3" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"></textarea>
+      <div class="flex justify-end gap-2">
+        <button type="button" id="cancel-edit-btn" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Cancel</button>
+        <button type="button" id="save-edit-btn" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">Save Changes</button>
+      </div>
+    </div>
+  </div>
 
   <!-- New Direct Message Modal -->
   <div id="new-dm-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
@@ -308,7 +346,7 @@
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { requireAuth, logout, getToken } from '/js/auth.js';
-    import { formatDateTime, initIcons, showToast } from '/js/ui.js';
+    import { formatDateTime, formatFileSize, initIcons, showToast } from '/js/ui.js';
 
     const user = requireAuth();
     if (user) {
@@ -318,7 +356,6 @@
         document.getElementById('admin-nav-link')?.classList.remove('hidden');
       }
 
-      // Configure my-class channel button
       const classBtn = document.getElementById('class-channel-btn');
       if (classBtn && user.className) {
         const cleanClass = user.className.toLowerCase().replace(/\s+/g, '_');
@@ -333,10 +370,12 @@
 
     // Chat state
     let currentChannel = 'school';
-    let currentChatType = 'channel'; // 'channel' | 'dm' | 'group'
+    let currentChatType = 'channel';
     let activeDmData = null;
     let ws = null;
     let allStudentsCache = [];
+    let selectedAttachmentFile = null;
+    let editingMessageId = null;
 
     const messagesContainer = document.getElementById('messages-container');
     const chatForm = document.getElementById('chat-form');
@@ -351,6 +390,48 @@
     const dmPermissionActions = document.getElementById('dm-permission-actions');
     const acceptDmBtn = document.getElementById('accept-dm-btn');
     const declineDmBtn = document.getElementById('decline-dm-btn');
+
+    // Attachment elements
+    const attachBtn = document.getElementById('attach-btn');
+    const chatFileInput = document.getElementById('chat-file-input');
+    const attachmentPreviewBar = document.getElementById('attachment-preview-bar');
+    const attachmentNameText = document.getElementById('attachment-name-text');
+    const attachmentSizeText = document.getElementById('attachment-size-text');
+    const removeAttachmentBtn = document.getElementById('remove-attachment-btn');
+
+    // Edit modal elements
+    const editMsgModal = document.getElementById('edit-msg-modal');
+    const editMsgInput = document.getElementById('edit-msg-input');
+    const closeEditModal = document.getElementById('close-edit-modal');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const saveEditBtn = document.getElementById('save-edit-btn');
+
+    // Handle file selection
+    attachBtn.addEventListener('click', () => chatFileInput.click());
+    chatFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('File size exceeds the 10MB limit', 'warning');
+        chatFileInput.value = '';
+        return;
+      }
+
+      selectedAttachmentFile = file;
+      attachmentNameText.textContent = file.name;
+      attachmentSizeText.textContent = `(${formatFileSize(file.size)})`;
+      attachmentPreviewBar.classList.remove('hidden');
+      chatInput.required = false;
+      initIcons();
+    });
+
+    removeAttachmentBtn.addEventListener('click', () => {
+      selectedAttachmentFile = null;
+      chatFileInput.value = '';
+      attachmentPreviewBar.classList.add('hidden');
+      chatInput.required = true;
+    });
 
     // Tab switching (Channels / DMs / Groups)
     document.querySelectorAll('.chat-tab-btn').forEach(btn => {
@@ -383,7 +464,7 @@
         activeDmData = null;
 
         channelNameEl.textContent = btn.dataset.title;
-        chatSubtitleEl.textContent = 'Public channel stream';
+        chatSubtitleEl.textContent = 'Public stream • Messages auto-purge after 7 days';
         currentChatIcon.innerHTML = `<i data-lucide="hash" class="w-4 h-4"></i>`;
         dmPermissionBanner.classList.add('hidden');
         chatInput.disabled = false;
@@ -402,11 +483,13 @@
         const messages = res.messages || [];
 
         if (messages.length === 0) {
-          messagesContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No messages yet. Say hello! 👋</div>';
+          messagesContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No messages yet in the past 7 days. Say hello! 👋</div>';
           return;
         }
 
         messagesContainer.innerHTML = messages.map(msg => renderMessageHtml(msg)).join('');
+        attachMessageActionListeners();
+        initIcons();
         scrollToBottom();
       } catch (err) {
         messagesContainer.innerHTML = `<div class="p-4 text-center text-rose-500 text-xs">${err.message}</div>`;
@@ -434,26 +517,159 @@
     function renderMessageHtml(msg) {
       const isMe = msg.sender_id === user.id;
       const isAdmin = msg.is_root_admin === 1;
+      const isEdited = msg.is_edited === 1;
+      const hasAttachment = msg.has_attachment === 1;
+
+      let attachmentHtml = '';
+      if (hasAttachment && msg.attachment_name) {
+        const isPdf = (msg.attachment_type || '').includes('pdf') || msg.attachment_name.endsWith('.pdf');
+        const isImg = (msg.attachment_type || '').includes('image');
+        const icon = isPdf ? 'file-text' : (isImg ? 'image' : 'file');
+
+        attachmentHtml = `
+          <div class="mt-2 p-2 rounded-xl ${isMe ? 'bg-black/20 text-white' : 'bg-slate-100 text-slate-800'} border border-black/10 flex items-center justify-between gap-2.5">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <div class="w-7 h-7 rounded-lg ${isMe ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center shrink-0">
+                <i data-lucide="${icon}" class="w-3.5 h-3.5"></i>
+              </div>
+              <div class="overflow-hidden">
+                <div class="font-bold text-[11px] truncate max-w-[140px] sm:max-w-[200px]" title="${escapeHtml(msg.attachment_name)}">${escapeHtml(msg.attachment_name)}</div>
+                <div class="text-[9px] opacity-75">${formatFileSize(msg.attachment_size)} • Tap to download</div>
+              </div>
+            </div>
+            <button type="button" class="download-attachment-btn px-2 py-1 rounded-lg ${isMe ? 'bg-white text-indigo-700 hover:bg-slate-100' : 'bg-indigo-600 text-white hover:bg-indigo-700'} font-bold text-[10px] flex items-center gap-1 shrink-0 transition shadow-xs"
+              data-msg-id="${msg.id}" data-filename="${escapeHtml(msg.attachment_name)}">
+              <i data-lucide="download" class="w-3 h-3"></i>
+              <span>Get</span>
+            </button>
+          </div>
+        `;
+      }
+
+      let actionsHtml = '';
+      if (isMe || user.role === 'admin') {
+        actionsHtml = `
+          <div class="flex items-center gap-2 mt-1 opacity-60 hover:opacity-100 text-[10px] transition">
+            <button class="edit-msg-btn text-slate-400 hover:text-indigo-600 flex items-center gap-0.5" data-msg-id="${msg.id}" data-content="${escapeHtml(msg.content)}" title="Edit message">
+              <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+            </button>
+            <button class="delete-msg-btn text-slate-400 hover:text-rose-600 flex items-center gap-0.5" data-msg-id="${msg.id}" title="Delete message">
+              <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
+            </button>
+          </div>
+        `;
+      }
 
       return `
-        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} group" id="msg-${msg.id}">
           <div class="flex items-center gap-1.5 mb-1 px-1">
             <span class="text-[10px] font-bold ${isAdmin ? 'text-rose-600' : 'text-slate-600'}">
               ${escapeHtml(msg.sender_name)}
             </span>
             ${isAdmin ? '<span class="text-[8px] px-1 rounded bg-rose-100 text-rose-700 font-bold uppercase">Admin</span>' : ''}
             <span class="text-[9px] text-slate-400">${formatDateTime(msg.created_at)}</span>
+            ${isEdited ? '<span class="text-[9px] text-slate-400 italic">(edited)</span>' : ''}
           </div>
           <div class="max-w-[85%] sm:max-w-md px-3.5 py-2 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
             isMe
               ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-tr-xs'
               : 'bg-white border border-slate-200 text-slate-800 rounded-tl-xs'
           }">
-            ${renderMarkdownSafe(msg.content, isMe)}
+            <div>${renderMarkdownSafe(msg.content, isMe)}</div>
+            ${attachmentHtml}
           </div>
+          ${actionsHtml}
         </div>
       `;
     }
+
+    function attachMessageActionListeners() {
+      // Lazy Download On Demand (Zero quality loss, zero background bandwidth waste)
+      messagesContainer.querySelectorAll('.download-attachment-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const msgId = btn.dataset.msgId;
+          const filename = btn.dataset.filename;
+          try {
+            showToast('Decompressing attachment losslessly...', 'info');
+            const token = getToken();
+            const res = await fetch(`/api/chat/attachments/${msgId}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(err.error || 'Failed to download attachment');
+            }
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+            showToast('Downloaded in 100% original quality!', 'success');
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+
+      // Edit Message Modal Open
+      messagesContainer.querySelectorAll('.edit-msg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          editingMessageId = btn.dataset.msgId;
+          editMsgInput.value = btn.dataset.content;
+          editMsgModal.classList.remove('hidden');
+          editMsgModal.classList.add('flex');
+          editMsgInput.focus();
+        });
+      });
+
+      // Delete Message confirmation
+      messagesContainer.querySelectorAll('.delete-msg-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const msgId = btn.dataset.msgId;
+          if (!confirm('Are you sure you want to delete this message? Any attached files will also be permanently removed.')) return;
+          try {
+            await apiRequest(`/chat/messages/${msgId}`, { method: 'DELETE' });
+            showToast('Message deleted', 'info');
+            loadMessages();
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+    }
+
+    // Edit modal listeners
+    function closeEditModalHandler() {
+      editingMessageId = null;
+      editMsgModal.classList.add('hidden');
+      editMsgModal.classList.remove('flex');
+    }
+    closeEditModal.addEventListener('click', closeEditModalHandler);
+    cancelEditBtn.addEventListener('click', closeEditModalHandler);
+
+    saveEditBtn.addEventListener('click', async () => {
+      if (!editingMessageId) return;
+      const newContent = editMsgInput.value.trim();
+      if (!newContent) {
+        showToast('Message cannot be empty', 'warning');
+        return;
+      }
+      try {
+        await apiRequest(`/chat/messages/${editingMessageId}`, {
+          method: 'PUT',
+          body: { content: newContent }
+        });
+        showToast('Message updated', 'success');
+        closeEditModalHandler();
+        loadMessages();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    });
 
     function scrollToBottom() {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -511,7 +727,6 @@
           `;
         }).join('');
 
-        // Attach click listener to DM items
         container.querySelectorAll('.dm-item').forEach(btn => {
           btn.addEventListener('click', () => {
             selectDmConversation(btn.dataset);
@@ -529,11 +744,10 @@
       activeDmData = data;
 
       channelNameEl.textContent = data.partnerName;
-      chatSubtitleEl.textContent = `@${data.partnerUsername} • 1-on-1 Direct Message`;
+      chatSubtitleEl.textContent = `@${data.partnerUsername} • 1-on-1 DM (Auto-purge 7 days)`;
       currentChatIcon.innerHTML = `<i data-lucide="lock" class="w-4 h-4 text-emerald-600"></i>`;
       initIcons();
 
-      // Permission Banner Check
       if (data.status === 'pending') {
         dmPermissionBanner.classList.remove('hidden');
         const isRequestedByMe = data.requestedByMe === 'true';
@@ -544,18 +758,21 @@
           chatInput.disabled = true;
           chatInput.placeholder = `Waiting for ${data.partnerName} to accept...`;
           sendBtn.disabled = true;
+          attachBtn.disabled = true;
         } else {
           dmPermissionText.textContent = `${data.partnerName} wants to chat with you. Accept invitation?`;
           dmPermissionActions.classList.remove('hidden');
           chatInput.disabled = true;
           chatInput.placeholder = 'Accept the request above to start messaging...';
           sendBtn.disabled = true;
+          attachBtn.disabled = true;
         }
       } else {
         dmPermissionBanner.classList.add('hidden');
         chatInput.disabled = false;
         chatInput.placeholder = `Message ${data.partnerName}...`;
         sendBtn.disabled = false;
+        attachBtn.disabled = false;
       }
 
       loadMessages();
@@ -581,23 +798,28 @@
         await apiRequest(`/chat/dms/${activeDmData.dmId}/decline`, { method: 'POST' });
         showToast('Chat request declined.', 'info');
         loadDmsList();
-        // Return to school channel
         document.querySelector('.channel-item[data-channel="school"]')?.click();
       } catch (err) {
         showToast(err.message, 'error');
       }
     });
 
-    // Send Message (Form submit)
+    // Send Message (Form submit with optional compressed attachment)
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const content = chatInput.value.trim();
-      if (!content) return;
+      if (!content && !selectedAttachmentFile) return;
 
+      const fileToSend = selectedAttachmentFile;
+      // Reset input immediately for responsive feel
       chatInput.value = '';
+      selectedAttachmentFile = null;
+      chatFileInput.value = '';
+      attachmentPreviewBar.classList.add('hidden');
+      chatInput.required = true;
 
-      // WebSocket attempt first
-      if (ws && ws.readyState === WebSocket.OPEN) {
+      // If text-only and WebSocket connected, stream instantly
+      if (!fileToSend && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({
           type: 'message',
           channel: currentChannel,
@@ -606,12 +828,27 @@
         return;
       }
 
-      // REST fallback
+      // REST upload for attachments or fallback
       try {
-        await apiRequest('/chat/messages', {
+        const formData = new FormData();
+        formData.append('content', content);
+        formData.append('channel', currentChannel);
+        if (fileToSend) {
+          formData.append('file', fileToSend);
+        }
+
+        const token = getToken();
+        const res = await fetch('/api/chat/messages', {
           method: 'POST',
-          body: { channel: currentChannel, content }
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
         });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Failed to send message');
+        }
+
         loadMessages();
       } catch (err) {
         showToast(err.message, 'error');
@@ -640,9 +877,10 @@
             if (data.type === 'new_message' && data.message) {
               if (data.message.channel === currentChannel) {
                 messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(data.message));
+                attachMessageActionListeners();
+                initIcons();
                 scrollToBottom();
               }
-              // If on DMs view, reload list to update last message
               if (!document.getElementById('dms-list').classList.contains('hidden')) {
                 loadDmsList();
               }
@@ -689,7 +927,6 @@
         }
         renderStudentPicker(allStudentsCache);
       } catch (err) {
-        // Fallback for regular students who may not have full admin endpoint access
         picker.innerHTML = `
           <div class="space-y-2 pt-2">
             <p class="text-[11px] text-slate-500">Enter student's exact username:</p>
@@ -740,7 +977,6 @@
             await apiRequest('/chat/dms/request', { method: 'POST', body: { targetUserId: btn.dataset.userId } });
             showToast('Chat request sent!', 'success');
             closeNewDmModal();
-            // Switch to DMs tab
             document.querySelector('.chat-tab-btn[data-target="dms-list"]')?.click();
           } catch (e) {
             showToast(e.message, 'error');
@@ -801,7 +1037,7 @@
             activeDmData = null;
 
             channelNameEl.textContent = btn.dataset.name;
-            chatSubtitleEl.textContent = 'Custom Study Group';
+            chatSubtitleEl.textContent = 'Custom Study Group (Auto-purge 7 days)';
             currentChatIcon.innerHTML = `<i data-lucide="users" class="w-4 h-4 text-purple-600"></i>`;
             dmPermissionBanner.classList.add('hidden');
             chatInput.disabled = false;
@@ -834,7 +1070,7 @@
       if (!name) return;
 
       try {
-        const res = await apiRequest('/chat/groups', {
+        await apiRequest('/chat/groups', {
           method: 'POST',
           body: { name, description }
         });

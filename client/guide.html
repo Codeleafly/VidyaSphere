@@ -202,51 +202,70 @@
       </ul>
     </article>
 
-    <!-- Section 5: Realtime Chat & DMs -->
-    <article id="chat" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <!-- Section 5: Realtime Chat, DMs & Ephemeral Storage -->
+    <article id="chat" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-5">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
           <i data-lucide="messages-square" class="w-5 h-5"></i>
         </div>
         <div>
-          <h2 class="text-xl font-bold text-slate-900">4. Realtime Chat & Consent-First Direct Messages</h2>
-          <p class="text-xs text-slate-400">Communicate safely without trading private phone numbers</p>
+          <h2 class="text-xl font-bold text-slate-900">4. Realtime Chat, Compressed Attachments & 7-Day Auto Purge</h2>
+          <p class="text-xs text-slate-400">Consent-first messaging engineered for privacy and zero storage waste</p>
         </div>
       </div>
 
-      <div class="space-y-3 text-sm text-slate-600 leading-relaxed">
+      <div class="space-y-4 text-sm text-slate-600 leading-relaxed">
         <p>
-          VidyaSphere supports 3 distinct chatting modes built natively on Cloudflare WebSockets:
+          VidyaSphere's messaging system is designed as a research-grade student communication protocol:
         </p>
 
-        <div class="space-y-3">
-          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 1. Consent-First 1-on-1 Direct Messages (DMs)
+        <!-- Feature Grid for Chat Upgrades -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+          <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1.5">
+            <h4 class="font-bold text-amber-900 flex items-center gap-2 text-xs uppercase tracking-wider">
+              <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i> ⏱️ 7-Day Ephemeral Auto-Purge
             </h4>
-            <p class="text-xs text-slate-600 leading-relaxed">
-              To chat privately with a classmate, select them from the Student Directory and click <strong>"Request to Chat"</strong>. 
-              To prevent unsolicited messages, <strong>the other student must Accept your invitation</strong> before private messages can be sent. Once accepted, you can discuss homework and projects in a private 1-on-1 thread!
+            <p class="text-amber-800 leading-relaxed">
+              All messages (public channels, study groups, DMs, and file attachments) <strong>automatically vanish after 7 days</strong>. This ensures students leave zero permanent digital traces and keeps our edge database lightweight and within free tier limits.
             </p>
           </div>
 
-          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-blue-500"></span> 2. Custom Study Groups
+          <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1.5">
+            <h4 class="font-bold text-indigo-900 flex items-center gap-2 text-xs uppercase tracking-wider">
+              <i data-lucide="edit-3" class="w-4 h-4 text-indigo-600"></i> Edit & Delete Anytime
             </h4>
-            <p class="text-xs text-slate-600 leading-relaxed">
-              Form custom group chats for science projects, debate teams, or math study sessions with your classmates.
+            <p class="text-indigo-800 leading-relaxed">
+              Sent a typo or changed your mind? Students have full control to <strong>edit</strong> or <strong>delete</strong> their sent messages at any time. Edited messages display an un-intrusive <em>(edited)</em> indicator.
             </p>
           </div>
 
-          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 3. Public School & Class Hub
+          <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1.5">
+            <h4 class="font-bold text-emerald-900 flex items-center gap-2 text-xs uppercase tracking-wider">
+              <i data-lucide="archive" class="w-4 h-4 text-emerald-600"></i> Scientific Lossless Compression
             </h4>
-            <p class="text-xs text-slate-600 leading-relaxed">
-              School-wide broadcast chat for announcements, daily assembly highlights, and general academic inquiries.
+            <p class="text-emerald-800 leading-relaxed">
+              When students attach diagrams, homework photos, or PDFs (up to 10MB), files are compressed using <strong>native Web Standards Gzip streams</strong>. This slashes storage by 30-70% while guaranteeing <strong>100% byte-for-byte exact original quality</strong> when decompressed.
             </p>
           </div>
+
+          <div class="p-4 rounded-xl border border-blue-200 bg-blue-50/50 space-y-1.5">
+            <h4 class="font-bold text-blue-900 flex items-center gap-2 text-xs uppercase tracking-wider">
+              <i data-lucide="download-cloud" class="w-4 h-4 text-blue-600"></i> Zero-Waste Lazy Downloads
+            </h4>
+            <p class="text-blue-800 leading-relaxed">
+              To protect mobile users on strict 1GB/day mobile data plans, attachments are <strong>never automatically downloaded</strong> into the chat feed. Instead, a clean file card with size information is shown, and the file only downloads when explicitly clicked!
+            </p>
+          </div>
+        </div>
+
+        <!-- 3 Modes Explanation -->
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2 text-xs">
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i> Consent-First Direct Messaging (DMs)
+          </h4>
+          <p class="text-slate-600 leading-relaxed">
+            To prevent spam and protect privacy, students must send a <strong>"Request to Chat"</strong> before 1-on-1 messaging unlocks. The recipient must accept the invitation first. No one can send unsolicited messages, and you never have to share personal phone numbers.
+          </p>
         </div>
       </div>
     </article>

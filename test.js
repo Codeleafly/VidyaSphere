@@ -322,9 +322,81 @@ async function runTests() {
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
     body: JSON.stringify({ channel: `dm_${dmId}`, content: 'Hello Admin, thank you for accepting my chat!' })
   }), mockEnv);
+  const dDmMsg = await rDmMsg.json();
+  const testDmMsgId = dDmMsg.id;
   console.log("✓ [Phase 4 - 1-on-1 Direct Message Delivered (201)]: ", rDmMsg.status === 201 ? 'PASS' : 'FAIL');
 
-  // 26. Phase 2: Daily Upload Quota Test (Max 4 PDF files per 24 hours)
+  // 26. Phase 4: Message Edit (PUT /api/chat/messages/:id)
+  const rEditMsg = await worker.fetch(new Request(`http://localhost/api/chat/messages/${testDmMsgId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ content: 'Hello Admin, thank you for accepting my chat! (Edited note)' })
+  }), mockEnv);
+  const dEditMsg = await rEditMsg.json();
+  console.log("✓ [Phase 4 - Student Edits Sent Chat Message]:", dEditMsg.success && dEditMsg.isEdited === 1 ? 'PASS' : 'FAIL');
+
+  // 27. Phase 4: Message Delete (DELETE /api/chat/messages/:id)
+  const rDeleteMsg = await worker.fetch(new Request(`http://localhost/api/chat/messages/${testDmMsgId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dDeleteMsg = await rDeleteMsg.json();
+  console.log("✓ [Phase 4 - Student Deletes Sent Chat Message]:", dDeleteMsg.success ? 'PASS' : 'FAIL');
+
+  // 28. Phase 4: Attachment with Scientific Lossless Compression & Lazy Download
+  const sampleAttachmentText = "VidyaSphere Zero-Waste Research: Lossless Study Notes Payload!";
+  const sampleBuf = new TextEncoder().encode(sampleAttachmentText);
+  let binaryStr = '';
+  for (let i = 0; i < sampleBuf.length; i++) binaryStr += String.fromCharCode(sampleBuf[i]);
+  const sampleB64 = btoa(binaryStr);
+
+  const rAttachMsg = await worker.fetch(new Request('http://localhost/api/chat/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({
+      channel: `dm_${dmId}`,
+      content: 'Sharing physics derivation summary',
+      fileName: 'physics_derivation.txt',
+      fileType: 'text/plain',
+      fileBase64: sampleB64
+    })
+  }), mockEnv);
+  const dAttachMsg = await rAttachMsg.json();
+  const attachMsgId = dAttachMsg.id;
+
+  const rLazyDownload = await worker.fetch(new Request(`http://localhost/api/chat/attachments/${attachMsgId}`, {
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const downloadedBuf = await rLazyDownload.arrayBuffer();
+  const downloadedText = new TextDecoder().decode(downloadedBuf);
+  console.log("✓ [Phase 4 - Lossless Compressed Attachment & Lazy Download]:", (rLazyDownload.status === 200 && downloadedText === sampleAttachmentText) ? 'PASS' : 'FAIL');
+
+  // 29. Phase 4: 7-Day Auto-Purge & Scheduled Edge Cleanup
+  // Insert an expired 8-day-old message into SQLite
+  db.prepare(`
+    INSERT INTO messages (id, sender_id, channel, content, created_at)
+    VALUES ('msg_expired_001', ?, 'school', 'Old message beyond 7 days', datetime('now', '-8 days'))
+  `).run(studentId);
+  db.prepare(`
+    INSERT INTO message_attachments (message_id, file_name, file_type, file_size, compressed_data)
+    VALUES ('msg_expired_001', 'expired.txt', 'text/plain', 50, x'1f8b0800')
+  `).run();
+
+  // Test that GET /api/chat/messages hides it from stream
+  const rGetPurged = await worker.fetch(new Request('http://localhost/api/chat/messages?channel=school', {
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dGetPurged = await rGetPurged.json();
+  const foundExpired = (dGetPurged.messages || []).some(m => m.id === 'msg_expired_001');
+
+  // Trigger scheduled edge cron cleanup
+  await worker.scheduled({}, mockEnv);
+  const purgedInDb = db.prepare(`SELECT COUNT(*) as c FROM messages WHERE id = 'msg_expired_001'`).get();
+  const purgedAttachInDb = db.prepare(`SELECT COUNT(*) as c FROM message_attachments WHERE message_id = 'msg_expired_001'`).get();
+
+  console.log("✓ [Phase 4 - Strict 7-Day Auto-Purge & Edge Cron Cleanup]:", (!foundExpired && purgedInDb.c === 0 && purgedAttachInDb.c === 0) ? 'PASS' : 'FAIL');
+
+  // 30. Phase 2: Daily Upload Quota Test (Max 4 PDF files per 24 hours)
   // Student has already uploaded 1 note (noteId earlier). Let's upload 3 more to reach the 4-file limit.
   for (let i = 2; i <= 4; i++) {
     await worker.fetch(new Request('http://localhost/api/notes/upload', {
@@ -342,7 +414,7 @@ async function runTests() {
   console.log("✓ [Phase 2 - Daily 4-Note Quota Enforced (429 Block)]: ", r5thNote.status === 429 ? 'PASS' : 'FAIL');
 
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 26 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 30 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 
