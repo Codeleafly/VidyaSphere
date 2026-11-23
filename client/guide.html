@@ -1,620 +1,360 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VidyaSphere - Complete Student User Guide</title>
-  <style>
-    :root {
-      --primary: #4f46e5;
-      --primary-light: #eef2ff;
-      --primary-dark: #3730a3;
-      --secondary: #7c3aed;
-      --accent: #06b6d4;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --slate-50: #f8fafc;
-      --slate-100: #f1f5f9;
-      --slate-200: #e2e8f0;
-      --slate-600: #475569;
-      --slate-700: #334155;
-      --slate-800: #1e293b;
-      --slate-900: #0f172a;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      background: #f8fafc;
-      color: var(--slate-800);
-      line-height: 1.6;
-      padding-bottom: 60px;
-    }
-
-    /* Top Sticky Header */
-    header {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      padding: 2.5rem 1.25rem 2rem;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
-    }
-
-    .badge-creator {
-      display: inline-block;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      padding: 4px 14px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    header h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
-    }
-
-    header p {
-      font-size: 0.95rem;
-      opacity: 0.92;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .url-chip {
-      margin-top: 1.25rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.25);
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-family: monospace;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      word-break: break-all;
-    }
-
-    .container {
-      max-width: 860px;
-      margin: -20px auto 0;
-      padding: 0 1rem;
-    }
-
-    /* Quick Navigation Bar */
-    .quick-nav {
-      background: white;
-      padding: 1rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 1.75rem;
-      border: 1px solid var(--slate-200);
-    }
-
-    .nav-btn {
-      text-decoration: none;
-      color: var(--slate-700);
-      background: var(--slate-100);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-
-    .nav-btn:hover {
-      background: var(--primary-light);
-      color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    /* Section Cards */
-    .section-card {
-      background: white;
-      border-radius: 20px;
-      padding: 1.75rem 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-      border: 1px solid var(--slate-200);
-      scroll-margin-top: 20px;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid var(--slate-100);
-    }
-
-    .step-number {
-      width: 36px;
-      height: 36px;
-      background: var(--primary);
-      color: white;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
-
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--slate-900);
-    }
-
-    .card-subtitle {
-      font-size: 0.82rem;
-      color: var(--slate-600);
-      font-weight: 500;
-    }
-
-    /* Step Sub-boxes */
-    .substep {
-      background: var(--slate-50);
-      border-left: 4px solid var(--primary);
-      padding: 1rem 1.25rem;
-      border-radius: 0 12px 12px 0;
-      margin: 1rem 0;
-    }
-
-    .substep-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--slate-900);
-      margin-bottom: 0.35rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .substep p, .substep li {
-      font-size: 0.88rem;
-      color: var(--slate-700);
-    }
-
-    ul, ol {
-      padding-left: 1.25rem;
-      margin: 0.5rem 0;
-    }
-
-    li {
-      margin-bottom: 0.4rem;
-    }
-
-    /* Alerts */
-    .alert {
-      padding: 0.85rem 1rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      margin: 1rem 0;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .alert-warning {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      color: #92400e;
-    }
-
-    .alert-info {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e40af;
-    }
-
-    .alert-success {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      color: #065f46;
-    }
-
-    /* Visual Screen Previews / Mockups */
-    .mockup-box {
-      background: #1e293b;
-      color: #e2e8f0;
-      border-radius: 12px;
-      padding: 1rem;
-      font-family: monospace;
-      font-size: 0.82rem;
-      margin: 1rem 0;
-      overflow-x: auto;
-      border: 1px solid #334155;
-    }
-
-    .mockup-header {
-      color: #94a3b8;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.5rem;
-      border-bottom: 1px solid #334155;
-      padding-bottom: 0.3rem;
-    }
-
-    .code-pill {
-      background: #e2e8f0;
-      color: #0f172a;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.82rem;
-      font-family: monospace;
-      font-weight: 600;
-    }
-
-    /* FAQ Accordion */
-    details {
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 0.75rem;
-      cursor: pointer;
-    }
-
-    summary {
-      font-weight: 700;
-      font-size: 0.92rem;
-      color: var(--slate-800);
-      outline: none;
-    }
-
-    details[open] summary {
-      color: var(--primary);
-      margin-bottom: 0.5rem;
-    }
-
-    details p {
-      font-size: 0.86rem;
-      color: var(--slate-600);
-      padding-top: 0.25rem;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      margin-top: 3rem;
-      font-size: 0.82rem;
-      color: var(--slate-600);
-    }
-
-    @media (max-width: 600px) {
-      header h1 { font-size: 1.6rem; }
-      .section-card { padding: 1.25rem 1rem; }
-    }
-  </style>
+  <title>Student User Guide & Manual | VidyaSphere</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <!-- Tailwind CSS CDN (0 npm, 0 build tools) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
-  <header>
-    <div class="badge-creator">Official Student Handout</div>
-    <h1>VidyaSphere Student Guide</h1>
-    <p>Class 1 se lekar Class 12 tak ke sabhi students ke liye platform ko zero se lekar master karne ka full step-by-step roadmap.</p>
-    <div class="url-chip">
-      🌐 Live URL: https://vidyasphere.ziprecovery2024-dbc.workers.dev
+  <!-- Sticky Top Header -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="/index.html" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+        </a>
+        <div>
+          <span class="text-xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">VidyaSphere</span>
+          <span class="hidden sm:inline-block text-xs text-slate-400 ml-2 font-semibold">Student Knowledge Ecosystem</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/dashboard/index.html" class="px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-indigo-600"></i> Dashboard
+        </a>
+        <a href="/auth/login.html" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition">
+          Sign In
+        </a>
+      </div>
     </div>
   </header>
 
-  <div class="container">
+  <!-- Hero Banner -->
+  <section class="bg-gradient-to-br from-indigo-900 via-indigo-800 to-purple-900 text-white py-12 px-4 sm:px-6 relative overflow-hidden">
+    <div class="max-w-4xl mx-auto text-center space-y-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-xs font-bold tracking-wide uppercase">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Official Student Handout & Platform Manual
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+        Master VidyaSphere in 5 Minutes
+      </h1>
+      <p class="text-sm sm:text-base text-indigo-200 max-w-2xl mx-auto leading-relaxed">
+        Everything you need to know about sharing notes, checking exam datesheets, clearing homework doubts, and connecting with classmates without ever sharing personal phone numbers.
+      </p>
+      <div class="pt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-indigo-200 font-mono">
+        <span class="bg-indigo-950/60 px-3 py-1 rounded-lg border border-indigo-700/50">Class 1 to Class 12</span>
+        <span class="bg-indigo-950/60 px-3 py-1 rounded-lg border border-indigo-700/50">Consent-First Messaging</span>
+        <span class="bg-indigo-950/60 px-3 py-1 rounded-lg border border-indigo-700/50">25MB Academic Notes</span>
+      </div>
+    </div>
+  </section>
 
-    <!-- Quick Navigation Links -->
-    <div class="quick-nav">
-      <a href="#intro" class="nav-btn">📌 Parichay</a>
-      <a href="#step1" class="nav-btn">📝 1. Registration</a>
-      <a href="#step2" class="nav-btn">⏳ 2. Status & Code</a>
-      <a href="#step3" class="nav-btn">🔑 3. Login Kaise Kare</a>
-      <a href="#step4" class="nav-btn">📢 4. Notice Board</a>
-      <a href="#step5" class="nav-btn">📚 5. Notes Library</a>
-      <a href="#step6" class="nav-btn">❓ 6. Doubt Q&A</a>
-      <a href="#step7" class="nav-btn">🗳️ 7. Voting & Polls</a>
-      <a href="#step8" class="nav-btn">💬 8. Class Chat</a>
-      <a href="#step9" class="nav-btn">📱 9. Mobile App Setup</a>
-      <a href="#faq" class="nav-btn">💡 FAQs & Help</a>
+  <!-- Main Content Container -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-10 flex-1">
+
+    <!-- Quick Navigation Pills -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-2 text-xs font-bold">
+      <a href="#vision" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition">💡 The Story & Vision</a>
+      <a href="#registration" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">📝 Account Setup</a>
+      <a href="#notes" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">📚 Notes (25MB Limit)</a>
+      <a href="#exams" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">📅 Exam Timetables</a>
+      <a href="#chat" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">💬 Consent-First DMs</a>
+      <a href="#qa-polls" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">❓ Q&A & School Polls</a>
+      <a href="#pwa" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">📱 Add to Home Screen</a>
+      <a href="#faqs" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">❓ Troubleshooting</a>
     </div>
 
-    <!-- Intro Card -->
-    <section id="intro" class="section-card">
-      <div class="card-header">
-        <div class="step-number">✨</div>
+    <!-- Section 1: Vision & Story -->
+    <article id="vision" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
         <div>
-          <div class="card-title">VidyaSphere Kya Hai?</div>
-          <div class="card-subtitle">School ka Next-Generation Digital Ecosystem</div>
+          <h2 class="text-xl font-bold text-slate-900">What is VidyaSphere & Why Was It Built?</h2>
+          <p class="text-xs text-slate-400">Created by students, for students</p>
         </div>
       </div>
-      <p>VidyaSphere aapke school ka digital hub hai jahan par aapko:</p>
-      <ul>
-        <li>School ke sabhi urgent <strong>Announcements & Notice</strong> sabse pehle milte hain.</li>
-        <li>Maharashtra State Board (SSC/HSC) aur CBSE ke sabhi subjects ke <strong>Study Notes & PDFs</strong> milte hain.</li>
-        <li>Koi bhi question poochne aur classmates se solution paane ke liye <strong>Academic Q&A Forum</strong> milta hai.</li>
-        <li>School aur Class activities par apna vote dene ke liye <strong>Live Polls</strong> milte hain.</li>
-        <li>Sabhi Class 1 se Class 12 tak ke students ke liye secure <strong>Realtime Class Chat</strong> milta hai.</li>
+
+      <p class="text-sm text-slate-600 leading-relaxed">
+        VidyaSphere is a dedicated, distraction-free digital ecosystem founded and engineered by a <strong>14-year-old student, Sriramik Sanjiv Sahu</strong> (Class 9th Shraddha).
+      </p>
+
+      <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-2">
+        <p class="font-bold flex items-center gap-2 text-amber-950">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
+          The Real Problem It Solves:
+        </p>
+        <p class="leading-relaxed">
+          Whenever schools have holidays, exam prep weeks, or unexpected closures, students frequently scramble to find study notes. This usually forces students to give out their personal WhatsApp numbers, get added to messy, distracting groups filled with spam, and risk their privacy.
+        </p>
+        <p class="leading-relaxed font-semibold">
+          VidyaSphere eliminates that completely! It gives every student from Class 1 to 12 a unified platform where notes, schedules, homework discussions, and chats live in one clean place—<strong>without ever sharing your phone number</strong>.
+        </p>
+      </div>
+    </article>
+
+    <!-- Section 2: Account Registration -->
+    <article id="registration" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+          <i data-lucide="user-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">1. Account Registration & Direct Password Setup</h2>
+          <p class="text-xs text-slate-400">No activation codes, zero bureaucratic email delays</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <span class="font-bold text-indigo-600 uppercase text-[10px] tracking-wider">Step 1</span>
+          <h4 class="font-bold text-slate-900">Sign Up Directly</h4>
+          <p class="text-slate-600">Provide your school name, select your Class (1 to 12), division, and roll number. Pick your own username and choose your password right away.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <span class="font-bold text-indigo-600 uppercase text-[10px] tracking-wider">Step 2</span>
+          <h4 class="font-bold text-slate-900">Save Your Tracking Token</h4>
+          <p class="text-slate-600">You will receive a unique token (e.g. <code>track_a1b2c3d4</code>). Keep it safe to look up your verification status anytime.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <span class="font-bold text-indigo-600 uppercase text-[10px] tracking-wider">Step 3</span>
+          <h4 class="font-bold text-slate-900">1-Click Peer Approval</h4>
+          <p class="text-slate-600">To keep out fake accounts and bots, the Student Lead Administrator approves your profile with 1 click. Your dashboard unlocks automatically!</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- Section 3: Notes & Upload Limits -->
+    <article id="notes" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+          <i data-lucide="book-open" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">2. Academic Notes Hub & Strict Storage Quotas</h2>
+          <p class="text-xs text-slate-400">Class, Subject, and Chapter-wise organized repository</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-sm text-slate-600 leading-relaxed">
+        <p>
+          Students can browse and download verified study materials, handwritten summaries, and question banks. To protect mobile bandwidth and ensure free edge hosting for the school, strict upload limits are enforced:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1.5">
+            <div class="font-bold text-emerald-900 flex items-center gap-2 text-xs uppercase tracking-wider">
+              <i data-lucide="file-check" class="w-4 h-4 text-emerald-600"></i> Max 25 MB Per File
+            </div>
+            <p class="text-xs text-emerald-800">
+              Direct PDF and image uploads are supported up to <strong>25 MB per file</strong>. Files are automatically compressed using native Gzip streaming to shrink storage by 40-60%.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1.5">
+            <div class="font-bold text-indigo-900 flex items-center gap-2 text-xs uppercase tracking-wider">
+              <i data-lucide="gauge" class="w-4 h-4 text-indigo-600"></i> 4 Uploads / 24 Hours
+            </div>
+            <p class="text-xs text-indigo-800">
+              Each student can upload up to <strong>4 direct PDF notes every 24 hours</strong>. Direct uploads stay active for 30 days before auto-archiving.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-100 text-xs text-slate-700 flex items-start gap-2.5">
+          <i data-lucide="link" class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5"></i>
+          <div>
+            <strong>Permanent Google Drive Links:</strong> For large textbook scans or entire year syllabi, choose the "Google Drive Link" option when uploading. Drive links are <strong>permanent for the full academic year</strong> and do not count against your 25MB file limit!
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Section 4: Examination Schedules -->
+    <article id="exams" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+          <i data-lucide="calendar" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">3. Official Examination Timetables</h2>
+          <p class="text-xs text-slate-400">Never miss datesheets, timings, or hall numbers</p>
+        </div>
+      </div>
+
+      <p class="text-sm text-slate-600 leading-relaxed">
+        VidyaSphere features an integrated Exam Timetable viewer (<a href="/dashboard/exams.html" class="text-indigo-600 font-bold underline">Exams & Timetables</a>).
+      </p>
+      <ul class="list-disc pl-5 text-xs text-slate-600 space-y-1.5">
+        <li><strong>Class-Specific Filtering:</strong> Filter by your exact class to see upcoming board exams, unit tests, or prelim dates.</li>
+        <li><strong>Detailed Exam Information:</strong> Displays exact start and end times, examination hall or room number, and chapter syllabus.</li>
+        <li><strong>Official Syllabus Links:</strong> Teachers and administrators attach permanent Google Drive links for detailed syllabus handouts and sample question papers.</li>
       </ul>
-      <div class="alert alert-info">
-        💡 <strong>Zero App Download Needed:</strong> Is website ko chalane ke liye Play Store se koi bhari app download karne ki zaroorat nahi hai. Yeh browser mein hi instant khulti hai aur phone ki memory bilkul nahi leti!
-      </div>
-    </section>
+    </article>
 
-    <!-- Step 1: Registration -->
-    <section id="step1" class="section-card">
-      <div class="card-header">
-        <div class="step-number">1</div>
+    <!-- Section 5: Realtime Chat & DMs -->
+    <article id="chat" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+          <i data-lucide="messages-square" class="w-5 h-5"></i>
+        </div>
         <div>
-          <div class="card-title">Admission & Account Registration</div>
-          <div class="card-subtitle">Pehli baar aane par apna khata (account) kaise banayein</div>
+          <h2 class="text-xl font-bold text-slate-900">4. Realtime Chat & Consent-First Direct Messages</h2>
+          <p class="text-xs text-slate-400">Communicate safely without trading private phone numbers</p>
         </div>
       </div>
 
-      <div class="substep">
-        <div class="substep-title">Step 1.1: Registration Page Kholein</div>
-        <p>Website ke homepage par jayein aur <strong>"Apply for Admission"</strong> par click karein ya direct is link par jayein:</p>
-        <p><span class="code-pill">/auth/register</span></p>
-      </div>
+      <div class="space-y-3 text-sm text-slate-600 leading-relaxed">
+        <p>
+          VidyaSphere supports 3 distinct chatting modes built natively on Cloudflare WebSockets:
+        </p>
 
-      <div class="substep">
-        <div class="substep-title">Step 1.2: Apni Real Details Bharein</div>
-        <ul>
-          <li><strong>Full Name:</strong> Apna poora real school name likhein (Jaise: <em>Aarav Rajesh Sharma</em>).</li>
-          <li><strong>Standard (Class):</strong> Class 1 se lekar Class 12 mein se apni class select karein.</li>
-          <li><strong>Division:</strong> Apni section division chunein (A, B, C, D).</li>
-          <li><strong>Roll Number:</strong> Apna school roll number enter karein (e.g. 15).</li>
-          <li><strong>Username:</strong> Ek simple username banayein bina space ke (e.g. <em>aarav_10a</em>).</li>
-          <li><strong>Password:</strong> Ek strong password banayein jise aap yaad rakh sakein.</li>
-        </ul>
-      </div>
+        <div class="space-y-3">
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 1. Consent-First 1-on-1 Direct Messages (DMs)
+            </h4>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              To chat privately with a classmate, select them from the Student Directory and click <strong>"Request to Chat"</strong>. 
+              To prevent unsolicited messages, <strong>the other student must Accept your invitation</strong> before private messages can be sent. Once accepted, you can discuss homework and projects in a private 1-on-1 thread!
+            </p>
+          </div>
 
-      <div class="substep">
-        <div class="substep-title">Step 1.3: Registration Tracking Token Ko Save Karein (Sabse Zaroori!)</div>
-        <p>Form submit karne ke baad screen par ek popup aayega jismein aapko ek unique token milega:</p>
-        <div class="mockup-box">
-          <div class="mockup-header">Registration Success Screen</div>
-          Registration Successful!<br>
-          Your Application Token:<br>
-          <strong style="color: #38bdf8; font-size: 1rem;">VSR-9A4B2C81</strong><br>
-          [ 📋 Copy Token Button ]
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-500"></span> 2. Custom Study Groups
+            </h4>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Form custom group chats for science projects, debate teams, or math study sessions with your classmates.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 3. Public School & Class Hub
+            </h4>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              School-wide broadcast chat for announcements, daily assembly highlights, and general academic inquiries.
+            </p>
+          </div>
         </div>
-        <div class="alert alert-warning">
-          ⚠️ <strong>Dhyan Dein:</strong> Is token ko copy karke kahin likh lein ya screenshot le lein. Kyunki school ki security ke liye fake accounts ko rokne ke liye, <strong>Lead Admin</strong> aapke form ko approve karenge. Approval status check karne ke liye yeh token zaroori hai!
-        </div>
       </div>
-    </section>
+    </article>
 
-    <!-- Step 2: Status & Activation -->
-    <section id="step2" class="section-card">
-      <div class="card-header">
-        <div class="step-number">2</div>
+    <!-- Section 6: Q&A Forum & Polls -->
+    <article id="qa-polls" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+          <i data-lucide="vote" class="w-5 h-5"></i>
+        </div>
         <div>
-          <div class="card-title">Application Status & Account Activation</div>
-          <div class="card-subtitle">Admin approval check karna aur 6-digit code se activate karna</div>
+          <h2 class="text-xl font-bold text-slate-900">5. Academic Q&A Forum & School Polls</h2>
+          <p class="text-xs text-slate-400">Peer homework help and democratic voting</p>
         </div>
       </div>
 
-      <div class="substep">
-        <div class="substep-title">Step 2.1: Status Tracker Page Par Jayein</div>
-        <p>Website par <strong>"Check Application Status"</strong> par click karein (<span class="code-pill">/auth/status</span>).</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <h4 class="font-bold text-slate-900 text-sm">Academic Q&A Forum</h4>
+          <p>Post questions when stuck on tricky homework problems. Any student can answer with a step-by-step breakdown. The student who asked can mark the best answer as the <strong>Accepted Solution</strong> with a verified green badge.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <h4 class="font-bold text-slate-900 text-sm">Duplicate-Proof Polls</h4>
+          <p>Participate in class polls and school election surveys. VidyaSphere enforces mathematical <code>UNIQUE(poll_id, user_id)</code> constraints—preventing multi-voting. Votes update live percentage bars instantly.</p>
+        </div>
       </div>
+    </article>
 
-      <div class="substep">
-        <div class="substep-title">Step 2.2: Apna Token Dalein</div>
-        <p>Apna <span class="code-pill">VSR-XXXXXXXX</span> token dalein aur <strong>"Track Application"</strong> par click karein.</p>
-        <p>Screen par 3 tarah ke status dikh sakte hain:</p>
-        <ul>
-          <li>🟡 <strong>Pending Review:</strong> Lead Admin abhi aapke form ko verify kar rahe hain. Thoda intezar karein.</li>
-          <li>🟢 <strong>Approved (Activation Code Ready):</strong> Admin ne aapko approve kar diya hai aur ek <strong>6-digit Secret Code</strong> (jaise <em>A7B9X2</em>) issue ho chuka hai!</li>
-          <li>🔵 <strong>Already Active:</strong> Aapka account pehle hi activate ho chuka hai, aap direct login kar sakte hain.</li>
-        </ul>
-      </div>
-
-      <div class="substep">
-        <div class="substep-title">Step 2.3: 1-Click Account Activate Karein</div>
-        <p>Jaise hi aapka status Approved hota hai, screen par <strong>"Activate Account Now"</strong> ka button dikhega. Us par click karte hi aapka account active ho jayega aur login screen par bhej diya jayega!</p>
-      </div>
-    </section>
-
-    <!-- Step 3: Login -->
-    <section id="step3" class="section-card">
-      <div class="card-header">
-        <div class="step-number">3</div>
+    <!-- Section 7: Mobile PWA -->
+    <article id="pwa" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+          <i data-lucide="smartphone" class="w-5 h-5"></i>
+        </div>
         <div>
-          <div class="card-title">Daily Sign In (Login Kaise Karein)</div>
-          <div class="card-subtitle">Rozana apne account mein enter hone ka tarika</div>
+          <h2 class="text-xl font-bold text-slate-900">6. Install as a Mobile App (10 Seconds)</h2>
+          <p class="text-xs text-slate-400">Zero phone memory used, no app store download required</p>
         </div>
       </div>
 
-      <div class="substep">
-        <div class="substep-title">Login Credentials Enter Karein</div>
-        <ol>
-          <li><span class="code-pill">/auth/login</span> page par jayein.</li>
-          <li>Apna <strong>Username</strong> dalein (Jo aapne registration ke samay banaya tha).</li>
-          <li>Apna <strong>Password</strong> dalein.</li>
-          <li><strong>"Sign In"</strong> button par click karein.</li>
-        </ol>
-      </div>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        VidyaSphere is a certified Progressive Web App (PWA). You don't need to visit the app store or consume 50MB of phone storage:
+      </p>
 
-      <div class="alert alert-success">
-        🔒 <strong>256-Bit Cryptographic Security:</strong> VidyaSphere mein aapka password encrypted rehta hai aur browser mein auto-login ke liye secure random session token use hota hai. Koi doosra student aapka password chura nahi sakta!
-      </div>
-    </section>
-
-    <!-- Step 4: Notice Board -->
-    <section id="step4" class="section-card">
-      <div class="card-header">
-        <div class="step-number">4</div>
-        <div>
-          <div class="card-title">Digital Notice Board (School Announcements)</div>
-          <div class="card-subtitle">Holidays, timetable aur exam notices dekhna</div>
-        </div>
-      </div>
-      <p>Login hone ke baad sabse pehla page aapka Dashboard hota hai jahan par School Notice Board dikhta hai:</p>
-      <ul>
-        <li>🔴 <strong style="color: #ef4444;">Urgent Badges:</strong> Achanak hone wali chutti ya zaroori alert.</li>
-        <li>🟣 <strong style="color: #7c3aed;">Exam Badges:</strong> Datesheet, syllabus aur exam hall guidelines.</li>
-        <li>🟢 <strong style="color: #10b981;">Holiday Badges:</strong> Festival ya vacation holidays ki jaankari.</li>
-        <li>🔵 <strong style="color: #3b82f6;">General:</strong> Sports day, science exhibition aur annual functions.</li>
-      </ul>
-      <p>Aap upar diye gaye filter se sirf <strong>Apni Class</strong> ke notices ya poore <strong>School-wide</strong> notices dekh sakte hain.</p>
-    </section>
-
-    <!-- Step 5: Notes Library -->
-    <section id="step5" class="section-card">
-      <div class="card-header">
-        <div class="step-number">5</div>
-        <div>
-          <div class="card-title">Study Notes & Material Library</div>
-          <div class="card-subtitle">Chapters ke notes padhna aur download karna</div>
-        </div>
-      </div>
-
-      <div class="substep">
-        <div class="substep-title">Notes Kaise Dhoondhein Aur Download Karein:</div>
-        <ol>
-          <li>Neeche bottom menu mein <strong>"Notes"</strong> icon par tap karein.</li>
-          <li>Apni <strong>Class</strong> select karein (Class 1 to 12).</li>
-          <li>Apna <strong>Subject</strong> chunein (CBSE & Maharashtra Board subjects jaise Mathematics, Science, Marathi, History, Geography, Physics, Chemistry, Economics etc.).</li>
-          <li>Chapter ka naam search bar mein type karein.</li>
-          <li>Note card par diye gaye <strong>"Download Note"</strong> button par tap karein. Document turant open ya download ho jayega!</li>
-        </ol>
-      </div>
-
-      <div class="substep">
-        <div class="substep-title">Apne Notes Upload Kaise Karein (Help Your Classmates):</div>
-        <p>Agar aapke paas kisi chapter ki acchi summary ya hand-written notes hain, toh aap <strong>"+ Upload Note"</strong> button par click karke title, subject aur chapter likh kar upload kar sakte hain.</p>
-      </div>
-    </section>
-
-    <!-- Step 6: Q&A Forum -->
-    <section id="step6" class="section-card">
-      <div class="card-header">
-        <div class="step-number">6</div>
-        <div>
-          <div class="card-title">Academic Q&A Discussion Forum</div>
-          <div class="card-subtitle">Doubt poochna aur doosron ke sawalon ke jawab dena</div>
-        </div>
-      </div>
-      <p>Padhai karte waqt koi question samajh nahi aa raha? Q&A forum ka use karein:</p>
-      <ul>
-        <li><strong>Ask a Question:</strong> <em>"Ask Question"</em> par tap karein, subject chunein aur apna doubt clearly likhein.</li>
-        <li><strong>Answer Others:</strong> Agar aapko kisi classmate ke sawal ka sahi jawab pata hai, toh question card khol kar apna step-by-step solution likhein.</li>
-        <li>✅ <strong>Accepted Solution:</strong> Jis student ne sawal poocha tha, agar usko aapka jawab sabse best lage toh woh green checkmark se <em>"Accept Answer"</em> mark kar sakta hai!</li>
-      </ul>
-    </section>
-
-    <!-- Step 7: Polls -->
-    <section id="step7" class="section-card">
-      <div class="card-header">
-        <div class="step-number">7</div>
-        <div>
-          <div class="card-title">School Polls & Elections</div>
-          <div class="card-subtitle">House captain election aur class surveys mein vote karna</div>
-        </div>
-      </div>
-      <p>Bottom navigation se <strong>"Polls"</strong> section mein jayein:</p>
-      <ul>
-        <li>Har active poll card mein sawal aur options dikhenge.</li>
-        <li>Apne pasand ke option ke radio circle par tap karein aur <strong>"Submit Vote"</strong> dabayein.</li>
-        <li><strong>Strict 1 Student = 1 Vote:</strong> System duplicate voting allow nahi karta. Vote submit hote hi aapko live percentage aur vote counts dikhenge!</li>
-      </ul>
-    </section>
-
-    <!-- Step 8: Chat -->
-    <section id="step8" class="section-card">
-      <div class="card-header">
-        <div class="step-number">8</div>
-        <div>
-          <div class="card-title">Realtime Class Chat</div>
-          <div class="card-subtitle">Apni class ke doston ke saath study discussion</div>
-        </div>
-      </div>
-      <p>Bottom menu se <strong>"Chat"</strong> section kholein:</p>
-      <ul>
-        <li>Yeh WhatsApp ki tarah instant messaging hai, jahan message bhejte hi sabhi online classmates ko live dikhta hai.</li>
-        <li><strong style="color: #ef4444;">Code of Conduct:</strong> Chat mein sirf padhai, homework aur school projects se judi baatein karein. Abusive ya spam messages bhejne par Lead Admin account ko suspend kar sakte hain.</li>
-      </ul>
-    </section>
-
-    <!-- Step 9: PWA Mobile Install -->
-    <section id="step9" class="section-card">
-      <div class="card-header">
-        <div class="step-number">9</div>
-        <div>
-          <div class="card-title">VidyaSphere Ko Mobile App Ki Tarah Install Karein</div>
-          <div class="card-subtitle">Phone ke Home Screen par icon laane ka 10-second tarika</div>
-        </div>
-      </div>
-      <p>Aapko bar-bar browser mein link type karne ki zaroorat nahi hai. Isko direct phone app bana lein:</p>
-      <ol>
-        <li>Apne phone ke **Chrome Browser** mein link open karein: <br><span class="code-pill">https://vidyasphere.ziprecovery2024-dbc.workers.dev</span></li>
-        <li>Upar right corner mein **3 dots (⋮)** par tap karein.</li>
-        <li>Menu mein se **"Install app"** ya **"Add to Home screen"** par tap karein.</li>
-        <li>Phone screen par VidyaSphere ka official app icon aa jayega. Ab aap ek tap mein seedha dashboard mein pahunch jayenge!</li>
+      <ol class="list-decimal pl-5 text-xs text-slate-600 space-y-2">
+        <li>Open <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700 font-bold">https://vidyasphere.ziprecovery2024-dbc.workers.dev</code> in Chrome on Android or Safari on iOS.</li>
+        <li>Tap the <strong>three dots (⋮)</strong> or the <strong>Share</strong> button.</li>
+        <li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li>
+        <li>The official VidyaSphere icon will appear on your phone home screen, launching full-screen like a native app!</li>
       </ol>
-    </section>
+    </article>
 
-    <!-- FAQs & Troubleshooting -->
-    <section id="faq" class="section-card">
-      <div class="card-header">
-        <div class="step-number">❓</div>
+    <!-- Section 8: Troubleshooting & FAQs -->
+    <article id="faqs" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold">
+          <i data-lucide="help-circle" class="w-5 h-5"></i>
+        </div>
         <div>
-          <div class="card-title">Frequently Asked Questions (Troubleshooting)</div>
-          <div class="card-subtitle">Kahin par phas gaye toh yahan dekhein</div>
+          <h2 class="text-xl font-bold text-slate-900">7. Frequently Asked Questions & Troubleshooting</h2>
+          <p class="text-xs text-slate-400">Common questions answered</p>
         </div>
       </div>
 
-      <details open>
-        <summary>Page kholte waqt "This site can't be reached" ya loading issue aaye toh kya karein?</summary>
-        <p>India mein Jio/Airtel SIM users ke liye Chrome mein <strong>Secure DNS</strong> on karna padta hai: Chrome Settings > Privacy & security > Use secure DNS > Choose "Cloudflare (1.1.1.1)" ya "Google Public DNS" select karein. Iske baad page palkein jhapakte hi khul jayega!</p>
-      </details>
+      <div class="space-y-3 text-xs text-slate-600">
+        <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+          <summary class="font-bold text-slate-900">What should I do if the site loads slowly on mobile data?</summary>
+          <p class="mt-2 text-slate-600 leading-relaxed">
+            Indian mobile carriers (Jio/Airtel) sometimes filter edge hostnames. To fix this instantly, enable <strong>Secure DNS</strong> in Chrome: <em>Settings &gt; Privacy and Security &gt; Use secure DNS &gt; Choose Cloudflare (1.1.1.1) or Google Public DNS</em>. The site will load instantaneously!
+          </p>
+        </details>
 
-      <details>
-        <summary>Agar main apna Registration Token (VSR-...) bhool gaya toh?</summary>
-        <p>Apne class teacher ya school ke <strong>Platform Creator & Lead Admin</strong> se sampark karein. Admin control panel se aapke Roll Number aur Name se aapka account manually find aur activate kar sakte hain.</p>
-      </details>
+        <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+          <summary class="font-bold text-slate-900">Is my password and data safe?</summary>
+          <p class="mt-2 text-slate-600 leading-relaxed">
+            Yes! All passwords are cryptographic hashed using PBKDF2 with 20,000 rounds and random salts. Plaintext passwords are never saved or sent to anyone. Sessions use 256-bit cryptographically random tokens stored in protected database tables.
+          </p>
+        </details>
 
-      <details>
-        <summary>Kya main apna Password kisi friend ke saath share kar sakta hoon?</summary>
-        <p>Bilkul nahi! Aapke account se jo bhi vote diya jayega ya doubt poocha jayega, woh aapke naam aur roll number ke sath link hota hai. Apna password kisi ko na dein.</p>
-      </details>
+        <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+          <summary class="font-bold text-slate-900">Can other students see my personal phone number?</summary>
+          <p class="mt-2 text-slate-600 leading-relaxed">
+            No! VidyaSphere never asks for your personal phone number. All peer communication happens directly within the platform's consent-first chat and discussion forums.
+          </p>
+        </details>
 
-      <details>
-        <summary>Kya main apne phone ke mobile data (1GB/day) par isko chala sakta hoon?</summary>
-        <p>Haan! VidyaSphere ko specially <strong>Ultra Light-weight Architecture</strong> par banaya gaya hai. Yeh bohot kam internet data use karta hai aur 4G/5G par super fast chalta hai.</p>
-      </details>
+        <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+          <summary class="font-bold text-slate-900">Who manages VidyaSphere?</summary>
+          <p class="mt-2 text-slate-600 leading-relaxed">
+            VidyaSphere is managed by <strong>Sriramik Sanjiv Sahu</strong>, a 14-year-old student from Class 9th Shraddha who built this platform for the student community.
+          </p>
+        </details>
+      </div>
+    </article>
 
-      <details>
-        <summary>VidyaSphere kisne banaya hai?</summary>
-        <p>VidyaSphere hamare school ke <strong>14-year-old Platform Creator & Lead Admin</strong> ne create kiya hai taaki hamare school ke har student ke paas ek modern aur super-fast digital platform ho.</p>
-      </details>
-    </section>
+  </main>
 
-  </div>
-
-  <footer>
-    <p><strong>VidyaSphere School Ecosystem &bull; Made with pride by Platform Creator & Lead Admin</strong></p>
-    <p style="margin-top: 4px; font-size: 0.75rem;">Strictly for School Academic Use &bull; All Rights Reserved 2026</p>
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-4xl mx-auto px-4 space-y-1">
+      <p><strong>VidyaSphere &bull; Supreme Knowledge Edge Ecosystem</strong></p>
+      <p class="text-[11px] text-slate-400">Created by Sriramik Sanjiv Sahu (Class 9th Shraddha, Lead Developer & Founder)</p>
+    </div>
   </footer>
 
+  <script type="module">
+    import { initIcons } from '/js/ui.js';
+    initIcons();
+  </script>
 </body>
 </html>

@@ -151,7 +151,7 @@ export async function handleAuthRoutes(request, env, path, method) {
       }
 
       if (user.account_status === 'rejected') {
-        return errorResponse(user.rejection_reason || 'Your admission request was rejected by school administration.', 403);
+        return errorResponse(user.rejection_reason || 'Your registration request was rejected by student lead administration.', 403);
       }
 
       // Generate session token (30 days validity)

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Realtime School Chat | VidyaSphere</title>
+  <title>Realtime Student Chat & DMs | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#4f46e5">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 overflow-x-hidden w-full">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 overflow-x-hidden w-full selection:bg-indigo-500 selection:text-white">
 
   <!-- Desktop Sidebar -->
   <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 p-4 shrink-0 h-screen sticky top-0 justify-between">
@@ -21,7 +21,7 @@
         </div>
         <div>
           <h2 class="font-extrabold text-slate-900 leading-tight">VidyaSphere</h2>
-          <span class="text-xs text-slate-400 font-medium">School Edge Portal</span>
+          <span class="text-xs text-slate-400 font-medium">Student Edge Hub</span>
         </div>
       </div>
 
@@ -33,7 +33,7 @@
           <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i> Exams & Timetable
         </a>
         <a href="/dashboard/chat.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-sm">
-          <i data-lucide="messages-square" class="w-5 h-5"></i> Realtime Chat
+          <i data-lucide="messages-square" class="w-5 h-5"></i> Realtime Chat & DMs
         </a>
         <a href="/dashboard/notes.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
           <i data-lucide="book-open" class="w-5 h-5"></i> Study Notes
@@ -73,15 +73,14 @@
   <header class="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-3 py-2.5 flex items-center justify-between shadow-sm w-full">
     <div class="flex items-center gap-2 overflow-hidden">
       <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0">
-        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+        <i data-lucide="messages-square" class="w-4 h-4"></i>
       </div>
-      <span class="font-bold text-xs sm:text-sm text-slate-900 truncate">VidyaSphere</span>
+      <span class="font-bold text-xs sm:text-sm text-slate-900 truncate">Chat & DMs</span>
     </div>
     <div class="flex items-center gap-2">
-      <a href="/admin/index.html" class="admin-mobile-switch hidden px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
-        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Admin
-      </a>
-      <span id="user-display-name-mob" class="text-[11px] font-bold text-slate-700 truncate max-w-[90px]"></span>
+      <button id="open-new-dm-mob" class="px-2 py-1 rounded-lg bg-indigo-600 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm">
+        <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> New DM
+      </button>
       <button class="logout-btn-trigger p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Logout">
         <i data-lucide="log-out" class="w-4 h-4"></i>
       </button>
@@ -93,6 +92,10 @@
     <a href="/dashboard/index.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
       <i data-lucide="layout-dashboard" class="w-4 h-4 mb-0.5"></i>
       <span class="truncate">Notices</span>
+    </a>
+    <a href="/dashboard/exams.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
+      <i data-lucide="calendar" class="w-4 h-4 mb-0.5"></i>
+      <span class="truncate">Exams</span>
     </a>
     <a href="/dashboard/chat.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-600 font-bold text-[9px] truncate">
       <i data-lucide="messages-square" class="w-4 h-4 mb-0.5"></i>
@@ -112,85 +115,290 @@
     </a>
   </nav>
 
-  <!-- Main Content Area: Chat Window -->
-  <main class="flex-1 w-full max-w-5xl mx-auto p-2.5 sm:p-6 lg:p-8 flex flex-col h-[calc(100vh-4rem)] md:h-screen overflow-x-hidden">
-    <!-- Chat Header -->
-    <div class="bg-white rounded-t-2xl border border-slate-200 p-3 sm:p-4 shrink-0 flex items-center justify-between gap-2 shadow-sm w-full">
-      <div class="flex items-center gap-2.5 overflow-hidden">
-        <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
-          <i data-lucide="hash" class="w-4 h-4"></i>
+  <!-- Main Content Area: Split View for Channels/DMs & Chat Feed -->
+  <main class="flex-1 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-6 flex flex-col md:flex-row gap-3 h-[calc(100vh-4rem)] md:h-screen overflow-hidden">
+    
+    <!-- Conversations / Channels Sidebar (Collapsible / Switchable) -->
+    <div id="channels-panel" class="w-full md:w-72 bg-white rounded-2xl border border-slate-200 p-3 flex flex-col shrink-0 h-48 md:h-full overflow-hidden shadow-sm">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+          <i data-lucide="message-circle" class="w-4 h-4 text-indigo-600"></i> Chats & DMs
+        </span>
+        <button id="open-new-dm-btn" class="hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[11px] font-bold transition">
+          <i data-lucide="plus" class="w-3 h-3"></i> Direct Chat
+        </button>
+      </div>
+
+      <!-- Navigation Tabs: Channels / DMs / Groups -->
+      <div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl my-2 text-[10px] font-bold">
+        <button class="chat-tab-btn active py-1 rounded-lg bg-white text-indigo-600 shadow-xs" data-target="channels-list">Hub</button>
+        <button class="chat-tab-btn py-1 rounded-lg text-slate-600 hover:text-slate-900" data-target="dms-list">DMs <span id="dm-badge" class="hidden w-2 h-2 rounded-full bg-rose-500 inline-block align-middle ml-0.5"></span></button>
+        <button class="chat-tab-btn py-1 rounded-lg text-slate-600 hover:text-slate-900" data-target="groups-list">Groups</button>
+      </div>
+
+      <!-- Scrollable List Area -->
+      <div class="flex-1 overflow-y-auto space-y-1 pr-1 text-xs" id="chat-tabs-content">
+        <!-- 1. Channels List -->
+        <div id="channels-list" class="space-y-1">
+          <button class="channel-item active w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition" data-channel="school" data-title="School Hub">
+            <span class="flex items-center gap-2 font-bold text-slate-800 truncate">
+              <i data-lucide="hash" class="w-3.5 h-3.5 text-indigo-600"></i> #school-hub
+            </span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-bold">All</span>
+          </button>
+          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition" data-channel="class" id="class-channel-btn" data-title="My Class Hub">
+            <span class="flex items-center gap-2 font-bold text-slate-800 truncate">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> #my-class
+            </span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 font-bold">Class</span>
+          </button>
+          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition" data-channel="academics" data-title="Academics & Study">
+            <span class="flex items-center gap-2 font-bold text-slate-800 truncate">
+              <i data-lucide="book" class="w-3.5 h-3.5 text-emerald-600"></i> #academics
+            </span>
+          </button>
+          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition" data-channel="sports" data-title="Sports & Events">
+            <span class="flex items-center gap-2 font-bold text-slate-800 truncate">
+              <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-600"></i> #sports
+            </span>
+          </button>
         </div>
-        <div class="overflow-hidden">
-          <h2 class="font-bold text-slate-900 text-xs sm:text-base truncate" id="channel-name">#school-hub</h2>
-          <div class="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-400">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-            <span id="connection-status" class="truncate">Live Connected</span>
+
+        <!-- 2. Direct Messages (DMs) List -->
+        <div id="dms-list" class="hidden space-y-1">
+          <div id="dms-items-container" class="space-y-1">
+            <p class="text-center text-slate-400 py-4 text-[11px]">Loading direct chats...</p>
+          </div>
+        </div>
+
+        <!-- 3. Study Groups List -->
+        <div id="groups-list" class="hidden space-y-1">
+          <div class="flex items-center justify-between pb-1">
+            <span class="text-[10px] text-slate-400 font-semibold">Your Study Groups</span>
+            <button id="create-group-btn" class="text-[10px] text-indigo-600 font-bold hover:underline">+ New Group</button>
+          </div>
+          <div id="groups-items-container" class="space-y-1">
+            <p class="text-center text-slate-400 py-4 text-[11px]">No groups joined yet.</p>
           </div>
         </div>
       </div>
-
-      <select id="channel-select" class="px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-semibold bg-white focus:ring-2 focus:ring-indigo-500 max-w-[130px] sm:max-w-xs shrink-0">
-        <option value="school" selected>School Hub</option>
-        <option value="academics">Academics</option>
-        <option value="sports">Sports & Events</option>
-      </select>
     </div>
 
-    <!-- Chat Messages Stream -->
-    <div id="messages-container" class="flex-1 bg-slate-100/70 border-x border-slate-200 p-3 sm:p-4 overflow-y-auto space-y-2.5 w-full">
-      <div class="p-8 text-center text-slate-400 text-xs">
-        Loading chat stream...
+    <!-- Right Side: Active Chat Stream Window -->
+    <div class="flex-1 bg-white rounded-2xl border border-slate-200 flex flex-col h-full overflow-hidden shadow-sm">
+      
+      <!-- Top Chat Header -->
+      <div class="p-3 sm:p-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0" id="current-chat-icon">
+            <i data-lucide="hash" class="w-4 h-4"></i>
+          </div>
+          <div class="overflow-hidden">
+            <h2 class="font-extrabold text-slate-900 text-xs sm:text-base truncate" id="channel-name">#school-hub</h2>
+            <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+              <span id="connection-status">Live Connected</span>
+              <span class="mx-1">•</span>
+              <span id="chat-subtitle" class="truncate">Public school stream</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Right Actions -->
+        <div class="flex items-center gap-2">
+          <button id="refresh-chat-btn" title="Refresh messages" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Permission Banner (Shown only for pending Direct Messages) -->
+      <div id="dm-permission-banner" class="hidden p-3 bg-amber-50 border-b border-amber-200 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
+        <div class="flex items-center gap-2 text-amber-900">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 shrink-0"></i>
+          <span id="dm-permission-text">Direct chat request is awaiting approval.</span>
+        </div>
+        <div id="dm-permission-actions" class="flex items-center gap-2 shrink-0">
+          <button id="accept-dm-btn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow-xs transition">
+            Accept Chat
+          </button>
+          <button id="decline-dm-btn" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-bold text-xs transition">
+            Decline
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Messages Scroll Container -->
+      <div id="messages-container" class="flex-1 bg-slate-50/70 p-3 sm:p-4 overflow-y-auto space-y-2.5">
+        <div class="p-8 text-center text-slate-400 text-xs">
+          Loading messages...
+        </div>
+      </div>
+
+      <!-- Bottom Chat Input Bar -->
+      <div class="p-2.5 sm:p-3 border-t border-slate-200 bg-white shrink-0">
+        <form id="chat-form" class="flex gap-2">
+          <input type="text" id="chat-input" required autocomplete="off"
+            class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
+            placeholder="Type your message...">
+          <button type="submit" id="send-btn"
+            class="px-4 sm:px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shrink-0 shadow-sm shadow-indigo-100">
+            <span>Send</span>
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          </button>
+        </form>
       </div>
     </div>
+  </main>
 
-    <!-- Message Input Bar -->
-    <div class="bg-white rounded-b-2xl border border-slate-200 p-2.5 sm:p-3 shrink-0 shadow-sm w-full">
-      <form id="chat-form" class="flex gap-2 w-full">
-        <input type="text" id="chat-input" required autocomplete="off"
-          class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
-          placeholder="Type your message...">
-        <button type="submit" id="send-btn"
-          class="px-3.5 sm:px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition flex items-center gap-1 shrink-0">
-          <span>Send</span>
-          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+  <!-- New Direct Message Modal -->
+  <div id="new-dm-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600"></i> Start Direct Chat
+        </h3>
+        <button id="close-dm-modal" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-500 leading-relaxed">
+        Select a classmate to send a chat request. Private messaging unlocks once they accept your invitation.
+      </p>
+
+      <div class="space-y-2">
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Search Classmate</label>
+        <input type="text" id="student-search-input" placeholder="Type name or roll number..."
+          class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div id="student-picker-list" class="max-h-48 overflow-y-auto space-y-1.5 text-xs divide-y divide-slate-100">
+        <p class="text-center text-slate-400 py-3 text-[11px]">Type to find classmates</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Study Group Modal -->
+  <div id="create-group-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="users" class="w-4 h-4 text-purple-600"></i> Create Study Group
+        </h3>
+        <button id="close-group-modal" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+      </div>
+
+      <form id="group-form" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Group Name</label>
+          <input type="text" id="group-name-input" required placeholder="e.g. Science Board Prep 2026"
+            class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Description</label>
+          <textarea id="group-desc-input" rows="2" placeholder="What is this study group for?"
+            class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-sm transition">
+          Create Group
         </button>
       </form>
     </div>
-  </main>
+  </div>
 
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { requireAuth, logout, getToken } from '/js/auth.js';
-    import { formatDateTime, initIcons } from '/js/ui.js';
+    import { formatDateTime, initIcons, showToast } from '/js/ui.js';
 
     const user = requireAuth();
     if (user) {
       document.getElementById('user-display-name').textContent = user.fullName || user.username;
-      document.getElementById('user-display-name-mob').textContent = user.fullName || user.username;
       document.getElementById('user-display-role').textContent = `${user.role} ${user.className ? '• ' + user.className : ''}`;
       if (user.role === 'admin') {
-        document.getElementById('admin-nav-link').classList.remove('hidden');
-        document.querySelectorAll('.admin-mobile-switch').forEach(el => el.classList.remove('hidden'));
+        document.getElementById('admin-nav-link')?.classList.remove('hidden');
+      }
+
+      // Configure my-class channel button
+      const classBtn = document.getElementById('class-channel-btn');
+      if (classBtn && user.className) {
+        const cleanClass = user.className.toLowerCase().replace(/\s+/g, '_');
+        classBtn.dataset.channel = `class_${cleanClass}`;
+        classBtn.dataset.title = `${user.className} Hub`;
+        classBtn.querySelector('span').innerHTML = `<i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> #${cleanClass}`;
       }
     }
 
     document.getElementById('logout-btn')?.addEventListener('click', logout);
     document.querySelectorAll('.logout-btn-trigger').forEach(btn => btn.addEventListener('click', logout));
 
+    // Chat state
+    let currentChannel = 'school';
+    let currentChatType = 'channel'; // 'channel' | 'dm' | 'group'
+    let activeDmData = null;
+    let ws = null;
+    let allStudentsCache = [];
+
     const messagesContainer = document.getElementById('messages-container');
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
-    const channelSelect = document.getElementById('channel-select');
-    const channelName = document.getElementById('channel-name');
+    const sendBtn = document.getElementById('send-btn');
+    const channelNameEl = document.getElementById('channel-name');
+    const chatSubtitleEl = document.getElementById('chat-subtitle');
     const connectionStatus = document.getElementById('connection-status');
+    const currentChatIcon = document.getElementById('current-chat-icon');
+    const dmPermissionBanner = document.getElementById('dm-permission-banner');
+    const dmPermissionText = document.getElementById('dm-permission-text');
+    const dmPermissionActions = document.getElementById('dm-permission-actions');
+    const acceptDmBtn = document.getElementById('accept-dm-btn');
+    const declineDmBtn = document.getElementById('decline-dm-btn');
 
-    let currentChannel = 'school';
-    let ws = null;
-    let reconnectTimeout = null;
+    // Tab switching (Channels / DMs / Groups)
+    document.querySelectorAll('.chat-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.chat-tab-btn').forEach(b => {
+          b.classList.remove('active', 'bg-white', 'text-indigo-600', 'shadow-xs');
+          b.classList.add('text-slate-600');
+        });
+        btn.classList.add('active', 'bg-white', 'text-indigo-600', 'shadow-xs');
+        btn.classList.remove('text-slate-600');
 
+        const targetId = btn.dataset.target;
+        ['channels-list', 'dms-list', 'groups-list'].forEach(id => {
+          document.getElementById(id).classList.toggle('hidden', id !== targetId);
+        });
+
+        if (targetId === 'dms-list') loadDmsList();
+        if (targetId === 'groups-list') loadGroupsList();
+      });
+    });
+
+    // Channel selection
+    document.querySelectorAll('.channel-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.channel-item').forEach(b => b.classList.remove('active', 'bg-indigo-50', 'text-indigo-700'));
+        btn.classList.add('active', 'bg-indigo-50', 'text-indigo-700');
+
+        currentChatType = 'channel';
+        currentChannel = btn.dataset.channel;
+        activeDmData = null;
+
+        channelNameEl.textContent = btn.dataset.title;
+        chatSubtitleEl.textContent = 'Public channel stream';
+        currentChatIcon.innerHTML = `<i data-lucide="hash" class="w-4 h-4"></i>`;
+        dmPermissionBanner.classList.add('hidden');
+        chatInput.disabled = false;
+        chatInput.placeholder = `Message ${btn.dataset.title}...`;
+        sendBtn.disabled = false;
+
+        initIcons();
+        loadMessages();
+      });
+    });
+
+    // Load Messages
     async function loadMessages() {
       try {
-        const res = await apiRequest(`/chat/messages?channel=${currentChannel}`);
+        const res = await apiRequest(`/chat/messages?channel=${encodeURIComponent(currentChannel)}`);
         const messages = res.messages || [];
 
         if (messages.length === 0) {
@@ -205,9 +413,8 @@
       }
     }
 
-    // Safe Markdown Parser (Strictly escapes raw HTML to prevent UI breakage or XSS)
     function escapeHtml(str) {
-      return str
+      return (str || '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -217,67 +424,32 @@
 
     function renderMarkdownSafe(md, isMe = false) {
       if (!md) return '';
-      // Step 1: Escape all HTML so raw tags are NEVER executed or break UI
       let text = escapeHtml(md);
-
-      // Step 2: Fenced Code Blocks (```lang\ncode\n```)
-      text = text.replace(/```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g, (match, lang, code) => {
-        return `<pre class="my-2 p-3 rounded-xl font-mono text-[11px] leading-relaxed overflow-x-auto border ${isMe ? 'bg-black/35 text-slate-100 border-white/20' : 'bg-slate-900 text-emerald-400 border-slate-800'}"><code>${code.trim()}</code></pre>`;
-      });
-
-      // Step 3: Inline code (`code`)
-      text = text.replace(/`([^`\n]+)`/g, (match, code) => {
-        return `<code class="px-1.5 py-0.5 rounded font-mono text-[11px] ${isMe ? 'bg-black/25 text-white' : 'bg-slate-100 text-purple-700 font-semibold border border-slate-200'}">${code}</code>`;
-      });
-
-      // Step 4: Headers (###, ##, #)
-      text = text.replace(/^### (.*$)/gim, '<h4 class="font-bold text-xs sm:text-sm my-1 text-inherit">$1</h4>');
-      text = text.replace(/^## (.*$)/gim, '<h3 class="font-bold text-sm sm:text-base my-1 text-inherit">$1</h3>');
-      text = text.replace(/^# (.*$)/gim, '<h2 class="font-extrabold text-base sm:text-lg my-1.5 text-inherit">$1</h2>');
-
-      // Step 5: Blockquotes (> quote)
-      text = text.replace(/^> (.*$)/gim, `<blockquote class="border-l-2 pl-2.5 my-1.5 italic ${isMe ? 'border-white/60 text-white/90' : 'border-indigo-500 text-slate-600'}">$1</blockquote>`);
-
-      // Step 6: Bold & Strikethrough & Italic
-      text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>');
-      text = text.replace(/__(.*?)__/g, '<strong class="font-bold text-inherit">$1</strong>');
-      text = text.replace(/~~(.*?)~~/g, '<del class="opacity-75">$1</del>');
-      text = text.replace(/\*([^\*\n]+)\*/g, '<em class="italic">$1</em>');
-      text = text.replace(/_([^_\n]+)_/g, '<em class="italic">$1</em>');
-
-      // Step 7: Safe Links [text](https://...) (HTTP and HTTPS only)
-      text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, (match, label, url) => {
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline font-bold transition ${isMe ? 'text-white hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-800'}">${label}</a>`;
-      });
-
-      // Step 8: Bullet Lists (- item or * item)
-      text = text.replace(/^[\*\-] (.*$)/gim, '<li class="ml-4 list-disc text-inherit">$1</li>');
-
-      // Step 9: Line breaks
-      text = text.replace(/\n/g, '<br>');
-
-      return text;
+      text = text.replace(/`([^`]+)`/g, '<code class="bg-black/10 px-1 py-0.5 rounded text-[11px] font-mono">$1</code>');
+      text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      return text.replace(/\n/g, '<br>');
     }
 
     function renderMessageHtml(msg) {
-      const isMe = user && msg.sender_id === user.id;
-      const isRoot = msg.is_root_admin === 1 || msg.isRootAdmin || msg.sender_id === 'admin-root-001';
-      const roleBadge = isRoot
-        ? '<span class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-amber-100 text-amber-900 border border-amber-300">👑 Founder & Lead Admin</span>'
-        : (msg.sender_role === 'admin'
-          ? '<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-indigo-100 text-indigo-800 border border-indigo-200">🛡️ Admin</span>'
-          : (msg.sender_role === 'teacher' ? '<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-indigo-100 text-indigo-700">Teacher</span>' : ''));
+      const isMe = msg.sender_id === user.id;
+      const isAdmin = msg.is_root_admin === 1;
 
       return `
-        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-full">
-          <div class="flex items-center gap-1.5 mb-1 text-[10px] text-slate-400">
-            <span class="font-bold text-slate-700 truncate max-w-[130px]">${isMe ? 'You' : (msg.sender_name || 'Member')}</span>
-            ${roleBadge}
-            <span>&bull;</span>
-            <span>${formatDateTime(msg.created_at || msg.createdAt)}</span>
+        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+          <div class="flex items-center gap-1.5 mb-1 px-1">
+            <span class="text-[10px] font-bold ${isAdmin ? 'text-rose-600' : 'text-slate-600'}">
+              ${escapeHtml(msg.sender_name)}
+            </span>
+            ${isAdmin ? '<span class="text-[8px] px-1 rounded bg-rose-100 text-rose-700 font-bold uppercase">Admin</span>' : ''}
+            <span class="text-[9px] text-slate-400">${formatDateTime(msg.created_at)}</span>
           </div>
-          <div class="px-3.5 py-2.5 rounded-2xl max-w-[90%] sm:max-w-lg text-xs sm:text-sm shadow-sm break-words leading-relaxed ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-200'}">
-            <div class="markdown-body space-y-1">${renderMarkdownSafe(msg.content, isMe)}</div>
+          <div class="max-w-[85%] sm:max-w-md px-3.5 py-2 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+            isMe
+              ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-tr-xs'
+              : 'bg-white border border-slate-200 text-slate-800 rounded-tl-xs'
+          }">
+            ${renderMarkdownSafe(msg.content, isMe)}
           </div>
         </div>
       `;
@@ -287,6 +459,166 @@
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
+    // Load Direct Chats (DMs)
+    async function loadDmsList() {
+      const container = document.getElementById('dms-items-container');
+      try {
+        const res = await apiRequest('/chat/dms');
+        const dms = res.dms || [];
+
+        if (dms.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-6 px-2 text-slate-400 space-y-2">
+              <p class="text-[11px]">No direct messages yet.</p>
+              <button id="start-first-dm" class="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold rounded-lg text-[10px]">
+                Find a Classmate
+              </button>
+            </div>
+          `;
+          document.getElementById('start-first-dm')?.addEventListener('click', openNewDmModal);
+          return;
+        }
+
+        container.innerHTML = dms.map(dm => {
+          const isPending = dm.status === 'pending';
+          const isIncoming = isPending && !dm.requestedByMe;
+
+          return `
+            <button class="dm-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-50 border border-transparent"
+              data-dm-id="${dm.id}"
+              data-partner-name="${escapeHtml(dm.partner.fullName)}"
+              data-partner-username="${escapeHtml(dm.partner.username)}"
+              data-status="${dm.status}"
+              data-requested-by-me="${dm.requestedByMe}">
+              <div class="overflow-hidden">
+                <div class="font-bold text-slate-800 truncate text-[11px]">
+                  ${escapeHtml(dm.partner.fullName)}
+                </div>
+                <div class="text-[10px] text-slate-400 truncate">
+                  ${dm.lastMessage ? escapeHtml(dm.lastMessage) : (isPending ? 'Pending request...' : 'Active conversation')}
+                </div>
+              </div>
+              <div class="shrink-0 text-right">
+                ${isIncoming 
+                  ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold animate-pulse">Request</span>' 
+                  : (isPending 
+                    ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">Pending</span>'
+                    : '<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>'
+                  )
+                }
+              </div>
+            </button>
+          `;
+        }).join('');
+
+        // Attach click listener to DM items
+        container.querySelectorAll('.dm-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            selectDmConversation(btn.dataset);
+          });
+        });
+
+      } catch (err) {
+        container.innerHTML = `<div class="p-3 text-rose-500 text-[10px] text-center">${err.message}</div>`;
+      }
+    }
+
+    function selectDmConversation(data) {
+      currentChatType = 'dm';
+      currentChannel = `dm_${data.dmId}`;
+      activeDmData = data;
+
+      channelNameEl.textContent = data.partnerName;
+      chatSubtitleEl.textContent = `@${data.partnerUsername} • 1-on-1 Direct Message`;
+      currentChatIcon.innerHTML = `<i data-lucide="lock" class="w-4 h-4 text-emerald-600"></i>`;
+      initIcons();
+
+      // Permission Banner Check
+      if (data.status === 'pending') {
+        dmPermissionBanner.classList.remove('hidden');
+        const isRequestedByMe = data.requestedByMe === 'true';
+
+        if (isRequestedByMe) {
+          dmPermissionText.textContent = `Invitation sent to ${data.partnerName}. Chat will unlock once they accept.`;
+          dmPermissionActions.classList.add('hidden');
+          chatInput.disabled = true;
+          chatInput.placeholder = `Waiting for ${data.partnerName} to accept...`;
+          sendBtn.disabled = true;
+        } else {
+          dmPermissionText.textContent = `${data.partnerName} wants to chat with you. Accept invitation?`;
+          dmPermissionActions.classList.remove('hidden');
+          chatInput.disabled = true;
+          chatInput.placeholder = 'Accept the request above to start messaging...';
+          sendBtn.disabled = true;
+        }
+      } else {
+        dmPermissionBanner.classList.add('hidden');
+        chatInput.disabled = false;
+        chatInput.placeholder = `Message ${data.partnerName}...`;
+        sendBtn.disabled = false;
+      }
+
+      loadMessages();
+    }
+
+    // Accept / Decline DMs
+    acceptDmBtn?.addEventListener('click', async () => {
+      if (!activeDmData) return;
+      try {
+        await apiRequest(`/chat/dms/${activeDmData.dmId}/accept`, { method: 'POST' });
+        showToast('Chat request accepted!', 'success');
+        activeDmData.status = 'accepted';
+        selectDmConversation(activeDmData);
+        loadDmsList();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    declineDmBtn?.addEventListener('click', async () => {
+      if (!activeDmData) return;
+      try {
+        await apiRequest(`/chat/dms/${activeDmData.dmId}/decline`, { method: 'POST' });
+        showToast('Chat request declined.', 'info');
+        loadDmsList();
+        // Return to school channel
+        document.querySelector('.channel-item[data-channel="school"]')?.click();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    // Send Message (Form submit)
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = chatInput.value.trim();
+      if (!content) return;
+
+      chatInput.value = '';
+
+      // WebSocket attempt first
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'message',
+          channel: currentChannel,
+          content
+        }));
+        return;
+      }
+
+      // REST fallback
+      try {
+        await apiRequest('/chat/messages', {
+          method: 'POST',
+          body: { channel: currentChannel, content }
+        });
+        loadMessages();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    // Native WebSocket Connection
     function connectWebSocket() {
       const token = getToken();
       if (!token) return;
@@ -299,71 +631,225 @@
 
         ws.onopen = () => {
           connectionStatus.textContent = 'Live Connected';
+          connectionStatus.parentElement.querySelector('span').className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0';
         };
 
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            if (data.type === 'new_message' && data.message.channel === currentChannel) {
-              const msgHtml = renderMessageHtml({
-                sender_id: data.message.senderId,
-                sender_name: data.message.senderName,
-                sender_role: data.message.senderRole,
-                content: data.message.content,
-                created_at: data.message.createdAt,
-              });
-              messagesContainer.insertAdjacentHTML('beforeend', msgHtml);
-              scrollToBottom();
+            if (data.type === 'new_message' && data.message) {
+              if (data.message.channel === currentChannel) {
+                messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(data.message));
+                scrollToBottom();
+              }
+              // If on DMs view, reload list to update last message
+              if (!document.getElementById('dms-list').classList.contains('hidden')) {
+                loadDmsList();
+              }
             }
-          } catch (e) {}
+          } catch (e) { /* ignore */ }
         };
 
         ws.onclose = () => {
           connectionStatus.textContent = 'Reconnecting...';
-          clearTimeout(reconnectTimeout);
-          reconnectTimeout = setTimeout(connectWebSocket, 4000);
+          connectionStatus.parentElement.querySelector('span').className = 'w-2 h-2 rounded-full bg-amber-500 shrink-0';
+          setTimeout(connectWebSocket, 4000);
         };
 
         ws.onerror = () => {
           ws.close();
         };
       } catch (err) {
-        connectionStatus.textContent = 'REST Mode';
+        setTimeout(connectWebSocket, 5000);
       }
     }
 
-    chatForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const content = chatInput.value.trim();
-      if (!content) return;
+    // New Direct Message Modal logic
+    const dmModal = document.getElementById('new-dm-modal');
+    function openNewDmModal() {
+      dmModal.classList.remove('hidden');
+      dmModal.classList.add('flex');
+      loadAllStudents();
+    }
+    function closeNewDmModal() {
+      dmModal.classList.add('hidden');
+      dmModal.classList.remove('flex');
+    }
 
-      chatInput.value = '';
+    document.getElementById('open-new-dm-btn')?.addEventListener('click', openNewDmModal);
+    document.getElementById('open-new-dm-mob')?.addEventListener('click', openNewDmModal);
+    document.getElementById('close-dm-modal')?.addEventListener('click', closeNewDmModal);
 
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          type: 'message',
-          channel: currentChannel,
-          content,
-        }));
-      } else {
-        try {
-          await apiRequest('/chat/messages', {
-            method: 'POST',
-            body: { content, channel: currentChannel },
-          });
-          loadMessages();
-        } catch (err) {
-          alert('Could not send message: ' + err.message);
+    async function loadAllStudents() {
+      const picker = document.getElementById('student-picker-list');
+      try {
+        if (allStudentsCache.length === 0) {
+          const res = await apiRequest('/admin/students');
+          allStudentsCache = (res.students || []).filter(s => s.id !== user.id && s.account_status === 'active');
         }
+        renderStudentPicker(allStudentsCache);
+      } catch (err) {
+        // Fallback for regular students who may not have full admin endpoint access
+        picker.innerHTML = `
+          <div class="space-y-2 pt-2">
+            <p class="text-[11px] text-slate-500">Enter student's exact username:</p>
+            <div class="flex gap-1.5">
+              <input type="text" id="manual-username-input" placeholder="e.g. aarav_10a" class="flex-1 px-3 py-1.5 border rounded-lg text-xs">
+              <button id="send-request-manual" class="px-3 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs">Invite</button>
+            </div>
+          </div>
+        `;
+        document.getElementById('send-request-manual')?.addEventListener('click', async () => {
+          const username = document.getElementById('manual-username-input').value.trim();
+          if (!username) return;
+          try {
+            await apiRequest('/chat/dms/request', { method: 'POST', body: { targetUsername: username } });
+            showToast('Chat request sent!', 'success');
+            closeNewDmModal();
+            loadDmsList();
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      }
+    }
+
+    function renderStudentPicker(students) {
+      const picker = document.getElementById('student-picker-list');
+      if (students.length === 0) {
+        picker.innerHTML = '<p class="text-center text-slate-400 py-3 text-[11px]">No classmates found.</p>';
+        return;
+      }
+
+      picker.innerHTML = students.slice(0, 15).map(s => `
+        <div class="py-2 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-slate-800">${escapeHtml(s.full_name)}</div>
+            <div class="text-[10px] text-slate-400">@${escapeHtml(s.username)} • ${escapeHtml(s.class_name)} (${escapeHtml(s.division)})</div>
+          </div>
+          <button class="invite-student-btn px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-[11px] transition"
+            data-user-id="${s.id}">
+            Chat
+          </button>
+        </div>
+      `).join('');
+
+      picker.querySelectorAll('.invite-student-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await apiRequest('/chat/dms/request', { method: 'POST', body: { targetUserId: btn.dataset.userId } });
+            showToast('Chat request sent!', 'success');
+            closeNewDmModal();
+            // Switch to DMs tab
+            document.querySelector('.chat-tab-btn[data-target="dms-list"]')?.click();
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+    }
+
+    document.getElementById('student-search-input')?.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = allStudentsCache.filter(s =>
+        s.full_name.toLowerCase().includes(q) ||
+        s.username.toLowerCase().includes(q) ||
+        (s.roll_number && s.roll_number.includes(q))
+      );
+      renderStudentPicker(filtered);
+    });
+
+    // Groups logic
+    async function loadGroupsList() {
+      const container = document.getElementById('groups-items-container');
+      try {
+        const res = await apiRequest('/chat/groups');
+        const groups = res.groups || [];
+
+        if (groups.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-6 text-slate-400 space-y-2">
+              <p class="text-[11px]">No study groups yet.</p>
+              <button id="create-first-group" class="px-2.5 py-1 bg-purple-50 text-purple-700 font-bold rounded-lg text-[10px]">
+                Create Study Group
+              </button>
+            </div>
+          `;
+          document.getElementById('create-first-group')?.addEventListener('click', () => {
+            document.getElementById('create-group-modal').classList.remove('hidden');
+            document.getElementById('create-group-modal').classList.add('flex');
+          });
+          return;
+        }
+
+        container.innerHTML = groups.map(g => `
+          <button class="group-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-50 border border-transparent"
+            data-group-id="${g.id}" data-name="${escapeHtml(g.name)}">
+            <span class="font-bold text-slate-800 truncate text-[11px] flex items-center gap-1.5">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> ${escapeHtml(g.name)}
+            </span>
+            <span class="text-[9px] text-slate-400">${g.member_count || 1} members</span>
+          </button>
+        `).join('');
+
+        initIcons();
+
+        container.querySelectorAll('.group-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentChatType = 'group';
+            currentChannel = `grp_${btn.dataset.groupId}`;
+            activeDmData = null;
+
+            channelNameEl.textContent = btn.dataset.name;
+            chatSubtitleEl.textContent = 'Custom Study Group';
+            currentChatIcon.innerHTML = `<i data-lucide="users" class="w-4 h-4 text-purple-600"></i>`;
+            dmPermissionBanner.classList.add('hidden');
+            chatInput.disabled = false;
+            chatInput.placeholder = `Message ${btn.dataset.name}...`;
+            sendBtn.disabled = false;
+
+            initIcons();
+            loadMessages();
+          });
+        });
+      } catch (err) {
+        container.innerHTML = `<div class="p-3 text-rose-500 text-[10px] text-center">${err.message}</div>`;
+      }
+    }
+
+    // Create Group Modal
+    const groupModal = document.getElementById('create-group-modal');
+    document.getElementById('create-group-btn')?.addEventListener('click', () => {
+      groupModal.classList.remove('hidden');
+      groupModal.classList.add('flex');
+    });
+    document.getElementById('close-group-modal')?.addEventListener('click', () => {
+      groupModal.classList.add('hidden');
+      groupModal.classList.remove('flex');
+    });
+    document.getElementById('group-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('group-name-input').value.trim();
+      const description = document.getElementById('group-desc-input').value.trim();
+      if (!name) return;
+
+      try {
+        const res = await apiRequest('/chat/groups', {
+          method: 'POST',
+          body: { name, description }
+        });
+        showToast('Study group created!', 'success');
+        groupModal.classList.add('hidden');
+        groupModal.classList.remove('flex');
+        loadGroupsList();
+      } catch (err) {
+        showToast(err.message, 'error');
       }
     });
 
-    channelSelect.addEventListener('change', () => {
-      currentChannel = channelSelect.value;
-      channelName.textContent = `#${channelSelect.options[channelSelect.selectedIndex].text.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-      loadMessages();
-    });
+    document.getElementById('refresh-chat-btn')?.addEventListener('click', loadMessages);
 
+    // Initial setups
     initIcons();
     loadMessages();
     connectWebSocket();

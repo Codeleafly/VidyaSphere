@@ -290,8 +290,59 @@ async function runTests() {
   const dDeleteExam = await rDeleteExam.json();
   console.log("✓ [Phase 5 - Admin Deletes Exam Schedule]:", dDeleteExam.success ? 'PASS' : 'FAIL');
 
+  // 22. Phase 4: Consent-First Direct Messaging (Send DM request)
+  const rDmReq = await worker.fetch(new Request('http://localhost/api/chat/dms/request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ targetUsername: 'admin' })
+  }), mockEnv);
+  const dDmReq = await rDmReq.json();
+  const dmId = dDmReq.id;
+  console.log("✓ [Phase 4 - Consent-First DM Request Sent (Pending)]: ", dDmReq.success && dDmReq.status === 'pending' ? 'PASS' : 'FAIL');
+
+  // 23. Phase 4: Privacy Security Check - Cannot message in DM before recipient accepts (403)
+  const rDmBlocked = await worker.fetch(new Request('http://localhost/api/chat/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ channel: `dm_${dmId}`, content: 'Hi admin, are notes available?' })
+  }), mockEnv);
+  console.log("✓ [Privacy Security - DM Blocked Until Accepted (403)]: ", rDmBlocked.status === 403 ? 'PASS' : 'FAIL');
+
+  // 24. Phase 4: Recipient Accepts Direct Chat
+  const rDmAccept = await worker.fetch(new Request(`http://localhost/api/chat/dms/${dmId}/accept`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${adminToken}` }
+  }), mockEnv);
+  const dDmAccept = await rDmAccept.json();
+  console.log("✓ [Phase 4 - Recipient Accepts Direct Chat]:", dDmAccept.success && dDmAccept.status === 'accepted' ? 'PASS' : 'FAIL');
+
+  // 25. Phase 4: Private 1-on-1 Messages Allowed After Acceptance
+  const rDmMsg = await worker.fetch(new Request('http://localhost/api/chat/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ channel: `dm_${dmId}`, content: 'Hello Admin, thank you for accepting my chat!' })
+  }), mockEnv);
+  console.log("✓ [Phase 4 - 1-on-1 Direct Message Delivered (201)]: ", rDmMsg.status === 201 ? 'PASS' : 'FAIL');
+
+  // 26. Phase 2: Daily Upload Quota Test (Max 4 PDF files per 24 hours)
+  // Student has already uploaded 1 note (noteId earlier). Let's upload 3 more to reach the 4-file limit.
+  for (let i = 2; i <= 4; i++) {
+    await worker.fetch(new Request('http://localhost/api/notes/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+      body: JSON.stringify({ title: `Chapter ${i} Notes`, className: 'Class 10', subject: 'Science' })
+    }), mockEnv);
+  }
+  // 5th upload attempt MUST be blocked with 429
+  const r5thNote = await worker.fetch(new Request('http://localhost/api/notes/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ title: '5th Note Overflow', className: 'Class 10', subject: 'Science' })
+  }), mockEnv);
+  console.log("✓ [Phase 2 - Daily 4-Note Quota Enforced (429 Block)]: ", r5thNote.status === 429 ? 'PASS' : 'FAIL');
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 21 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 26 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

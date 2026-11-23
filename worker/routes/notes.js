@@ -150,9 +150,21 @@ export async function handleNotesRoutes(request, env, path, method) {
         }
       }
 
-      // Max 15MB size limit for direct files
-      if (fileSize > 15 * 1024 * 1024) {
-        return errorResponse('File size exceeds the 15MB limit');
+      // Check daily upload limit for direct files: Max 4 uploads per 24 hours per student
+      if (noteType === 'file') {
+        const uploadCountRow = await env.DB.prepare(
+          `SELECT COUNT(*) as count FROM notes 
+           WHERE uploader_id = ? AND note_type = 'file' AND created_at >= datetime('now', '-1 day')`
+        ).bind(auth.user.id).first();
+
+        if (uploadCountRow && uploadCountRow.count >= 4) {
+          return errorResponse('Daily upload limit reached. To conserve edge storage, each student can upload a maximum of 4 study materials per 24 hours. You can still share unlimited Google Drive links.', 429);
+        }
+      }
+
+      // Max 25MB size limit for direct files
+      if (fileSize > 25 * 1024 * 1024) {
+        return errorResponse('File size exceeds the 25MB limit. Please compress the file or share via a Google Drive link.');
       }
 
       const noteId = generateId('note', 8);

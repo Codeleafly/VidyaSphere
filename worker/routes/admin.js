@@ -111,7 +111,7 @@ export async function handleAdminRoutes(request, env, path, method) {
         ).bind(generateId('log', 8), auth.user.id, `Rejected student ${targetId}: ${reason}`),
       ]);
 
-      return successResponse({}, 'Student admission application marked as rejected');
+      return successResponse({}, 'Student verification request marked as rejected');
     } catch (err) {
       return errorResponse(`Reject error: ${err.message}`, 500);
     }

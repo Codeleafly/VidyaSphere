@@ -166,6 +166,42 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (sender_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
+-- PHASE 4: Direct Message Consent & Conversations (Permission-Based Direct Messaging)
+CREATE TABLE IF NOT EXISTS direct_chats (
+    id TEXT PRIMARY KEY,
+    user1_id TEXT NOT NULL,
+    user2_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'accepted', 'rejected')),
+    requested_by TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user1_id, user2_id),
+    FOREIGN KEY (user1_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    FOREIGN KEY (user2_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    FOREIGN KEY (requested_by) REFERENCES profiles(id) ON DELETE CASCADE
+);
+
+-- PHASE 4: Study Groups & Custom Group Chats
+CREATE TABLE IF NOT EXISTS chat_groups (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    class_name TEXT DEFAULT 'all',
+    creator_id TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (creator_id) REFERENCES profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS group_members (
+    group_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'member' CHECK(role IN ('admin', 'member')),
+    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (group_id, user_id),
+    FOREIGN KEY (group_id) REFERENCES chat_groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
+);
+
 -- PHASE 5: Official Examination Schedules & Timetables
 CREATE TABLE IF NOT EXISTS exams (
     id TEXT PRIMARY KEY,

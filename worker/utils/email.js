@@ -13,26 +13,24 @@ export async function sendActivationEmail(env, { email, fullName, username, code
   const cleanEmail = email.trim().toLowerCase();
   const activationUrl = `https://vidyasphere.ziprecovery2024-dbc.workers.dev/auth/status?token=${encodeURIComponent(trackingToken)}`;
 
-  const subject = `🎓 VidyaSphere Admission Approved - Your Username & 6-Digit Code`;
+  const subject = `🎓 VidyaSphere Account Verified - Welcome @${username}`;
   
   const textContent = `
 Hello ${fullName},
 
-Great news! Your admission request for VidyaSphere has been approved by the Platform Creator & Lead Admin.
+Great news! Your VidyaSphere student account has been verified by the Student Lead Administrator.
 
-Here are your official school portal credentials:
-- Assigned Username: ${username}
-- 6-Digit Activation Code: ${code}
+Your official credentials:
+- Username: @${username}
 - Tracking Token: ${trackingToken}
+- Verification Status: Active
 
-To activate your account and choose your password, visit:
+To access your portal, view academic notes, check exam timetables, and connect with classmates:
 ${activationUrl}
 
-Or open https://vidyasphere.ziprecovery2024-dbc.workers.dev/auth/status and enter your 6-digit code.
-
 Best regards,
-VidyaSphere Academic Platform
-Platform Creator & Lead Admin
+VidyaSphere Academic Network
+Student-to-Student Digital Ecosystem
 `.trim();
 
   const htmlContent = `
@@ -52,7 +50,6 @@ Platform Creator & Lead Admin
     .row:last-child { margin-bottom: 0; }
     .label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; letter-spacing: 0.05em; }
     .value { font-size: 18px; font-weight: 800; color: #4f46e5; font-family: monospace; }
-    .code-badge { display: inline-block; background: #4f46e5; color: #ffffff; padding: 6px 14px; border-radius: 8px; font-size: 20px; font-weight: 800; letter-spacing: 2px; font-family: monospace; }
     .btn { display: block; text-align: center; background: #4f46e5; color: #ffffff !important; text-decoration: none; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; margin-top: 24px; }
     .footer { padding: 20px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #f1f5f9; }
   </style>
@@ -61,34 +58,34 @@ Platform Creator & Lead Admin
   <div class="card">
     <div class="header">
       <h1>🎓 VidyaSphere</h1>
-      <p>School Digital Knowledge Edge Portal</p>
+      <p>Student-to-Student Digital Knowledge Ecosystem</p>
     </div>
     <div class="content">
       <h2 style="font-size: 18px; font-weight: 700; margin-top: 0;">Welcome, ${fullName}!</h2>
       <p style="font-size: 14px; line-height: 1.6; color: #475569;">
-        Aapka student admission request school ke <strong>Platform Creator & Lead Admin</strong> dwara approve kar diya gaya hai.
+        Your student profile on VidyaSphere has been officially verified by the Student Lead Administrator.
       </p>
       
       <div class="credential-box">
         <div class="row">
-          <div class="label">Assigned Login Username</div>
-          <div class="value">${username}</div>
+          <div class="label">Assigned Username</div>
+          <div class="value">@${username}</div>
         </div>
         <div class="row">
-          <div class="label">6-Digit Secret Activation Code</div>
-          <div style="margin-top: 4px;"><span class="code-badge">${code}</span></div>
+          <div class="label">Account Status</div>
+          <div style="font-weight: 700; color: #059669;">Verified & Active</div>
         </div>
       </div>
 
       <p style="font-size: 13px; line-height: 1.5; color: #64748b;">
-        Neeche diye gaye button par click karein aur apna password set karke account turant activate karein:
+        You can now access your dashboard to download academic notes, view official exam timetables, ask homework doubts, and collaborate with your classmates:
       </p>
 
-      <a href="${activationUrl}" class="btn">🚀 Activate Account & Sign In</a>
+      <a href="${activationUrl}" class="btn">🚀 Enter VidyaSphere Dashboard</a>
     </div>
     <div class="footer">
-      VidyaSphere Academic Platform &bull; Made by Platform Creator & Lead Admin<br>
-      Please do not share your 6-digit activation code with anyone.
+      VidyaSphere Academic Network &bull; Built by Students, For Students<br>
+      Privacy-First Peer Learning &bull; No Personal Phone Numbers Required
     </div>
   </div>
 </body>
@@ -134,20 +131,6 @@ Platform Creator & Lead Admin
       return { success: true, provider: 'cloudflare_send_email', email: cleanEmail };
     } catch (err) {
       console.error('Cloudflare Email send error:', err);
-    }
-  }
-
-  // Strategy 3: Graceful Webhook / Relay if configured
-  if (env.EMAIL_WEBHOOK_URL) {
-    try {
-      await fetch(env.EMAIL_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: cleanEmail, subject, text: textContent, html: htmlContent, username, code }),
-      });
-      return { success: true, provider: 'webhook', email: cleanEmail };
-    } catch (err) {
-      console.error('Email webhook error:', err);
     }
   }
 
