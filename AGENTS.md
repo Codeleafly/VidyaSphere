@@ -30,6 +30,15 @@
   - `WebSocketPair` for realtime chat
 * No runtime npm packages may ever be added to `package.json` or imported in `worker/`.
 
+### 4. Git Branch Isolation & Preview-First Deployment (MANDATORY RULE)
+* **NEVER code or commit directly on `master` or `main`.** Always create and switch to a new branch first: `git checkout -b <branch-name>`.
+* **NEVER deploy directly to Main Production (`wrangler deploy`) without user approval.**
+* **MANDATORY 4-STEP CYCLE FOR EVERY UPDATE:**
+  1. **New Branch:** Create and checkout a feature/task branch (`git checkout -b feature/<name>`).
+  2. **Local Verification:** Perform surgical changes and verify with `node test.js` (Must be 100% PASS).
+  3. **Experimental Deploy:** Deploy ONLY to the experimental/preview URL using `wrangler deploy --env preview`. Share the experimental preview URL with the user.
+  4. **Main Production Gate:** Deploy to main production (`wrangler deploy` on `master`) ONLY after the user explicitly verifies and commands: *"main me karo"*.
+
 ---
 
 ## ⚡ COMMAND-FIRST REFERENCE
@@ -39,8 +48,9 @@ All commands must be executed from the project root (`/data/data/com.termux/file
 | Purpose | Command | Notes |
 | :--- | :--- | :--- |
 | **Local Dev Server** | `node dev.js` | Uses Node.js native `DatabaseSync` (`node:sqlite`) on port 8787. Avoids `workerd EPIPE` Termux crash. |
-| **Automated Tests** | `node test.js` | Runs the full 21-point verification suite in-memory. Must PASS 100% before any task is complete. |
-| **Cloudflare Deploy** | `wrangler deploy` | Deploys Worker + Static Client Assets directly to Cloudflare edge. |
+| **Automated Tests** | `node test.js` | Runs full master verification suite in-memory. Must PASS 100% before any task is complete. |
+| **Experimental / Preview Deploy** | `wrangler deploy --env preview` | Deploys to isolated preview worker (`vidyasphere-preview`). Main URL is NEVER touched. |
+| **Main Production Deploy** | `wrangler deploy` | ONLY executed when user explicitly approves promoting to main. |
 | **D1 Remote Schema** | `wrangler d1 execute vidyasphere-db --remote --file=./schema.sql` | Updates remote production schema when database structure changes. |
 | **D1 Remote Query** | `wrangler d1 execute vidyasphere-db --remote --command="SELECT COUNT(*) FROM profiles"` | Runs ad-hoc read/maintenance query on Cloudflare D1. |
 | **Cloudflare Tail Logs** | `wrangler tail` | Streams live production Worker logs. |
@@ -51,11 +61,12 @@ All commands must be executed from the project root (`/data/data/com.termux/file
 
 * **Live Status:** This project is already live and hosted on Cloudflare Workers and Cloudflare D1.
 * **Wrangler CLI:** Pre-installed globally in Termux. AI agents must use `wrangler` commands directly for deployment, D1 maintenance, and secrets configuration.
-* **Continuous Updates:** When the user requests new features or bug fixes:
-  1. Make minimal, surgical edits to code.
-  2. Validate changes locally using `node test.js`.
-  3. Deploy updates directly via `wrangler deploy` when requested by user.
-  4. If database schema was altered, apply it remotely via `wrangler d1 execute vidyasphere-db --remote --file=./schema.sql`.
+* **Continuous Updates (Strict 4-Step Cycle):**
+  1. **Branch First:** Always create a new branch: `git checkout -b <branch-name>`.
+  2. **Minimal Edits & Local Tests:** Make minimal surgical edits and run `node test.js` until 100% PASS.
+  3. **Experimental Deploy:** Deploy to preview environment via `wrangler deploy --env preview` and provide the experimental URL to user.
+  4. **Production Deploy (Approval Gate):** NEVER deploy to main unless the user explicitly reviews and commands *"main me karo"*. When approved, merge branch to `master` and run `wrangler deploy`.
+  5. If database schema was altered, apply it remotely via `wrangler d1 execute vidyasphere-db --remote --file=./schema.sql`.
 
 ---
 

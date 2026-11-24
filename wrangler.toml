@@ -21,3 +21,22 @@ crons = ["0 0 * * *"]
 
 [vars]
 JWT_SECRET = "vidyasphere_edge_super_secret_key_2026_change_in_production"
+
+# ==============================================================================
+# EXPERIMENTAL / PREVIEW ENVIRONMENT
+# Deploy via: wrangler deploy --env preview
+# Produces a separate experimental URL: https://vidyasphere-preview.<subdomain>.workers.dev
+# Main production URL (vidyasphere) is NEVER touched until user explicitly approves.
+# ==============================================================================
+[env.preview]
+name = "vidyasphere-preview"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "vidyasphere-db"
+database_id = "78869fad-da13-4a9b-adad-1e3fb439b0d9"
+
+[env.preview.vars]
+JWT_SECRET = "vidyasphere_edge_super_secret_key_2026_change_in_production"
+
+
