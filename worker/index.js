@@ -12,6 +12,7 @@ import { handleQARoutes } from './routes/qa.js';
 import { handlePollsRoutes } from './routes/polls.js';
 import { handleChatRoutes } from './routes/chat.js';
 import { handleExamsRoutes } from './routes/exams.js';
+import { handleStudentsRoutes } from './routes/students.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -75,6 +76,11 @@ export default {
         // Phase 4: Realtime School Chat
         if (path.startsWith('/api/chat/')) {
           return await handleChatRoutes(request, env, path, method);
+        }
+
+        // Student Directory & Classmate Discovery (Active Students & Admins)
+        if (path === '/api/students' || path.startsWith('/api/students/')) {
+          return await handleStudentsRoutes(request, env, path, method);
         }
 
         return errorResponse(`API endpoint not found: ${path}`, 404);

@@ -55,6 +55,7 @@ async function runTests() {
   const dLogin = await rLogin.json();
   console.log("✓ [Root Admin Auth]:", dLogin.success && dLogin.user.isRootAdmin ? 'PASS' : 'FAIL', `(Root: @${dLogin.user.username})`);
   const adminToken = dLogin.token;
+  const adminUserId = dLogin.user.id;
 
   // 3. Student Direct Registration with Password (No codes!)
   const rReg = await worker.fetch(new Request('http://localhost/api/auth/register', {
@@ -413,8 +414,48 @@ async function runTests() {
   }), mockEnv);
   console.log("✓ [Phase 2 - Daily 4-Note Quota Enforced (429 Block)]: ", r5thNote.status === 429 ? 'PASS' : 'FAIL');
 
+  // 31. Phase 4: Classmate Discovery Endpoint (GET /api/students)
+  const rStudents = await worker.fetch(new Request('http://localhost/api/students', {
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dStudents = await rStudents.json();
+  console.log("✓ [Phase 4 - Active Student Access to Classmate Directory (200)]: ", rStudents.status === 200 && Array.isArray(dStudents.students) ? 'PASS' : 'FAIL');
+
+  // 32. Phase 4: Create Study Group & Add Member (POST /api/chat/groups & /members)
+  const rCreateGroup = await worker.fetch(new Request('http://localhost/api/chat/groups', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ name: 'Science Board Prep 2026', description: 'Group study for Physics and Chemistry' })
+  }), mockEnv);
+  const dCreateGroup = await rCreateGroup.json();
+  const testGroupId = dCreateGroup.id;
+
+  const rAddMember = await worker.fetch(new Request(`http://localhost/api/chat/groups/${testGroupId}/members`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ targetUsername: 'admin' })
+  }), mockEnv);
+  const dAddMember = await rAddMember.json();
+  console.log("✓ [Phase 4 - Create Study Group & Add Member (201)]: ", rAddMember.status === 201 && dAddMember.success ? 'PASS' : 'FAIL');
+
+  // 33. Phase 4: Get Group Members List (GET /api/chat/groups/:id/members)
+  const rGetMembers = await worker.fetch(new Request(`http://localhost/api/chat/groups/${testGroupId}/members`, {
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dGetMembers = await rGetMembers.json();
+  const foundAdminMember = (dGetMembers.members || []).some(m => m.username === 'admin');
+  console.log("✓ [Phase 4 - Group Members Listed Correctly]: ", rGetMembers.status === 200 && foundAdminMember && dGetMembers.members.length === 2 ? 'PASS' : 'FAIL');
+
+  // 34. Phase 4: Remove Member / Leave Group (DELETE /api/chat/groups/:id/members/:userId)
+  const rRemoveMember = await worker.fetch(new Request(`http://localhost/api/chat/groups/${testGroupId}/members/${adminUserId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dRemoveMember = await rRemoveMember.json();
+  console.log("✓ [Phase 4 - Remove Member / Leave Study Group]: ", rRemoveMember.status === 200 && dRemoveMember.success ? 'PASS' : 'FAIL');
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 30 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 34 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

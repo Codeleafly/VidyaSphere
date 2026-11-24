@@ -348,6 +348,158 @@ export async function handleChatRoutes(request, env, path, method) {
     }
   }
 
+  // 6a. GET /api/chat/groups/:id/members - List members of a study group
+  if (path.startsWith('/api/chat/groups/') && path.endsWith('/members') && method === 'GET') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const groupId = parts[4];
+
+    // Check if user is a member of this group or system admin
+    const callerMember = await env.DB.prepare(
+      `SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`
+    ).bind(groupId, auth.user.id).first();
+
+    if (!callerMember && auth.user.role !== 'admin') {
+      return errorResponse('Forbidden: You are not a member of this study group', 403);
+    }
+
+    const { results } = await env.DB.prepare(`
+      SELECT gm.group_id, gm.user_id, gm.role as member_role,
+             strftime('%Y-%m-%dT%H:%M:%SZ', gm.joined_at) as joined_at,
+             p.username, p.full_name, p.class_name, p.division, p.roll_number, p.is_root_admin
+      FROM group_members gm
+      JOIN profiles p ON gm.user_id = p.id
+      WHERE gm.group_id = ?
+      ORDER BY (CASE WHEN gm.role = 'admin' THEN 0 ELSE 1 END), p.full_name ASC
+    `).bind(groupId).all();
+
+    return successResponse({ members: results || [] });
+  }
+
+  // 6b. POST /api/chat/groups/:id/members - Add member to study group
+  if (path.startsWith('/api/chat/groups/') && path.endsWith('/members') && method === 'POST') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const groupId = parts[4];
+
+    const group = await env.DB.prepare(`SELECT * FROM chat_groups WHERE id = ?`).bind(groupId).first();
+    if (!group) return errorResponse('Study group not found', 404);
+
+    const callerMember = await env.DB.prepare(
+      `SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`
+    ).bind(groupId, auth.user.id).first();
+
+    if (!callerMember && auth.user.role !== 'admin') {
+      return errorResponse('Forbidden: Only study group members can add classmates', 403);
+    }
+
+    try {
+      const body = await request.json();
+      const { targetUserId, targetUsername } = body;
+
+      if (!targetUserId && !targetUsername) {
+        return errorResponse('Student ID or username is required', 400);
+      }
+
+      let targetUser = null;
+      if (targetUserId) {
+        targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE id = ? AND account_status = 'active'`).bind(targetUserId).first();
+      } else {
+        targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE username = ? AND account_status = 'active'`).bind(targetUsername.trim().toLowerCase()).first();
+      }
+
+      if (!targetUser) {
+        return errorResponse('Classmate not found or student account is not active', 404);
+      }
+
+      const existing = await env.DB.prepare(
+        `SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`
+      ).bind(groupId, targetUser.id).first();
+
+      if (existing) {
+        return errorResponse(`${targetUser.full_name} is already a member of this study group`, 400);
+      }
+
+      await env.DB.prepare(
+        `INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, 'member')`
+      ).bind(groupId, targetUser.id).run();
+
+      return successResponse({
+        member: {
+          id: targetUser.id,
+          username: targetUser.username,
+          fullName: targetUser.full_name,
+          role: 'member'
+        }
+      }, `${targetUser.full_name} added to ${group.name}!`, 201);
+    } catch (err) {
+      return errorResponse(`Add member error: ${err.message}`, 500);
+    }
+  }
+
+  // 6c. DELETE /api/chat/groups/:id/members/:userId - Remove member or leave group
+  if (path.startsWith('/api/chat/groups/') && path.includes('/members/') && method === 'DELETE') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const groupId = parts[4];
+    const targetUserId = parts[6];
+
+    const group = await env.DB.prepare(`SELECT * FROM chat_groups WHERE id = ?`).bind(groupId).first();
+    if (!group) return errorResponse('Study group not found', 404);
+
+    const callerMember = await env.DB.prepare(
+      `SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`
+    ).bind(groupId, auth.user.id).first();
+
+    if (!callerMember && auth.user.role !== 'admin') {
+      return errorResponse('Forbidden: You are not a member of this group', 403);
+    }
+
+    const isSelfLeaving = (targetUserId === auth.user.id);
+    const isGroupAdmin = (callerMember && callerMember.role === 'admin');
+    const isSystemAdmin = (auth.user.role === 'admin');
+
+    if (!isSelfLeaving && !isGroupAdmin && !isSystemAdmin) {
+      return errorResponse('Forbidden: Only group admins can remove other members', 403);
+    }
+
+    await env.DB.prepare(
+      `DELETE FROM group_members WHERE group_id = ? AND user_id = ?`
+    ).bind(groupId, targetUserId).run();
+
+    return successResponse({ groupId, userId: targetUserId }, isSelfLeaving ? 'You left the study group' : 'Member removed from group');
+  }
+
+  // 6d. DELETE /api/chat/groups/:id - Delete study group (Creator, Admin)
+  if (path.startsWith('/api/chat/groups/') && !path.includes('/members') && method === 'DELETE') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const groupId = parts[4];
+
+    const group = await env.DB.prepare(`SELECT * FROM chat_groups WHERE id = ?`).bind(groupId).first();
+    if (!group) return errorResponse('Study group not found', 404);
+
+    if (group.creator_id !== auth.user.id && auth.user.role !== 'admin') {
+      return errorResponse('Forbidden: Only the group creator or admin can delete the study group', 403);
+    }
+
+    await env.DB.batch([
+      env.DB.prepare(`DELETE FROM group_members WHERE group_id = ?`).bind(groupId),
+      env.DB.prepare(`DELETE FROM messages WHERE channel = ?`).bind(`grp_${groupId}`),
+      env.DB.prepare(`DELETE FROM chat_groups WHERE id = ?`).bind(groupId)
+    ]);
+
+    return successResponse({ groupId }, 'Study group deleted');
+  }
+
   // 7. GET /api/chat/messages - Fetch messages for channel (Strict Ephemeral 7-Day Window)
   if (path === '/api/chat/messages' && method === 'GET') {
     const auth = await authenticate(request, env);
@@ -384,10 +536,12 @@ export async function handleChatRoutes(request, env, path, method) {
       }
     }
 
-    // Strict 7-Day Auto-Purge window: Messages older than 7 days are automatically excluded
+    // Strict 7-Day Auto-Purge window with ISO 8601 UTC Z formatting
     const { results } = await env.DB.prepare(`
       SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.has_attachment,
-             m.attachment_name, m.attachment_type, m.attachment_size, m.created_at, m.updated_at,
+             m.attachment_name, m.attachment_type, m.attachment_size,
+             strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
+             strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
              p.full_name as sender_name, p.role as sender_role, p.class_name, p.is_root_admin
       FROM messages m
       JOIN profiles p ON m.sender_id = p.id

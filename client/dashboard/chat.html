@@ -115,18 +115,26 @@
     </a>
   </nav>
 
+  <!-- Mobile Channels Backdrop -->
+  <div id="channels-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 hidden md:hidden transition-opacity"></div>
+
   <!-- Main Content Area: Split View for Channels/DMs & Chat Feed -->
-  <main class="flex-1 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-6 flex flex-col md:flex-row gap-3 h-[calc(100vh-4rem)] md:h-screen overflow-hidden">
+  <main class="flex-1 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-6 flex flex-col md:flex-row gap-3 h-[calc(100dvh-3.5rem-3.5rem)] md:h-screen overflow-hidden">
     
-    <!-- Conversations / Channels Sidebar -->
-    <div id="channels-panel" class="w-full md:w-72 bg-white rounded-2xl border border-slate-200 p-3 flex flex-col shrink-0 h-48 md:h-full overflow-hidden shadow-sm">
+    <!-- Conversations / Channels Sidebar (Slide-over drawer on mobile, static sidebar on desktop) -->
+    <div id="channels-panel" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r md:border border-slate-200 p-3 flex-col shrink-0 h-full overflow-hidden shadow-2xl md:shadow-sm hidden md:flex md:relative md:inset-auto md:z-auto md:rounded-2xl">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
           <i data-lucide="message-circle" class="w-4 h-4 text-indigo-600"></i> Chats & DMs
         </span>
-        <button id="open-new-dm-btn" class="hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[11px] font-bold transition">
-          <i data-lucide="plus" class="w-3 h-3"></i> Direct Chat
-        </button>
+        <div class="flex items-center gap-1">
+          <button id="open-new-dm-btn" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[11px] font-bold transition">
+            <i data-lucide="plus" class="w-3 h-3"></i> Direct Chat
+          </button>
+          <button id="close-channels-mob-btn" class="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600" title="Close">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Navigation Tabs: Channels / DMs / Groups -->
@@ -188,13 +196,22 @@
     <div class="flex-1 bg-white rounded-2xl border border-slate-200 flex flex-col h-full overflow-hidden shadow-sm">
       
       <!-- Top Chat Header -->
-      <div class="p-3 sm:p-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
-        <div class="flex items-center gap-2.5 overflow-hidden">
-          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0" id="current-chat-icon">
+      <div class="p-2.5 sm:p-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <button id="toggle-channels-mob-btn" class="md:hidden p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 shrink-0" title="Switch Channel or DMs">
+            <i data-lucide="menu" class="w-4 h-4"></i>
+          </button>
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0" id="current-chat-icon">
             <i data-lucide="hash" class="w-4 h-4"></i>
           </div>
           <div class="overflow-hidden">
-            <h2 class="font-extrabold text-slate-900 text-xs sm:text-base truncate" id="channel-name">#school-hub</h2>
+            <div class="flex items-center gap-1.5">
+              <h2 class="font-extrabold text-slate-900 text-xs sm:text-base truncate" id="channel-name">#school-hub</h2>
+              <button id="group-info-btn" class="hidden px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 text-[10px] font-bold items-center gap-1 shrink-0 transition" title="Manage Group Members">
+                <i data-lucide="users" class="w-3 h-3"></i>
+                <span id="group-members-count-badge">Members</span>
+              </button>
+            </div>
             <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
               <span id="connection-status">Live Connected</span>
@@ -205,7 +222,7 @@
         </div>
 
         <!-- Top Right Actions -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 sm:gap-2">
           <span class="hidden sm:inline-flex items-center gap-1 text-[10px] bg-slate-100 text-slate-500 font-medium px-2 py-1 rounded-lg">
             <i data-lucide="clock" class="w-3 h-3 text-amber-500"></i> 7-Day Auto Purge
           </span>
@@ -343,6 +360,55 @@
     </div>
   </div>
 
+  <!-- Group Members & Invite Modal -->
+  <div id="group-members-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md p-4 sm:p-5 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100 shrink-0">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold shrink-0">
+            <i data-lucide="users" class="w-4 h-4"></i>
+          </div>
+          <div class="overflow-hidden">
+            <h3 class="text-sm font-extrabold text-slate-900 truncate" id="group-modal-title">Study Group</h3>
+            <span class="text-[10px] text-slate-400" id="group-modal-member-count">0 members</span>
+          </div>
+        </div>
+        <button id="close-group-members-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none p-1">&times;</button>
+      </div>
+
+      <!-- Add Classmate Section -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2 shrink-0">
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5 text-indigo-600"></i> Add Classmate to Group
+        </label>
+        <div class="flex gap-1.5">
+          <input type="text" id="add-member-search-input" placeholder="Type name, roll # or username..."
+            class="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
+        </div>
+        <div id="group-add-candidate-list" class="max-h-32 overflow-y-auto space-y-1 text-xs divide-y divide-slate-100 hidden">
+        </div>
+      </div>
+
+      <!-- Members List -->
+      <div class="flex-1 overflow-y-auto space-y-1.5 min-h-0 pr-1">
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Group Members</div>
+        <div id="group-members-list-container" class="space-y-1 text-xs">
+          <p class="text-center text-slate-400 py-4 text-xs">Loading members...</p>
+        </div>
+      </div>
+
+      <!-- Footer Actions (Leave / Delete) -->
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs shrink-0" id="group-modal-footer">
+        <button id="leave-group-btn" class="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold transition flex items-center gap-1">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Leave Group
+        </button>
+        <button id="delete-group-btn" class="hidden px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold transition flex items-center gap-1">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Group
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { requireAuth, logout, getToken } from '/js/auth.js';
@@ -376,6 +442,47 @@
     let allStudentsCache = [];
     let selectedAttachmentFile = null;
     let editingMessageId = null;
+
+    // Mobile Drawer elements
+    const channelsPanel = document.getElementById('channels-panel');
+    const channelsBackdrop = document.getElementById('channels-backdrop');
+    const toggleChannelsMobBtn = document.getElementById('toggle-channels-mob-btn');
+    const closeChannelsMobBtn = document.getElementById('close-channels-mob-btn');
+
+    function openChannelsDrawer() {
+      channelsBackdrop?.classList.remove('hidden');
+      channelsPanel?.classList.remove('hidden');
+      channelsPanel?.classList.add('flex');
+      initIcons();
+    }
+    function closeChannelsDrawer() {
+      channelsBackdrop?.classList.add('hidden');
+      if (window.innerWidth < 768) {
+        channelsPanel?.classList.add('hidden');
+        channelsPanel?.classList.remove('flex');
+      }
+    }
+    toggleChannelsMobBtn?.addEventListener('click', openChannelsDrawer);
+    closeChannelsMobBtn?.addEventListener('click', closeChannelsDrawer);
+    channelsBackdrop?.addEventListener('click', closeChannelsDrawer);
+
+    // Group info & members elements
+    let currentGroupId = null;
+    let currentGroupRole = 'member';
+    let currentGroupName = '';
+    let currentGroupMembers = [];
+
+    const groupInfoBtn = document.getElementById('group-info-btn');
+    const groupMembersCountBadge = document.getElementById('group-members-count-badge');
+    const groupMembersModal = document.getElementById('group-members-modal');
+    const closeGroupMembersModal = document.getElementById('close-group-members-modal');
+    const groupModalTitle = document.getElementById('group-modal-title');
+    const groupModalMemberCount = document.getElementById('group-modal-member-count');
+    const addMemberSearchInput = document.getElementById('add-member-search-input');
+    const groupAddCandidateList = document.getElementById('group-add-candidate-list');
+    const groupMembersListContainer = document.getElementById('group-members-list-container');
+    const leaveGroupBtn = document.getElementById('leave-group-btn');
+    const deleteGroupBtn = document.getElementById('delete-group-btn');
 
     const messagesContainer = document.getElementById('messages-container');
     const chatForm = document.getElementById('chat-form');
@@ -459,9 +566,13 @@
         document.querySelectorAll('.channel-item').forEach(b => b.classList.remove('active', 'bg-indigo-50', 'text-indigo-700'));
         btn.classList.add('active', 'bg-indigo-50', 'text-indigo-700');
 
+        closeChannelsDrawer();
+
         currentChatType = 'channel';
         currentChannel = btn.dataset.channel;
         activeDmData = null;
+        currentGroupId = null;
+        groupInfoBtn?.classList.add('hidden');
 
         channelNameEl.textContent = btn.dataset.title;
         chatSubtitleEl.textContent = 'Public stream • Messages auto-purge after 7 days';
@@ -739,9 +850,12 @@
     }
 
     function selectDmConversation(data) {
+      closeChannelsDrawer();
       currentChatType = 'dm';
       currentChannel = `dm_${data.dmId}`;
       activeDmData = data;
+      currentGroupId = null;
+      groupInfoBtn?.classList.add('hidden');
 
       channelNameEl.textContent = data.partnerName;
       chatSubtitleEl.textContent = `@${data.partnerUsername} • 1-on-1 DM (Auto-purge 7 days)`;
@@ -922,32 +1036,34 @@
       const picker = document.getElementById('student-picker-list');
       try {
         if (allStudentsCache.length === 0) {
-          const res = await apiRequest('/admin/students');
+          const res = await apiRequest('/students');
           allStudentsCache = (res.students || []).filter(s => s.id !== user.id && s.account_status === 'active');
         }
-        renderStudentPicker(allStudentsCache);
+        if (picker) renderStudentPicker(allStudentsCache);
       } catch (err) {
-        picker.innerHTML = `
-          <div class="space-y-2 pt-2">
-            <p class="text-[11px] text-slate-500">Enter student's exact username:</p>
-            <div class="flex gap-1.5">
-              <input type="text" id="manual-username-input" placeholder="e.g. aarav_10a" class="flex-1 px-3 py-1.5 border rounded-lg text-xs">
-              <button id="send-request-manual" class="px-3 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs">Invite</button>
+        if (picker) {
+          picker.innerHTML = `
+            <div class="space-y-2 pt-2">
+              <p class="text-[11px] text-slate-500">Enter student's exact username:</p>
+              <div class="flex gap-1.5">
+                <input type="text" id="manual-username-input" placeholder="e.g. aarav_10a" class="flex-1 px-3 py-1.5 border rounded-lg text-xs">
+                <button id="send-request-manual" class="px-3 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs">Invite</button>
+              </div>
             </div>
-          </div>
-        `;
-        document.getElementById('send-request-manual')?.addEventListener('click', async () => {
-          const username = document.getElementById('manual-username-input').value.trim();
-          if (!username) return;
-          try {
-            await apiRequest('/chat/dms/request', { method: 'POST', body: { targetUsername: username } });
-            showToast('Chat request sent!', 'success');
-            closeNewDmModal();
-            loadDmsList();
-          } catch (e) {
-            showToast(e.message, 'error');
-          }
-        });
+          `;
+          document.getElementById('send-request-manual')?.addEventListener('click', async () => {
+            const username = document.getElementById('manual-username-input').value.trim();
+            if (!username) return;
+            try {
+              await apiRequest('/chat/dms/request', { method: 'POST', body: { targetUsername: username } });
+              showToast('Chat request sent!', 'success');
+              closeNewDmModal();
+              loadDmsList();
+            } catch (e) {
+              showToast(e.message, 'error');
+            }
+          });
+        }
       }
     }
 
@@ -1020,7 +1136,7 @@
 
         container.innerHTML = groups.map(g => `
           <button class="group-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-50 border border-transparent"
-            data-group-id="${g.id}" data-name="${escapeHtml(g.name)}">
+            data-group-id="${g.id}" data-name="${escapeHtml(g.name)}" data-my-role="${g.my_role || 'member'}" data-member-count="${g.member_count || 1}">
             <span class="font-bold text-slate-800 truncate text-[11px] flex items-center gap-1.5">
               <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> ${escapeHtml(g.name)}
             </span>
@@ -1033,13 +1149,21 @@
         container.querySelectorAll('.group-item').forEach(btn => {
           btn.addEventListener('click', () => {
             currentChatType = 'group';
+            currentGroupId = btn.dataset.groupId;
+            currentGroupName = btn.dataset.name;
+            currentGroupRole = btn.dataset.myRole || 'member';
             currentChannel = `grp_${btn.dataset.groupId}`;
             activeDmData = null;
+
+            closeChannelsDrawer();
 
             channelNameEl.textContent = btn.dataset.name;
             chatSubtitleEl.textContent = 'Custom Study Group (Auto-purge 7 days)';
             currentChatIcon.innerHTML = `<i data-lucide="users" class="w-4 h-4 text-purple-600"></i>`;
             dmPermissionBanner.classList.add('hidden');
+            groupInfoBtn?.classList.remove('hidden');
+            groupMembersCountBadge.textContent = `${btn.dataset.memberCount || 1} Members`;
+
             chatInput.disabled = false;
             chatInput.placeholder = `Message ${btn.dataset.name}...`;
             sendBtn.disabled = false;
@@ -1052,6 +1176,180 @@
         container.innerHTML = `<div class="p-3 text-rose-500 text-[10px] text-center">${err.message}</div>`;
       }
     }
+
+    // Group Modal management
+    function openGroupModal() {
+      if (!currentGroupId) return;
+      groupModalTitle.textContent = currentGroupName;
+      groupMembersModal.classList.remove('hidden');
+      groupMembersModal.classList.add('flex');
+      loadGroupMembers(currentGroupId);
+      loadAllStudents();
+      initIcons();
+    }
+    function closeGroupModal() {
+      groupMembersModal.classList.add('hidden');
+      groupMembersModal.classList.remove('flex');
+      if (addMemberSearchInput) addMemberSearchInput.value = '';
+      if (groupAddCandidateList) groupAddCandidateList.classList.add('hidden');
+    }
+
+    groupInfoBtn?.addEventListener('click', openGroupModal);
+    closeGroupMembersModal?.addEventListener('click', closeGroupModal);
+
+    async function loadGroupMembers(groupId) {
+      groupMembersListContainer.innerHTML = '<p class="text-center text-slate-400 py-3 text-xs">Loading members...</p>';
+      try {
+        const res = await apiRequest(`/chat/groups/${groupId}/members`);
+        currentGroupMembers = res.members || [];
+        groupModalMemberCount.textContent = `${currentGroupMembers.length} active members`;
+        groupMembersCountBadge.textContent = `${currentGroupMembers.length} Members`;
+
+        const me = currentGroupMembers.find(m => m.user_id === user.id);
+        if (me) currentGroupRole = me.member_role;
+        const isGroupAdmin = (currentGroupRole === 'admin' || user.role === 'admin');
+
+        if (isGroupAdmin) {
+          deleteGroupBtn.classList.remove('hidden');
+        } else {
+          deleteGroupBtn.classList.add('hidden');
+        }
+
+        renderGroupMembers(currentGroupMembers, isGroupAdmin);
+      } catch (err) {
+        groupMembersListContainer.innerHTML = `<div class="p-2 text-center text-rose-500 text-xs">${err.message}</div>`;
+      }
+    }
+
+    function renderGroupMembers(members, isGroupAdmin) {
+      if (members.length === 0) {
+        groupMembersListContainer.innerHTML = '<p class="text-center text-slate-400 py-3 text-xs">No members found.</p>';
+        return;
+      }
+
+      groupMembersListContainer.innerHTML = members.map(m => {
+        const isMe = m.user_id === user.id;
+        const isAdmin = m.member_role === 'admin';
+        const canRemove = isGroupAdmin && !isMe;
+
+        return `
+          <div class="py-1.5 px-2 rounded-xl flex items-center justify-between hover:bg-slate-50 transition border border-transparent">
+            <div class="overflow-hidden">
+              <div class="font-bold text-slate-800 text-xs truncate flex items-center gap-1.5">
+                ${escapeHtml(m.full_name)}
+                ${isMe ? '<span class="text-[9px] text-slate-400 font-normal">(You)</span>' : ''}
+                ${isAdmin ? '<span class="text-[8px] px-1.5 py-0.2 rounded bg-purple-100 text-purple-700 font-bold uppercase">Admin</span>' : ''}
+              </div>
+              <div class="text-[10px] text-slate-400 truncate">
+                @${escapeHtml(m.username)} • ${escapeHtml(m.class_name)} ${m.division ? '(' + escapeHtml(m.division) + ')' : ''}
+              </div>
+            </div>
+            ${canRemove ? `
+              <button class="remove-member-btn text-[10px] text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 transition shrink-0"
+                data-user-id="${m.user_id}" data-name="${escapeHtml(m.full_name)}">
+                Remove
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      initIcons();
+
+      groupMembersListContainer.querySelectorAll('.remove-member-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(`Remove ${btn.dataset.name} from this study group?`)) return;
+          try {
+            await apiRequest(`/chat/groups/${currentGroupId}/members/${btn.dataset.userId}`, { method: 'DELETE' });
+            showToast(`${btn.dataset.name} removed from group`, 'info');
+            loadGroupMembers(currentGroupId);
+            loadGroupsList();
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+    }
+
+    addMemberSearchInput?.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        groupAddCandidateList.classList.add('hidden');
+        return;
+      }
+
+      const existingUserIds = new Set(currentGroupMembers.map(m => m.user_id));
+      const candidates = allStudentsCache.filter(s =>
+        !existingUserIds.has(s.id) &&
+        (s.full_name.toLowerCase().includes(q) || s.username.toLowerCase().includes(q) || (s.roll_number && s.roll_number.includes(q)))
+      );
+
+      if (candidates.length === 0) {
+        groupAddCandidateList.innerHTML = '<p class="text-center text-slate-400 py-2 text-[10px]">No eligible classmates found</p>';
+        groupAddCandidateList.classList.remove('hidden');
+        return;
+      }
+
+      groupAddCandidateList.innerHTML = candidates.slice(0, 8).map(s => `
+        <div class="py-1.5 px-2 flex items-center justify-between hover:bg-white rounded-lg">
+          <div class="overflow-hidden">
+            <div class="font-bold text-slate-800 text-[11px] truncate">${escapeHtml(s.full_name)}</div>
+            <div class="text-[9px] text-slate-400">@${escapeHtml(s.username)} • ${escapeHtml(s.class_name)}</div>
+          </div>
+          <button class="add-to-group-action-btn px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-700 text-white font-bold text-[10px] transition shrink-0"
+            data-user-id="${s.id}" data-name="${escapeHtml(s.full_name)}">
+            + Add
+          </button>
+        </div>
+      `).join('');
+      groupAddCandidateList.classList.remove('hidden');
+
+      groupAddCandidateList.querySelectorAll('.add-to-group-action-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await apiRequest(`/chat/groups/${currentGroupId}/members`, {
+              method: 'POST',
+              body: { targetUserId: btn.dataset.userId }
+            });
+            showToast(`${btn.dataset.name} added to group!`, 'success');
+            addMemberSearchInput.value = '';
+            groupAddCandidateList.classList.add('hidden');
+            loadGroupMembers(currentGroupId);
+            loadGroupsList();
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        });
+      });
+    });
+
+    leaveGroupBtn?.addEventListener('click', async () => {
+      if (!currentGroupId) return;
+      if (!confirm(`Are you sure you want to leave ${currentGroupName}?`)) return;
+      try {
+        await apiRequest(`/chat/groups/${currentGroupId}/members/${user.id}`, { method: 'DELETE' });
+        showToast('You left the study group', 'info');
+        closeGroupModal();
+        loadGroupsList();
+        document.querySelector('.channel-item[data-channel="school"]')?.click();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    deleteGroupBtn?.addEventListener('click', async () => {
+      if (!currentGroupId) return;
+      if (!confirm(`Permanently delete ${currentGroupName}? All group messages will be removed.`)) return;
+      try {
+        await apiRequest(`/chat/groups/${currentGroupId}`, { method: 'DELETE' });
+        showToast('Study group deleted', 'info');
+        closeGroupModal();
+        loadGroupsList();
+        document.querySelector('.channel-item[data-channel="school"]')?.click();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
 
     // Create Group Modal
     const groupModal = document.getElementById('create-group-modal');

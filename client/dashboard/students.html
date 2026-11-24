@@ -193,7 +193,7 @@
       if (className) params.append('className', className);
 
       try {
-        const res = await apiRequest(`/admin/students?${params.toString()}`);
+        const res = await apiRequest(`/students?${params.toString()}`);
         const list = res.students || [];
 
         if (list.length === 0) {
