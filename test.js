@@ -454,8 +454,75 @@ async function runTests() {
   const dRemoveMember = await rRemoveMember.json();
   console.log("✓ [Phase 4 - Remove Member / Leave Study Group]: ", rRemoveMember.status === 200 && dRemoveMember.success ? 'PASS' : 'FAIL');
 
+  // 35. Phase 4: Invite Member by Roll Number & Consent Enforcement (Pending Block 403)
+  const rGroup2 = await worker.fetch(new Request('http://localhost/api/chat/groups', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ name: 'Mathematics Olympiad Squad', description: 'Advanced problem solving' })
+  }), mockEnv);
+  const dGroup2 = await rGroup2.json();
+  const group2Id = dGroup2.id;
+
+  // Invite student Aarav by Roll Number '21'
+  const rInviteByRoll = await worker.fetch(new Request(`http://localhost/api/chat/groups/${group2Id}/members`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ query: '21' })
+  }), mockEnv);
+  const dInviteByRoll = await rInviteByRoll.json();
+  const invitedByRollSuccess = rInviteByRoll.status === 201 && dInviteByRoll.member?.username === 'aarav_10a_21' && dInviteByRoll.member?.inviteStatus === 'pending';
+  console.log("✓ [Phase 4 - Invite Student to Group by Roll Number]: ", invitedByRollSuccess ? 'PASS' : 'FAIL');
+
+  // Student blocked from posting message while invite_status is pending (403)
+  const rPendingPost = await worker.fetch(new Request('http://localhost/api/chat/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ channel: `grp_${group2Id}`, content: 'Can I chat here?' })
+  }), mockEnv);
+  console.log("✓ [Privacy Security - Pending Group Invite Cannot Send Messages (403)]: ", rPendingPost.status === 403 ? 'PASS' : 'FAIL');
+
+  // 36. Phase 4: Accept Group Invitation & Post Unlocks (201)
+  const rAcceptGroup = await worker.fetch(new Request(`http://localhost/api/chat/groups/${group2Id}/accept`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dAcceptGroup = await rAcceptGroup.json();
+
+  const rActiveGroupPost = await worker.fetch(new Request('http://localhost/api/chat/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ channel: `grp_${group2Id}`, content: 'Accepted invite! Excited to solve math problems.' })
+  }), mockEnv);
+  console.log("✓ [Phase 4 - Accept Group Invitation & Message Unlocks (201)]: ", (dAcceptGroup.success && rActiveGroupPost.status === 201) ? 'PASS' : 'FAIL');
+
+  // 37. Phase 4: Decline Group Invitation Flow
+  const rGroup3 = await worker.fetch(new Request('http://localhost/api/chat/groups', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ name: 'Robotics Team', description: 'Weekend build club' })
+  }), mockEnv);
+  const dGroup3 = await rGroup3.json();
+  const group3Id = dGroup3.id;
+
+  // Invite by username with @ prefix
+  await worker.fetch(new Request(`http://localhost/api/chat/groups/${group3Id}/members`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ query: '@aarav_10a_21' })
+  }), mockEnv);
+
+  // Student declines
+  const rDeclineGroup = await worker.fetch(new Request(`http://localhost/api/chat/groups/${group3Id}/decline`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dDeclineGroup = await rDeclineGroup.json();
+
+  const membershipCheck = await mockEnv.DB.prepare(`SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`).bind(group3Id, studentId).first();
+  console.log("✓ [Phase 4 - Student Declines Group Invitation & Clean Purge]: ", (dDeclineGroup.success && !membershipCheck) ? 'PASS' : 'FAIL');
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 34 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 37 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

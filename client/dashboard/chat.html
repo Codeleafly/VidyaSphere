@@ -362,7 +362,7 @@
 
   <!-- Group Members & Invite Modal -->
   <div id="group-members-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md p-4 sm:p-5 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col">
+    <div class="bg-white rounded-2xl w-full max-w-md p-4 sm:p-5 space-y-3 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100 shrink-0">
         <div class="flex items-center gap-2 overflow-hidden">
           <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold shrink-0">
@@ -376,24 +376,45 @@
         <button id="close-group-members-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none p-1">&times;</button>
       </div>
 
-      <!-- Add Classmate Section -->
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2 shrink-0">
-        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-          <i data-lucide="user-plus" class="w-3.5 h-3.5 text-indigo-600"></i> Add Classmate to Group
-        </label>
-        <div class="flex gap-1.5">
-          <input type="text" id="add-member-search-input" placeholder="Type name, roll # or username..."
-            class="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
-        </div>
-        <div id="group-add-candidate-list" class="max-h-32 overflow-y-auto space-y-1 text-xs divide-y divide-slate-100 hidden">
+      <!-- Navigation Tabs: Members vs Add Classmates -->
+      <div class="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-bold shrink-0">
+        <button id="tab-btn-group-members" class="py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition">
+          Members List
+        </button>
+        <button id="tab-btn-group-add" class="py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Classmates
+        </button>
+      </div>
+
+      <!-- Panel 1: Current Members -->
+      <div id="panel-group-members" class="flex-1 overflow-y-auto space-y-1.5 min-h-0 pr-1">
+        <div id="group-members-list-container" class="space-y-1 text-xs">
+          <p class="text-center text-slate-400 py-4 text-xs">Loading members...</p>
         </div>
       </div>
 
-      <!-- Members List -->
-      <div class="flex-1 overflow-y-auto space-y-1.5 min-h-0 pr-1">
-        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Group Members</div>
-        <div id="group-members-list-container" class="space-y-1 text-xs">
-          <p class="text-center text-slate-400 py-4 text-xs">Loading members...</p>
+      <!-- Panel 2: Add Classmates (Selector like Direct Message) -->
+      <div id="panel-group-add" class="hidden flex-1 flex-col space-y-2 min-h-0">
+        <!-- Live Search -->
+        <div class="shrink-0">
+          <input type="text" id="add-member-search-input" placeholder="Search classmate by name, roll # or @username..."
+            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
+        </div>
+
+        <!-- Classmate Selector Scrollable List -->
+        <div id="group-classmate-selector" class="flex-1 overflow-y-auto space-y-1 text-xs divide-y divide-slate-100 pr-1">
+          <p class="text-center text-slate-400 py-6 text-[11px]">Loading classmates list...</p>
+        </div>
+
+        <!-- Manual Quick Invite Fallback -->
+        <div class="pt-2 border-t border-slate-100 shrink-0">
+          <div class="flex gap-1.5">
+            <input type="text" id="manual-group-invite-input" placeholder="Or type roll # or username directly..."
+              class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
+            <button id="manual-group-invite-btn" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition">
+              Invite
+            </button>
+          </div>
         </div>
       </div>
 
@@ -471,6 +492,7 @@
     let currentGroupRole = 'member';
     let currentGroupName = '';
     let currentGroupMembers = [];
+    let currentGroupInviteStatus = 'accepted';
 
     const groupInfoBtn = document.getElementById('group-info-btn');
     const groupMembersCountBadge = document.getElementById('group-members-count-badge');
@@ -478,8 +500,14 @@
     const closeGroupMembersModal = document.getElementById('close-group-members-modal');
     const groupModalTitle = document.getElementById('group-modal-title');
     const groupModalMemberCount = document.getElementById('group-modal-member-count');
+    const tabBtnGroupMembers = document.getElementById('tab-btn-group-members');
+    const tabBtnGroupAdd = document.getElementById('tab-btn-group-add');
+    const panelGroupMembers = document.getElementById('panel-group-members');
+    const panelGroupAdd = document.getElementById('panel-group-add');
     const addMemberSearchInput = document.getElementById('add-member-search-input');
-    const groupAddCandidateList = document.getElementById('group-add-candidate-list');
+    const groupClassmateSelector = document.getElementById('group-classmate-selector');
+    const manualGroupInviteInput = document.getElementById('manual-group-invite-input');
+    const manualGroupInviteBtn = document.getElementById('manual-group-invite-btn');
     const groupMembersListContainer = document.getElementById('group-members-list-container');
     const leaveGroupBtn = document.getElementById('leave-group-btn');
     const deleteGroupBtn = document.getElementById('delete-group-btn');
@@ -673,11 +701,16 @@
 
       return `
         <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} group" id="msg-${msg.id}">
-          <div class="flex items-center gap-1.5 mb-1 px-1">
-            <span class="text-[10px] font-bold ${isAdmin ? 'text-rose-600' : 'text-slate-600'}">
+          <div class="flex items-center gap-1.5 mb-1 px-1 flex-wrap">
+            <span class="text-[10px] font-bold ${isAdmin ? 'text-rose-600' : 'text-slate-700'}">
               ${escapeHtml(msg.sender_name)}
             </span>
             ${isAdmin ? '<span class="text-[8px] px-1 rounded bg-rose-100 text-rose-700 font-bold uppercase">Admin</span>' : ''}
+            ${msg.class_name ? `
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-semibold" title="${escapeHtml(msg.class_name)} ${msg.division ? 'Div ' + escapeHtml(msg.division) : ''}">
+                ${escapeHtml(msg.class_name)}${msg.division ? ' (' + escapeHtml(msg.division) + ')' : ''}${msg.roll_number ? ' • #' + escapeHtml(msg.roll_number) : ''}
+              </span>
+            ` : ''}
             <span class="text-[9px] text-slate-400">${formatDateTime(msg.created_at)}</span>
             ${isEdited ? '<span class="text-[9px] text-slate-400 italic">(edited)</span>' : ''}
           </div>
@@ -809,19 +842,24 @@
         container.innerHTML = dms.map(dm => {
           const isPending = dm.status === 'pending';
           const isIncoming = isPending && !dm.requestedByMe;
+          const academicDetail = `${dm.partner.className || ''}${dm.partner.division ? ' (' + dm.partner.division + ')' : ''}${dm.partner.rollNumber ? ' • Roll #' + dm.partner.rollNumber : ''}`;
 
           return `
             <button class="dm-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-50 border border-transparent"
               data-dm-id="${dm.id}"
               data-partner-name="${escapeHtml(dm.partner.fullName)}"
               data-partner-username="${escapeHtml(dm.partner.username)}"
+              data-partner-class="${escapeHtml(dm.partner.className || '')}"
+              data-partner-division="${escapeHtml(dm.partner.division || '')}"
+              data-partner-roll="${escapeHtml(dm.partner.rollNumber || '')}"
               data-status="${dm.status}"
               data-requested-by-me="${dm.requestedByMe}">
               <div class="overflow-hidden">
                 <div class="font-bold text-slate-800 truncate text-[11px]">
                   ${escapeHtml(dm.partner.fullName)}
                 </div>
-                <div class="text-[10px] text-slate-400 truncate">
+                ${academicDetail ? `<div class="text-[9px] text-indigo-600 font-semibold truncate">${escapeHtml(academicDetail)}</div>` : ''}
+                <div class="text-[9px] text-slate-400 truncate">
                   ${dm.lastMessage ? escapeHtml(dm.lastMessage) : (isPending ? 'Pending request...' : 'Active conversation')}
                 </div>
               </div>
@@ -858,7 +896,12 @@
       groupInfoBtn?.classList.add('hidden');
 
       channelNameEl.textContent = data.partnerName;
-      chatSubtitleEl.textContent = `@${data.partnerUsername} • 1-on-1 DM (Auto-purge 7 days)`;
+      const detailParts = [
+        data.partnerClass ? `${data.partnerClass}${data.partnerDivision ? ' (' + data.partnerDivision + ')' : ''}` : '',
+        data.partnerRoll ? `Roll #${data.partnerRoll}` : '',
+        `@${data.partnerUsername}`
+      ].filter(Boolean);
+      chatSubtitleEl.textContent = detailParts.length > 0 ? detailParts.join(' • ') : `@${data.partnerUsername} • 1-on-1 DM`;
       currentChatIcon.innerHTML = `<i data-lucide="lock" class="w-4 h-4 text-emerald-600"></i>`;
       initIcons();
 
@@ -892,29 +935,55 @@
       loadMessages();
     }
 
-    // Accept / Decline DMs
+    // Accept / Decline DMs or Group Invitations
     acceptDmBtn?.addEventListener('click', async () => {
-      if (!activeDmData) return;
-      try {
-        await apiRequest(`/chat/dms/${activeDmData.dmId}/accept`, { method: 'POST' });
-        showToast('Chat request accepted!', 'success');
-        activeDmData.status = 'accepted';
-        selectDmConversation(activeDmData);
-        loadDmsList();
-      } catch (err) {
-        showToast(err.message, 'error');
+      if (currentChatType === 'dm' && activeDmData) {
+        try {
+          await apiRequest(`/chat/dms/${activeDmData.dmId}/accept`, { method: 'POST' });
+          showToast('Chat request accepted!', 'success');
+          activeDmData.status = 'accepted';
+          selectDmConversation(activeDmData);
+          loadDmsList();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      } else if (currentChatType === 'group' && currentGroupId) {
+        try {
+          await apiRequest(`/chat/groups/${currentGroupId}/accept`, { method: 'POST' });
+          showToast('Joined study group successfully!', 'success');
+          currentGroupInviteStatus = 'accepted';
+          dmPermissionBanner.classList.add('hidden');
+          chatInput.disabled = false;
+          chatInput.placeholder = `Message ${currentGroupName}...`;
+          sendBtn.disabled = false;
+          attachBtn.disabled = false;
+          loadGroupsList();
+          loadMessages();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
       }
     });
 
     declineDmBtn?.addEventListener('click', async () => {
-      if (!activeDmData) return;
-      try {
-        await apiRequest(`/chat/dms/${activeDmData.dmId}/decline`, { method: 'POST' });
-        showToast('Chat request declined.', 'info');
-        loadDmsList();
-        document.querySelector('.channel-item[data-channel="school"]')?.click();
-      } catch (err) {
-        showToast(err.message, 'error');
+      if (currentChatType === 'dm' && activeDmData) {
+        try {
+          await apiRequest(`/chat/dms/${activeDmData.dmId}/decline`, { method: 'POST' });
+          showToast('Chat request declined.', 'info');
+          loadDmsList();
+          document.querySelector('.channel-item[data-channel="school"]')?.click();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      } else if (currentChatType === 'group' && currentGroupId) {
+        try {
+          await apiRequest(`/chat/groups/${currentGroupId}/decline`, { method: 'POST' });
+          showToast('Group invitation declined.', 'info');
+          loadGroupsList();
+          document.querySelector('.channel-item[data-channel="school"]')?.click();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
       }
     });
 
@@ -1040,13 +1109,16 @@
           allStudentsCache = (res.students || []).filter(s => s.id !== user.id && s.account_status === 'active');
         }
         if (picker) renderStudentPicker(allStudentsCache);
+        if (groupClassmateSelector && panelGroupAdd && !panelGroupAdd.classList.contains('hidden')) {
+          renderGroupClassmateSelector(allStudentsCache);
+        }
       } catch (err) {
         if (picker) {
           picker.innerHTML = `
             <div class="space-y-2 pt-2">
-              <p class="text-[11px] text-slate-500">Enter student's exact username:</p>
+              <p class="text-[11px] text-slate-500">Enter student's exact username or roll #:</p>
               <div class="flex gap-1.5">
-                <input type="text" id="manual-username-input" placeholder="e.g. aarav_10a" class="flex-1 px-3 py-1.5 border rounded-lg text-xs">
+                <input type="text" id="manual-username-input" placeholder="e.g. 21 or aarav_10a" class="flex-1 px-3 py-1.5 border rounded-lg text-xs">
                 <button id="send-request-manual" class="px-3 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs">Invite</button>
               </div>
             </div>
@@ -1074,18 +1146,26 @@
         return;
       }
 
-      picker.innerHTML = students.slice(0, 15).map(s => `
-        <div class="py-2 flex items-center justify-between">
-          <div>
-            <div class="font-bold text-slate-800">${escapeHtml(s.full_name)}</div>
-            <div class="text-[10px] text-slate-400">@${escapeHtml(s.username)} • ${escapeHtml(s.class_name)} (${escapeHtml(s.division)})</div>
+      picker.innerHTML = students.slice(0, 20).map(s => {
+        const academicDetail = [
+          s.class_name ? `${s.class_name}${s.division ? ' (' + s.division + ')' : ''}` : '',
+          s.roll_number ? `Roll #${s.roll_number}` : '',
+          `@${s.username}`
+        ].filter(Boolean).join(' • ');
+
+        return `
+          <div class="py-2 flex items-center justify-between">
+            <div class="overflow-hidden">
+              <div class="font-bold text-slate-800 text-xs">${escapeHtml(s.full_name)}</div>
+              <div class="text-[10px] text-indigo-600 font-semibold truncate">${escapeHtml(academicDetail)}</div>
+            </div>
+            <button class="invite-student-btn px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-[11px] transition shrink-0"
+              data-user-id="${s.id}">
+              Chat
+            </button>
           </div>
-          <button class="invite-student-btn px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-[11px] transition"
-            data-user-id="${s.id}">
-            Chat
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
       picker.querySelectorAll('.invite-student-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -1104,9 +1184,10 @@
     document.getElementById('student-search-input')?.addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
       const filtered = allStudentsCache.filter(s =>
-        s.full_name.toLowerCase().includes(q) ||
-        s.username.toLowerCase().includes(q) ||
-        (s.roll_number && s.roll_number.includes(q))
+        (s.full_name && s.full_name.toLowerCase().includes(q)) ||
+        (s.username && s.username.toLowerCase().includes(q)) ||
+        (s.roll_number && s.roll_number.toString().includes(q)) ||
+        (s.class_name && s.class_name.toLowerCase().includes(q))
       );
       renderStudentPicker(filtered);
     });
@@ -1134,15 +1215,37 @@
           return;
         }
 
-        container.innerHTML = groups.map(g => `
-          <button class="group-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-50 border border-transparent"
-            data-group-id="${g.id}" data-name="${escapeHtml(g.name)}" data-my-role="${g.my_role || 'member'}" data-member-count="${g.member_count || 1}">
-            <span class="font-bold text-slate-800 truncate text-[11px] flex items-center gap-1.5">
-              <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> ${escapeHtml(g.name)}
-            </span>
-            <span class="text-[9px] text-slate-400">${g.member_count || 1} members</span>
-          </button>
-        `).join('');
+        container.innerHTML = groups.map(g => {
+          const isPending = g.invite_status === 'pending';
+          const academicDetail = `${g.creator_name ? 'By ' + g.creator_name : ''}${g.creator_class ? ' • ' + g.creator_class : ''}${g.creator_division ? ' (' + g.creator_division + ')' : ''}${g.creator_roll ? ' • #' + g.creator_roll : ''}`;
+
+          return `
+            <button class="group-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-50 border border-transparent"
+              data-group-id="${g.id}"
+              data-name="${escapeHtml(g.name)}"
+              data-my-role="${g.my_role || 'member'}"
+              data-invite-status="${g.invite_status || 'accepted'}"
+              data-creator-name="${escapeHtml(g.creator_name || '')}"
+              data-creator-username="${escapeHtml(g.creator_username || '')}"
+              data-creator-class="${escapeHtml(g.creator_class || '')}"
+              data-creator-division="${escapeHtml(g.creator_division || '')}"
+              data-creator-roll="${escapeHtml(g.creator_roll || '')}"
+              data-member-count="${g.member_count || 1}">
+              <div class="overflow-hidden">
+                <div class="font-bold text-slate-800 truncate text-[11px] flex items-center gap-1.5">
+                  <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> ${escapeHtml(g.name)}
+                </div>
+                ${academicDetail ? `<div class="text-[9px] text-indigo-600 font-semibold truncate">${escapeHtml(academicDetail)}</div>` : ''}
+              </div>
+              <div class="shrink-0 text-right">
+                ${isPending 
+                  ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold animate-pulse">Invite</span>'
+                  : `<span class="text-[9px] text-slate-400 font-medium">${g.member_count || 1} members</span>`
+                }
+              </div>
+            </button>
+          `;
+        }).join('');
 
         initIcons();
 
@@ -1152,21 +1255,39 @@
             currentGroupId = btn.dataset.groupId;
             currentGroupName = btn.dataset.name;
             currentGroupRole = btn.dataset.myRole || 'member';
+            currentGroupInviteStatus = btn.dataset.inviteStatus || 'accepted';
             currentChannel = `grp_${btn.dataset.groupId}`;
             activeDmData = null;
 
             closeChannelsDrawer();
 
             channelNameEl.textContent = btn.dataset.name;
-            chatSubtitleEl.textContent = 'Custom Study Group (Auto-purge 7 days)';
+            const creatorAcademic = [
+              btn.dataset.creatorName ? `Created by ${btn.dataset.creatorName}` : '',
+              btn.dataset.creatorClass ? `${btn.dataset.creatorClass}${btn.dataset.creatorDivision ? ' (' + btn.dataset.creatorDivision + ')' : ''}` : '',
+              btn.dataset.creatorRoll ? `Roll #${btn.dataset.creatorRoll}` : ''
+            ].filter(Boolean).join(' • ');
+
+            chatSubtitleEl.textContent = creatorAcademic || 'Custom Study Group (Auto-purge 7 days)';
             currentChatIcon.innerHTML = `<i data-lucide="users" class="w-4 h-4 text-purple-600"></i>`;
-            dmPermissionBanner.classList.add('hidden');
             groupInfoBtn?.classList.remove('hidden');
             groupMembersCountBadge.textContent = `${btn.dataset.memberCount || 1} Members`;
 
-            chatInput.disabled = false;
-            chatInput.placeholder = `Message ${btn.dataset.name}...`;
-            sendBtn.disabled = false;
+            if (currentGroupInviteStatus === 'pending') {
+              dmPermissionBanner.classList.remove('hidden');
+              dmPermissionText.textContent = `${btn.dataset.creatorName || 'A classmate'} invited you to join "${btn.dataset.name}". Accept invitation to join?`;
+              dmPermissionActions.classList.remove('hidden');
+              chatInput.disabled = true;
+              chatInput.placeholder = 'Accept the group invitation above to send messages...';
+              sendBtn.disabled = true;
+              attachBtn.disabled = true;
+            } else {
+              dmPermissionBanner.classList.add('hidden');
+              chatInput.disabled = false;
+              chatInput.placeholder = `Message ${btn.dataset.name}...`;
+              sendBtn.disabled = false;
+              attachBtn.disabled = false;
+            }
 
             initIcons();
             loadMessages();
@@ -1177,21 +1298,42 @@
       }
     }
 
-    // Group Modal management
+    // Group Modal Tab Switcher & Management
+    function switchGroupModalTab(tab) {
+      if (tab === 'members') {
+        tabBtnGroupMembers.className = 'py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition';
+        tabBtnGroupAdd.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1';
+        panelGroupMembers.classList.remove('hidden');
+        panelGroupAdd.classList.add('hidden');
+        panelGroupAdd.classList.remove('flex');
+      } else {
+        tabBtnGroupAdd.className = 'py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition flex items-center justify-center gap-1';
+        tabBtnGroupMembers.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
+        panelGroupMembers.classList.add('hidden');
+        panelGroupAdd.classList.remove('hidden');
+        panelGroupAdd.classList.add('flex');
+        renderGroupClassmateSelector(allStudentsCache);
+      }
+      initIcons();
+    }
+    tabBtnGroupMembers?.addEventListener('click', () => switchGroupModalTab('members'));
+    tabBtnGroupAdd?.addEventListener('click', () => switchGroupModalTab('add'));
+
     function openGroupModal() {
       if (!currentGroupId) return;
       groupModalTitle.textContent = currentGroupName;
       groupMembersModal.classList.remove('hidden');
       groupMembersModal.classList.add('flex');
+      switchGroupModalTab('members');
       loadGroupMembers(currentGroupId);
       loadAllStudents();
       initIcons();
     }
+
     function closeGroupModal() {
       groupMembersModal.classList.add('hidden');
       groupMembersModal.classList.remove('flex');
       if (addMemberSearchInput) addMemberSearchInput.value = '';
-      if (groupAddCandidateList) groupAddCandidateList.classList.add('hidden');
     }
 
     groupInfoBtn?.addEventListener('click', openGroupModal);
@@ -1202,8 +1344,9 @@
       try {
         const res = await apiRequest(`/chat/groups/${groupId}/members`);
         currentGroupMembers = res.members || [];
-        groupModalMemberCount.textContent = `${currentGroupMembers.length} active members`;
-        groupMembersCountBadge.textContent = `${currentGroupMembers.length} Members`;
+        const acceptedCount = currentGroupMembers.filter(m => m.invite_status === 'accepted').length;
+        groupModalMemberCount.textContent = `${acceptedCount} active members (${currentGroupMembers.length} total)`;
+        groupMembersCountBadge.textContent = `${acceptedCount} Members`;
 
         const me = currentGroupMembers.find(m => m.user_id === user.id);
         if (me) currentGroupRole = me.member_role;
@@ -1230,24 +1373,32 @@
       groupMembersListContainer.innerHTML = members.map(m => {
         const isMe = m.user_id === user.id;
         const isAdmin = m.member_role === 'admin';
+        const isPending = m.invite_status === 'pending';
         const canRemove = isGroupAdmin && !isMe;
 
+        const academicBadge = [
+          m.class_name ? `${m.class_name}${m.division ? ' (' + m.division + ')' : ''}` : '',
+          m.roll_number ? `Roll #${m.roll_number}` : '',
+          `@${m.username}`
+        ].filter(Boolean).join(' • ');
+
         return `
-          <div class="py-1.5 px-2 rounded-xl flex items-center justify-between hover:bg-slate-50 transition border border-transparent">
+          <div class="py-2 px-2.5 rounded-xl flex items-center justify-between hover:bg-slate-50 transition border border-transparent">
             <div class="overflow-hidden">
-              <div class="font-bold text-slate-800 text-xs truncate flex items-center gap-1.5">
+              <div class="font-bold text-slate-800 text-xs truncate flex items-center gap-1.5 flex-wrap">
                 ${escapeHtml(m.full_name)}
                 ${isMe ? '<span class="text-[9px] text-slate-400 font-normal">(You)</span>' : ''}
                 ${isAdmin ? '<span class="text-[8px] px-1.5 py-0.2 rounded bg-purple-100 text-purple-700 font-bold uppercase">Admin</span>' : ''}
+                ${isPending ? '<span class="text-[8px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold">Pending Invite</span>' : ''}
               </div>
-              <div class="text-[10px] text-slate-400 truncate">
-                @${escapeHtml(m.username)} • ${escapeHtml(m.class_name)} ${m.division ? '(' + escapeHtml(m.division) + ')' : ''}
+              <div class="text-[10px] text-indigo-600 font-medium truncate mt-0.5">
+                ${escapeHtml(academicBadge)}
               </div>
             </div>
             ${canRemove ? `
-              <button class="remove-member-btn text-[10px] text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 transition shrink-0"
+              <button class="remove-member-btn text-[10px] text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 transition shrink-0"
                 data-user-id="${m.user_id}" data-name="${escapeHtml(m.full_name)}">
-                Remove
+                ${isPending ? 'Cancel Invite' : 'Remove'}
               </button>
             ` : ''}
           </div>
@@ -1262,9 +1413,87 @@
           try {
             await apiRequest(`/chat/groups/${currentGroupId}/members/${btn.dataset.userId}`, { method: 'DELETE' });
             showToast(`${btn.dataset.name} removed from group`, 'info');
-            loadGroupMembers(currentGroupId);
+            await loadGroupMembers(currentGroupId);
+            renderGroupClassmateSelector(allStudentsCache);
             loadGroupsList();
           } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+    }
+
+    function renderGroupClassmateSelector(students) {
+      if (!groupClassmateSelector) return;
+      const list = students || allStudentsCache || [];
+      if (list.length === 0) {
+        groupClassmateSelector.innerHTML = '<p class="text-center text-slate-400 py-6 text-[11px]">No classmates found.</p>';
+        return;
+      }
+
+      const existingMap = new Map();
+      currentGroupMembers.forEach(m => existingMap.set(m.user_id, m.invite_status || 'accepted'));
+
+      groupClassmateSelector.innerHTML = list.slice(0, 30).map(s => {
+        const isCurrentMember = existingMap.has(s.id);
+        const status = existingMap.get(s.id);
+        const isMe = s.id === user.id;
+
+        let actionButton = '';
+        if (isMe) {
+          actionButton = '<span class="text-[9px] px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-bold">You</span>';
+        } else if (isCurrentMember) {
+          if (status === 'accepted') {
+            actionButton = '<span class="text-[9px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">In Group</span>';
+          } else {
+            actionButton = '<span class="text-[9px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">Invited</span>';
+          }
+        } else {
+          actionButton = `
+            <button class="invite-classmate-btn px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 font-bold text-[10px] transition shrink-0"
+              data-user-id="${s.id}" data-user-name="${escapeHtml(s.full_name)}">
+              + Invite
+            </button>
+          `;
+        }
+
+        const academicDetail = [
+          s.class_name ? `${s.class_name}${s.division ? ' (' + s.division + ')' : ''}` : '',
+          s.roll_number ? `Roll #${s.roll_number}` : '',
+          `@${s.username}`
+        ].filter(Boolean).join(' • ');
+
+        return `
+          <div class="py-2 px-1 flex items-center justify-between hover:bg-slate-50 rounded-lg transition gap-2">
+            <div class="overflow-hidden">
+              <div class="font-bold text-slate-800 text-[11px] truncate">${escapeHtml(s.full_name)}</div>
+              <div class="text-[9px] text-indigo-600 font-medium truncate">${escapeHtml(academicDetail)}</div>
+            </div>
+            ${actionButton}
+          </div>
+        `;
+      }).join('');
+
+      initIcons();
+
+      groupClassmateSelector.querySelectorAll('.invite-classmate-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const targetId = btn.dataset.userId;
+          const targetName = btn.dataset.userName;
+          try {
+            btn.disabled = true;
+            btn.textContent = 'Inviting...';
+            await apiRequest(`/chat/groups/${currentGroupId}/members`, {
+              method: 'POST',
+              body: { targetUserId: targetId }
+            });
+            showToast(`Invitation sent to ${targetName}!`, 'success');
+            await loadGroupMembers(currentGroupId);
+            renderGroupClassmateSelector(allStudentsCache);
+            loadGroupsList();
+          } catch (e) {
+            btn.disabled = false;
+            btn.textContent = '+ Invite';
             showToast(e.message, 'error');
           }
         });
@@ -1274,53 +1503,51 @@
     addMemberSearchInput?.addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
       if (!q) {
-        groupAddCandidateList.classList.add('hidden');
+        renderGroupClassmateSelector(allStudentsCache);
         return;
       }
-
-      const existingUserIds = new Set(currentGroupMembers.map(m => m.user_id));
-      const candidates = allStudentsCache.filter(s =>
-        !existingUserIds.has(s.id) &&
-        (s.full_name.toLowerCase().includes(q) || s.username.toLowerCase().includes(q) || (s.roll_number && s.roll_number.includes(q)))
+      const filtered = allStudentsCache.filter(s =>
+        (s.full_name && s.full_name.toLowerCase().includes(q)) ||
+        (s.username && s.username.toLowerCase().includes(q)) ||
+        (s.roll_number && s.roll_number.toString().includes(q)) ||
+        (s.class_name && s.class_name.toLowerCase().includes(q)) ||
+        (s.division && s.division.toLowerCase().includes(q))
       );
+      renderGroupClassmateSelector(filtered);
+    });
 
-      if (candidates.length === 0) {
-        groupAddCandidateList.innerHTML = '<p class="text-center text-slate-400 py-2 text-[10px]">No eligible classmates found</p>';
-        groupAddCandidateList.classList.remove('hidden');
+    async function handleManualGroupInvite() {
+      const val = manualGroupInviteInput.value.trim();
+      if (!val) {
+        showToast('Please enter a roll number or username', 'warning');
         return;
       }
-
-      groupAddCandidateList.innerHTML = candidates.slice(0, 8).map(s => `
-        <div class="py-1.5 px-2 flex items-center justify-between hover:bg-white rounded-lg">
-          <div class="overflow-hidden">
-            <div class="font-bold text-slate-800 text-[11px] truncate">${escapeHtml(s.full_name)}</div>
-            <div class="text-[9px] text-slate-400">@${escapeHtml(s.username)} • ${escapeHtml(s.class_name)}</div>
-          </div>
-          <button class="add-to-group-action-btn px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-700 text-white font-bold text-[10px] transition shrink-0"
-            data-user-id="${s.id}" data-name="${escapeHtml(s.full_name)}">
-            + Add
-          </button>
-        </div>
-      `).join('');
-      groupAddCandidateList.classList.remove('hidden');
-
-      groupAddCandidateList.querySelectorAll('.add-to-group-action-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            await apiRequest(`/chat/groups/${currentGroupId}/members`, {
-              method: 'POST',
-              body: { targetUserId: btn.dataset.userId }
-            });
-            showToast(`${btn.dataset.name} added to group!`, 'success');
-            addMemberSearchInput.value = '';
-            groupAddCandidateList.classList.add('hidden');
-            loadGroupMembers(currentGroupId);
-            loadGroupsList();
-          } catch (err) {
-            showToast(err.message, 'error');
-          }
+      try {
+        manualGroupInviteBtn.disabled = true;
+        manualGroupInviteBtn.textContent = 'Inviting...';
+        await apiRequest(`/chat/groups/${currentGroupId}/members`, {
+          method: 'POST',
+          body: { query: val }
         });
-      });
+        showToast(`Invitation sent to ${val}!`, 'success');
+        manualGroupInviteInput.value = '';
+        await loadGroupMembers(currentGroupId);
+        renderGroupClassmateSelector(allStudentsCache);
+        loadGroupsList();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        manualGroupInviteBtn.disabled = false;
+        manualGroupInviteBtn.textContent = 'Invite';
+      }
+    }
+
+    manualGroupInviteBtn?.addEventListener('click', handleManualGroupInvite);
+    manualGroupInviteInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleManualGroupInvite();
+      }
     });
 
     leaveGroupBtn?.addEventListener('click', async () => {

@@ -86,11 +86,11 @@ export async function handleChatRoutes(request, env, path, method) {
           } else if (channel.startsWith('grp_')) {
             const grpId = channel.replace('grp_', '');
             const member = await env.DB.prepare(
-              `SELECT user_id FROM group_members WHERE group_id = ? AND user_id = ?`
+              `SELECT user_id, invite_status FROM group_members WHERE group_id = ? AND user_id = ?`
             ).bind(grpId, session.user_id).first();
 
-            if (!member) {
-              server.send(JSON.stringify({ type: 'error', error: 'You are not a member of this study group' }));
+            if (!member || member.invite_status !== 'accepted') {
+              server.send(JSON.stringify({ type: 'error', error: 'You must accept the group invitation before sending messages' }));
               return;
             }
           }
@@ -109,6 +109,9 @@ export async function handleChatRoutes(request, env, path, method) {
               senderId: session.user_id,
               senderName: session.full_name,
               senderRole: session.role,
+              className: session.class_name || null,
+              division: session.division || null,
+              rollNumber: session.roll_number || null,
               isRootAdmin: session.is_root_admin === 1,
               channel,
               content,
@@ -159,8 +162,8 @@ export async function handleChatRoutes(request, env, path, method) {
 
     const { results } = await env.DB.prepare(`
       SELECT dc.id, dc.user1_id, dc.user2_id, dc.status, dc.requested_by, dc.created_at, dc.updated_at,
-             p1.username as u1_username, p1.full_name as u1_name, p1.class_name as u1_class, p1.is_root_admin as u1_root,
-             p2.username as u2_username, p2.full_name as u2_name, p2.class_name as u2_class, p2.is_root_admin as u2_root,
+             p1.username as u1_username, p1.full_name as u1_name, p1.class_name as u1_class, p1.division as u1_division, p1.roll_number as u1_roll, p1.is_root_admin as u1_root,
+             p2.username as u2_username, p2.full_name as u2_name, p2.class_name as u2_class, p2.division as u2_division, p2.roll_number as u2_roll, p2.is_root_admin as u2_root,
              (SELECT content FROM messages WHERE channel = ('dm_' || dc.id) AND created_at >= datetime('now', '-7 days') ORDER BY created_at DESC LIMIT 1) as last_message,
              (SELECT created_at FROM messages WHERE channel = ('dm_' || dc.id) AND created_at >= datetime('now', '-7 days') ORDER BY created_at DESC LIMIT 1) as last_message_time
       FROM direct_chats dc
@@ -177,6 +180,8 @@ export async function handleChatRoutes(request, env, path, method) {
         username: isUser1 ? r.u2_username : r.u1_username,
         fullName: isUser1 ? r.u2_name : r.u1_name,
         className: isUser1 ? r.u2_class : r.u1_class,
+        division: isUser1 ? r.u2_division : r.u1_division,
+        rollNumber: isUser1 ? r.u2_roll : r.u1_roll,
         isRootAdmin: (isUser1 ? r.u2_root : r.u1_root) === 1,
       };
       return {
@@ -306,10 +311,13 @@ export async function handleChatRoutes(request, env, path, method) {
     if (auth.error) return auth.error;
 
     const { results } = await env.DB.prepare(`
-      SELECT g.*, gm.role as my_role,
-             (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count
+      SELECT g.*, gm.role as my_role, gm.invite_status,
+             p.full_name as creator_name, p.username as creator_username,
+             p.class_name as creator_class, p.division as creator_division, p.roll_number as creator_roll,
+             (SELECT COUNT(*) FROM group_members WHERE group_id = g.id AND invite_status = 'accepted') as member_count
       FROM chat_groups g
       JOIN group_members gm ON g.id = gm.group_id
+      JOIN profiles p ON g.creator_id = p.id
       WHERE gm.user_id = ?
       ORDER BY g.created_at DESC
     `).bind(auth.user.id).all();
@@ -337,8 +345,8 @@ export async function handleChatRoutes(request, env, path, method) {
            VALUES (?, ?, ?, ?, ?)`
         ).bind(groupId, name.trim(), description.trim(), className, auth.user.id),
         env.DB.prepare(
-          `INSERT INTO group_members (group_id, user_id, role)
-           VALUES (?, ?, 'admin')`
+          `INSERT INTO group_members (group_id, user_id, role, invite_status)
+           VALUES (?, ?, 'admin', 'accepted')`
         ).bind(groupId, auth.user.id)
       ]);
 
@@ -366,19 +374,19 @@ export async function handleChatRoutes(request, env, path, method) {
     }
 
     const { results } = await env.DB.prepare(`
-      SELECT gm.group_id, gm.user_id, gm.role as member_role,
+      SELECT gm.group_id, gm.user_id, gm.role as member_role, gm.invite_status,
              strftime('%Y-%m-%dT%H:%M:%SZ', gm.joined_at) as joined_at,
              p.username, p.full_name, p.class_name, p.division, p.roll_number, p.is_root_admin
       FROM group_members gm
       JOIN profiles p ON gm.user_id = p.id
       WHERE gm.group_id = ?
-      ORDER BY (CASE WHEN gm.role = 'admin' THEN 0 ELSE 1 END), p.full_name ASC
+      ORDER BY (CASE WHEN gm.role = 'admin' THEN 0 ELSE 1 END), (CASE WHEN gm.invite_status = 'accepted' THEN 0 ELSE 1 END), p.full_name ASC
     `).bind(groupId).all();
 
     return successResponse({ members: results || [] });
   }
 
-  // 6b. POST /api/chat/groups/:id/members - Add member to study group
+  // 6b. POST /api/chat/groups/:id/members - Add/Invite member to study group (Roll Number, Username, Name, ID)
   if (path.startsWith('/api/chat/groups/') && path.endsWith('/members') && method === 'POST') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
@@ -399,21 +407,40 @@ export async function handleChatRoutes(request, env, path, method) {
 
     try {
       const body = await request.json();
-      const { targetUserId, targetUsername } = body;
+      const { targetUserId, targetUsername, targetRollNumber, query } = body;
+      const cleanTarget = (targetUserId || targetUsername || targetRollNumber || query || '').toString().trim();
+      const cleanUsername = cleanTarget.replace(/^@/, '').toLowerCase();
 
-      if (!targetUserId && !targetUsername) {
-        return errorResponse('Student ID or username is required', 400);
+      if (!cleanTarget) {
+        return errorResponse('Please enter a roll number, username, or select a student', 400);
       }
 
       let targetUser = null;
-      if (targetUserId) {
-        targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE id = ? AND account_status = 'active'`).bind(targetUserId).first();
-      } else {
-        targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE username = ? AND account_status = 'active'`).bind(targetUsername.trim().toLowerCase()).first();
+      // 1. Try by ID
+      targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE id = ? AND account_status = 'active'`).bind(cleanTarget).first();
+
+      // 2. Try by username
+      if (!targetUser) {
+        targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE LOWER(username) = ? AND account_status = 'active'`).bind(cleanUsername).first();
+      }
+
+      // 3. Try by roll number
+      if (!targetUser && /^\d+$/.test(cleanTarget)) {
+        if (group.class_name && group.class_name !== 'all') {
+          targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE roll_number = ? AND class_name = ? AND account_status = 'active'`).bind(cleanTarget, group.class_name).first();
+        }
+        if (!targetUser) {
+          targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE roll_number = ? AND account_status = 'active'`).bind(cleanTarget).first();
+        }
+      }
+
+      // 4. Try by full name
+      if (!targetUser) {
+        targetUser = await env.DB.prepare(`SELECT * FROM profiles WHERE LOWER(full_name) = ? AND account_status = 'active'`).bind(cleanTarget.toLowerCase()).first();
       }
 
       if (!targetUser) {
-        return errorResponse('Classmate not found or student account is not active', 404);
+        return errorResponse(`Student "${cleanTarget}" not found. Verify the roll number or username.`, 404);
       }
 
       const existing = await env.DB.prepare(
@@ -421,11 +448,30 @@ export async function handleChatRoutes(request, env, path, method) {
       ).bind(groupId, targetUser.id).first();
 
       if (existing) {
-        return errorResponse(`${targetUser.full_name} is already a member of this study group`, 400);
+        if (existing.invite_status === 'accepted') {
+          return errorResponse(`${targetUser.full_name} is already an active member of this study group`, 400);
+        } else if (existing.invite_status === 'pending') {
+          return errorResponse(`An invitation has already been sent to ${targetUser.full_name} and is awaiting approval`, 400);
+        } else {
+          await env.DB.prepare(`UPDATE group_members SET invite_status = 'pending' WHERE group_id = ? AND user_id = ?`).bind(groupId, targetUser.id).run();
+          return successResponse({
+            member: {
+              id: targetUser.id,
+              username: targetUser.username,
+              fullName: targetUser.full_name,
+              className: targetUser.class_name,
+              division: targetUser.division,
+              rollNumber: targetUser.roll_number,
+              role: 'member',
+              inviteStatus: 'pending'
+            }
+          }, `Invitation re-sent to ${targetUser.full_name}!`, 201);
+        }
       }
 
+      // Consent-first invitation: inserted with invite_status = 'pending'
       await env.DB.prepare(
-        `INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, 'member')`
+        `INSERT INTO group_members (group_id, user_id, role, invite_status) VALUES (?, ?, 'member', 'pending')`
       ).bind(groupId, targetUser.id).run();
 
       return successResponse({
@@ -433,15 +479,55 @@ export async function handleChatRoutes(request, env, path, method) {
           id: targetUser.id,
           username: targetUser.username,
           fullName: targetUser.full_name,
-          role: 'member'
+          className: targetUser.class_name,
+          division: targetUser.division,
+          rollNumber: targetUser.roll_number,
+          role: 'member',
+          inviteStatus: 'pending'
         }
-      }, `${targetUser.full_name} added to ${group.name}!`, 201);
+      }, `Invitation sent to ${targetUser.full_name}! They can accept to join.`, 201);
     } catch (err) {
       return errorResponse(`Add member error: ${err.message}`, 500);
     }
   }
 
-  // 6c. DELETE /api/chat/groups/:id/members/:userId - Remove member or leave group
+  // 6c. POST /api/chat/groups/:id/accept - Student accepts group invitation
+  if (path.startsWith('/api/chat/groups/') && path.endsWith('/accept') && method === 'POST') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const groupId = parts[4];
+
+    const membership = await env.DB.prepare(
+      `SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`
+    ).bind(groupId, auth.user.id).first();
+
+    if (!membership) return errorResponse('Group invitation not found or you were not invited', 404);
+
+    await env.DB.prepare(
+      `UPDATE group_members SET invite_status = 'accepted', joined_at = CURRENT_TIMESTAMP WHERE group_id = ? AND user_id = ?`
+    ).bind(groupId, auth.user.id).run();
+
+    return successResponse({ groupId, inviteStatus: 'accepted' }, 'Group invitation accepted! Welcome to the group.');
+  }
+
+  // 6d. POST /api/chat/groups/:id/decline - Student declines group invitation
+  if (path.startsWith('/api/chat/groups/') && path.endsWith('/decline') && method === 'POST') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const parts = path.split('/');
+    const groupId = parts[4];
+
+    await env.DB.prepare(
+      `DELETE FROM group_members WHERE group_id = ? AND user_id = ? AND invite_status = 'pending'`
+    ).bind(groupId, auth.user.id).run();
+
+    return successResponse({ groupId, inviteStatus: 'declined' }, 'Group invitation declined.');
+  }
+
+  // 6e. DELETE /api/chat/groups/:id/members/:userId - Remove member or leave group
   if (path.startsWith('/api/chat/groups/') && path.includes('/members/') && method === 'DELETE') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
@@ -528,10 +614,10 @@ export async function handleChatRoutes(request, env, path, method) {
     } else if (channel.startsWith('grp_')) {
       const grpId = channel.replace('grp_', '');
       const member = await env.DB.prepare(
-        `SELECT user_id FROM group_members WHERE group_id = ? AND user_id = ?`
+        `SELECT user_id, invite_status FROM group_members WHERE group_id = ? AND user_id = ?`
       ).bind(grpId, auth.user.id).first();
 
-      if (!member) {
+      if (!member && auth.user.role !== 'admin') {
         return errorResponse('You are not a member of this study group', 403);
       }
     }
@@ -542,7 +628,7 @@ export async function handleChatRoutes(request, env, path, method) {
              m.attachment_name, m.attachment_type, m.attachment_size,
              strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
              strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
-             p.full_name as sender_name, p.role as sender_role, p.class_name, p.is_root_admin
+             p.full_name as sender_name, p.role as sender_role, p.class_name, p.division, p.roll_number, p.is_root_admin
       FROM messages m
       JOIN profiles p ON m.sender_id = p.id
       WHERE m.channel = ? AND m.created_at >= datetime('now', '-7 days')
@@ -622,11 +708,14 @@ export async function handleChatRoutes(request, env, path, method) {
       } else if (channel.startsWith('grp_')) {
         const grpId = channel.replace('grp_', '');
         const member = await env.DB.prepare(
-          `SELECT user_id FROM group_members WHERE group_id = ? AND user_id = ?`
+          `SELECT user_id, invite_status FROM group_members WHERE group_id = ? AND user_id = ?`
         ).bind(grpId, auth.user.id).first();
 
         if (!member) {
           return errorResponse('You are not a member of this study group', 403);
+        }
+        if (member.invite_status !== 'accepted') {
+          return errorResponse('Cannot send message. Please accept the group invitation first.', 403);
         }
       }
 
@@ -663,6 +752,9 @@ export async function handleChatRoutes(request, env, path, method) {
         id: msgId,
         senderName: auth.user.fullName,
         senderRole: auth.user.role,
+        className: auth.user.className || null,
+        division: auth.user.division || null,
+        rollNumber: auth.user.rollNumber || null,
         isRootAdmin: auth.user.isRootAdmin || false,
         channel,
         content: content || (fileName ? `Shared attachment: ${fileName}` : ''),

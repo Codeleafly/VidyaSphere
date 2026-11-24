@@ -213,6 +213,7 @@ CREATE TABLE IF NOT EXISTS group_members (
     group_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'member' CHECK(role IN ('admin', 'member')),
+    invite_status TEXT NOT NULL DEFAULT 'accepted' CHECK(invite_status IN ('pending', 'accepted', 'rejected')),
     joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (group_id, user_id),
     FOREIGN KEY (group_id) REFERENCES chat_groups(id) ON DELETE CASCADE,
