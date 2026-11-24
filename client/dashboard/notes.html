@@ -316,7 +316,7 @@
             </label>
             <label class="cursor-pointer border border-slate-200 bg-slate-50 p-2.5 rounded-xl flex items-center gap-2 hover:bg-slate-100">
               <input type="radio" name="note-type-radio" value="file" class="text-indigo-600 focus:ring-indigo-500">
-              <span class="text-xs font-bold text-slate-800 leading-tight">📁 Direct PDF<br><span class="text-[10px] font-normal text-amber-600">Expires in 30 Days</span></span>
+              <span class="text-xs font-bold text-slate-800 leading-tight">📁 Direct PDF<br><span class="text-[10px] font-normal text-amber-600">Max 15MB • 30 Days</span></span>
             </label>
           </div>
         </div>
@@ -330,10 +330,10 @@
         </div>
 
         <div id="direct-file-box" class="hidden">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Select PDF File</label>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Select PDF File (Max 15MB)</label>
           <input type="file" id="up-file" accept="application/pdf,image/*"
             class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-          <p class="text-[10px] text-amber-600 font-medium mt-1">⚠️ To conserve server storage, direct file uploads auto-expire after 30 days.</p>
+          <p class="text-[10px] text-amber-600 font-medium mt-1">⚠️ Max 15MB limit. To conserve server storage, direct file uploads auto-expire after 30 days.</p>
         </div>
 
         <button type="submit" id="up-submit-btn"
@@ -409,6 +409,7 @@
 
         grid.innerHTML = notes.map(note => {
           const isDrive = note.note_type === 'drive_link';
+          const canDelete = user && (user.id === note.uploader_id || user.role === 'admin');
           return `
           <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-2.5 flex flex-col justify-between w-full break-words">
             <div class="space-y-1.5">
@@ -431,30 +432,59 @@
               <p class="text-xs text-slate-500 line-clamp-2">${note.description || 'No description provided'}</p>
             </div>
 
-            <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
-              <div class="flex items-center gap-1.5 text-slate-500 text-[11px]">
+            <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
+              <div class="flex items-center gap-1.5 text-slate-500 text-[11px] truncate">
                 <span class="font-semibold text-slate-700">${note.class_name}</span>
                 <span>&bull;</span>
                 <span class="flex items-center gap-0.5"><i data-lucide="eye" class="w-3 h-3"></i> ${note.download_count}</span>
+                ${note.uploader_name ? `<span>&bull;</span><span class="truncate max-w-[90px] sm:max-w-[120px]" title="Uploaded by ${note.uploader_name}">By ${note.uploader_name}</span>` : ''}
               </div>
 
-              ${isDrive && note.drive_url ? `
-                <a href="${note.drive_url}" target="_blank" rel="noopener noreferrer"
-                  class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
-                  <i data-lucide="external-link" class="w-3 h-3"></i> Open Drive
-                </a>
-              ` : `
-                <a href="/api/notes/${note.id}/file" target="_blank"
-                  class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
-                  <i data-lucide="arrow-down-to-line" class="w-3 h-3"></i> Download
-                </a>
-              `}
+              <div class="flex items-center gap-1.5 shrink-0">
+                ${canDelete ? `
+                  <button data-note-id="${note.id}" data-note-title="${(note.title || '').replace(/"/g, '&quot;')}" class="delete-note-btn p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Delete Note">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                ` : ''}
+                ${isDrive && note.drive_url ? `
+                  <a href="${note.drive_url}" target="_blank" rel="noopener noreferrer"
+                    class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                    <i data-lucide="external-link" class="w-3 h-3"></i> Open Drive
+                  </a>
+                ` : `
+                  <a href="/api/notes/${note.id}/file" target="_blank"
+                    class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                    <i data-lucide="arrow-down-to-line" class="w-3 h-3"></i> Download
+                  </a>
+                `}
+              </div>
             </div>
           </div>
         `;
         }).join('');
 
         initIcons();
+
+        // Bind delete buttons
+        grid.querySelectorAll('.delete-note-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const noteId = btn.dataset.noteId;
+            const noteTitle = btn.dataset.noteTitle || 'this note';
+            if (!confirm(`Are you sure you want to delete "${noteTitle}"? This will permanently remove the study material.`)) return;
+
+            try {
+              btn.disabled = true;
+              await apiRequest(`/notes/${noteId}`, { method: 'DELETE' });
+              showToast('Study note deleted successfully', 'success');
+              await loadNotes();
+            } catch (err) {
+              showToast(err.message || 'Failed to delete note', 'error');
+              btn.disabled = false;
+            }
+          });
+        });
       } catch (err) {
         grid.innerHTML = `<div class="col-span-full p-6 text-center text-rose-500 bg-rose-50 rounded-2xl text-sm">${err.message}</div>`;
       }
@@ -487,7 +517,18 @@
 
       try {
         let res;
-        if (selectedType === 'file' && file) {
+        if (selectedType === 'file') {
+          if (!file) {
+            showToast('Please select a file to upload', 'warning');
+            submitBtn.disabled = false;
+            return;
+          }
+          if (file.size > 15 * 1024 * 1024) {
+            showToast('File size exceeds the 15MB limit. Please compress the file or use Google Drive.', 'warning');
+            submitBtn.disabled = false;
+            return;
+          }
+
           const formData = new FormData();
           formData.append('title', document.getElementById('up-title').value.trim());
           formData.append('className', document.getElementById('up-class').value);

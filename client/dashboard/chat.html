@@ -270,7 +270,7 @@
         <form id="chat-form" class="flex items-center gap-2">
           <!-- Attachment Button & Hidden File Input -->
           <input type="file" id="chat-file-input" class="hidden" accept="image/*,application/pdf,.doc,.docx,.txt">
-          <button type="button" id="attach-btn" title="Attach image, PDF or study material (Max 10MB)"
+          <button type="button" id="attach-btn" title="Attach image, PDF or study material (Max 15MB)"
             class="p-2 text-slate-400 hover:text-indigo-600 rounded-xl hover:bg-slate-100 transition shrink-0">
             <i data-lucide="paperclip" class="w-4 h-4"></i>
           </button>
@@ -547,8 +547,8 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      if (file.size > 10 * 1024 * 1024) {
-        showToast('File size exceeds the 10MB limit', 'warning');
+      if (file.size > 15 * 1024 * 1024) {
+        showToast('File size exceeds the 15MB limit', 'warning');
         chatFileInput.value = '';
         return;
       }

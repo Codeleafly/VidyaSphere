@@ -713,9 +713,9 @@ export async function handleChatRoutes(request, env, path, method) {
         return errorResponse('Message content or file attachment is required', 400);
       }
 
-      // Max 10MB attachment limit for chat to protect mobile edge storage
-      if (fileSize > 10 * 1024 * 1024) {
-        return errorResponse('Chat file attachment exceeds the 10MB limit. For large textbooks, use Google Drive in the Notes section.', 400);
+      // Max 15MB attachment limit for chat to protect mobile edge storage
+      if (fileSize > 15 * 1024 * 1024) {
+        return errorResponse('Chat file attachment exceeds the 15MB limit. For large textbooks, use Google Drive in the Notes section.', 400);
       }
 
       // Direct message security verification

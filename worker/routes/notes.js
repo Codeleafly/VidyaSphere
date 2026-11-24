@@ -162,9 +162,9 @@ export async function handleNotesRoutes(request, env, path, method) {
         }
       }
 
-      // Max 25MB size limit for direct files
-      if (fileSize > 25 * 1024 * 1024) {
-        return errorResponse('File size exceeds the 25MB limit. Please compress the file or share via a Google Drive link.');
+      // Max 15MB size limit for direct files
+      if (fileSize > 15 * 1024 * 1024) {
+        return errorResponse('File size exceeds the 15MB limit. Please compress the file or share via a Google Drive link.');
       }
 
       const noteId = generateId('note', 8);

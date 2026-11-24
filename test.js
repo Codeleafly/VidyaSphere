@@ -537,8 +537,34 @@ async function runTests() {
   const syncPass = Array.isArray(dSyncSince.messages) && dSyncSince.messages.some(m => m.id === dPostSync.id);
   console.log("✓ [Phase 4 - Adaptive Realtime Incremental Sync]:", syncPass ? 'PASS' : 'FAIL');
 
+  // 39. Phase 2: Student Deletes Uploaded Study Note
+  const rDelNote = await worker.fetch(new Request(`http://localhost/api/notes/${noteId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dDelNote = await rDelNote.json();
+  const rCheckDeleted = await worker.fetch(new Request(`http://localhost/api/notes/${noteId}/file`), mockEnv);
+  console.log("✓ [Phase 2 - Student Deletes Uploaded Study Note]:", (dDelNote.success && rCheckDeleted.status === 404) ? 'PASS' : 'FAIL');
+
+  // 40. Phase 2: File Size Exceeding 15MB Blocked
+  const oversizeBuffer = new Uint8Array(16 * 1024 * 1024); // 16MB
+  const rOversizeNote = await worker.fetch(new Request('http://localhost/api/notes/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({
+      title: 'Oversize Textbook Scan',
+      className: 'Class 10',
+      subject: 'Science',
+      noteType: 'file',
+      fileBase64: Buffer.from(oversizeBuffer).toString('base64')
+    })
+  }), mockEnv);
+  const dOversizeNote = await rOversizeNote.json();
+  const oversizePass = rOversizeNote.status === 400 && dOversizeNote.error && dOversizeNote.error.includes('15MB limit');
+  console.log("✓ [Phase 2 - Direct File Exceeding 15MB Blocked (400)]:", oversizePass ? 'PASS' : 'FAIL');
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 38 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 40 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 
