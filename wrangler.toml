@@ -20,7 +20,7 @@ database_id = "78869fad-da13-4a9b-adad-1e3fb439b0d9"
 crons = ["0 0 * * *"]
 
 [vars]
-JWT_SECRET = "vidyasphere_edge_super_secret_key_2026_change_in_production"
+JWT_SECRET = "d8f8b58062166aa34abde82cab6836226a843d6bb30be1fc020cdb5c78685eae"
 
 # ==============================================================================
 # EXPERIMENTAL / PREVIEW ENVIRONMENT
@@ -37,6 +37,6 @@ database_name = "vidyasphere-db"
 database_id = "78869fad-da13-4a9b-adad-1e3fb439b0d9"
 
 [env.preview.vars]
-JWT_SECRET = "vidyasphere_edge_super_secret_key_2026_change_in_production"
+JWT_SECRET = "d8f8b58062166aa34abde82cab6836226a843d6bb30be1fc020cdb5c78685eae"
 
 
