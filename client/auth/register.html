@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
-  <!-- Instant Session Detection & Auto-Redirect -->
   <script>
     (function() {
       try {
@@ -26,137 +25,126 @@
 </head>
 <body class="bg-slate-50 min-h-screen py-8 px-4 flex items-center justify-center">
 
-  <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-white text-center">
-      <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur">
-        <i data-lucide="user-plus" class="w-6 h-6"></i>
-      </div>
-      <h1 class="text-2xl font-bold">Create Student Account</h1>
-      <p class="text-xs text-indigo-100 mt-1">Set your login credentials directly. Admin approval unlocks your portal.</p>
+  <div class="w-full max-w-lg space-y-4">
+    <div class="text-center">
+      <a href="/index.html?landing=1" class="inline-flex items-center gap-2 text-slate-900 font-extrabold text-lg">
+        <span class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
+          <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+        </span>
+        VidyaSphere
+      </a>
     </div>
 
-    <!-- Registration Form -->
-    <div class="p-6 sm:p-8 space-y-5">
-      <form id="register-form" class="space-y-4">
-        <!-- Full Name -->
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Full Name</label>
-          <input type="text" id="fullName" required
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-            placeholder="e.g. Aarav Patel">
-        </div>
+    <div class="bg-white rounded-2xl shadow-[0_12px_32px_-16px_rgba(15,23,42,0.16)] border border-slate-200/80 overflow-hidden">
+      <div class="p-6 sm:p-7 pb-0">
+        <h1 class="text-xl font-extrabold text-slate-900">Create student account</h1>
+        <p class="text-xs text-slate-500 mt-1">Set your username and password directly. Admin approval unlocks your portal automatically.</p>
+      </div>
 
-        <!-- Class, Div, Roll Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="p-6 sm:p-7 space-y-5">
+        <form id="register-form" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Class / Grade</label>
-            <select id="className" required
-              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
-              <option value="">Select Class</option>
-              <optgroup label="Secondary (SSC / 10th)">
-                <option value="Class 10" selected>Class 10 (Board Exam)</option>
-                <option value="Class 9">Class 9</option>
-              </optgroup>
-              <optgroup label="Higher Secondary (HSC / 11th - 12th)">
-                <option value="Class 12">Class 12 (HSC/CBSE)</option>
-                <option value="Class 11">Class 11</option>
-              </optgroup>
-              <optgroup label="Middle School">
-                <option value="Class 8">Class 8</option>
-                <option value="Class 7">Class 7</option>
-                <option value="Class 6">Class 6</option>
-                <option value="Class 5">Class 5</option>
-              </optgroup>
-              <optgroup label="Primary School">
-                <option value="Class 4">Class 4</option>
-                <option value="Class 3">Class 3</option>
-                <option value="Class 2">Class 2</option>
-                <option value="Class 1">Class 1</option>
-              </optgroup>
-            </select>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Full Name</label>
+            <input type="text" id="fullName" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 text-sm"
+              placeholder="e.g. Aarav Patel">
           </div>
 
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Division</label>
-            <input type="text" id="division" required maxlength="2"
-              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase text-center"
-              placeholder="A, B, C">
-          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Class / Grade</label>
+              <select id="className" required
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm">
+                <option value="">Select Class</option>
+                <optgroup label="Secondary (SSC / 10th)">
+                  <option value="Class 10" selected>Class 10</option>
+                  <option value="Class 9">Class 9</option>
+                </optgroup>
+                <optgroup label="Higher Secondary">
+                  <option value="Class 12">Class 12</option>
+                  <option value="Class 11">Class 11</option>
+                </optgroup>
+                <optgroup label="Middle School">
+                  <option value="Class 8">Class 8</option>
+                  <option value="Class 7">Class 7</option>
+                  <option value="Class 6">Class 6</option>
+                  <option value="Class 5">Class 5</option>
+                </optgroup>
+                <optgroup label="Primary School">
+                  <option value="Class 4">Class 4</option>
+                  <option value="Class 3">Class 3</option>
+                  <option value="Class 2">Class 2</option>
+                  <option value="Class 1">Class 1</option>
+                </optgroup>
+              </select>
+            </div>
 
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Roll Number</label>
-            <input type="text" id="rollNumber" required
-              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-center"
-              placeholder="e.g. 21">
-          </div>
-        </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Division</label>
+              <input type="text" id="division" required maxlength="10"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm uppercase text-center"
+                placeholder="A">
+            </div>
 
-        <!-- Username Selection -->
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Choose Username</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-mono text-sm">@</span>
-            <input type="text" id="username" required minlength="3" maxlength="20"
-              class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono lowercase"
-              placeholder="aarav_patel10">
-          </div>
-          <p class="text-[10px] text-slate-400 mt-1">Letters, numbers, and underscores (3-20 characters).</p>
-        </div>
-
-        <!-- Password Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Create Password</label>
-            <input type="password" id="password" required minlength="6"
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              placeholder="Minimum 6 characters">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Roll Number</label>
+              <input type="text" id="rollNumber" required
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm text-center"
+                placeholder="21">
+            </div>
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Confirm Password</label>
-            <input type="password" id="confirmPassword" required minlength="6"
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              placeholder="Re-enter password">
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Choose Username</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-mono text-sm">@</span>
+              <input type="text" id="username" required minlength="3" maxlength="20"
+                class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm font-mono lowercase"
+                placeholder="aarav_patel10">
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Letters, numbers, and underscores (3–20 characters).</p>
           </div>
-        </div>
 
-        <!-- Optional Email -->
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-            Email Address <span class="text-slate-400 font-normal lowercase">(optional)</span>
-          </label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-              <i data-lucide="mail" class="w-4 h-4"></i>
-            </span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Create Password</label>
+              <input type="password" id="password" required minlength="6"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm"
+                placeholder="Min 6 characters">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Confirm Password</label>
+              <input type="password" id="confirmPassword" required minlength="6"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm"
+                placeholder="Re-enter password">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              Email Address <span class="text-slate-400 font-normal lowercase">(optional)</span>
+            </label>
             <input type="email" id="email"
-              class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm"
               placeholder="student@gmail.com">
           </div>
+
+          <div class="p-3 bg-indigo-50/70 border border-indigo-200/80 rounded-xl text-[11px] text-indigo-900 leading-relaxed">
+            <strong>1-Click Verification:</strong> Once the Student Lead Admin verifies your profile, your dashboard unlocks automatically without any access codes.
+          </div>
+
+          <button type="submit" id="submit-btn"
+            class="w-full py-3 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>Create Account &amp; Submit</span>
+          </button>
+        </form>
+
+        <div class="border-t border-slate-100 pt-3 text-center">
+          <a href="/auth/login.html" class="text-xs font-bold text-indigo-600 hover:underline">
+            Already have an account? Sign In &rarr;
+          </a>
         </div>
-
-        <!-- Information Callout -->
-        <div class="p-3 bg-indigo-50/80 border border-indigo-200 rounded-xl text-xs text-indigo-950 space-y-1">
-          <p class="font-bold flex items-center gap-1.5 text-indigo-900">
-            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i> Seamless 1-Click Verification:
-          </p>
-          <p class="text-[11px] text-slate-600 leading-relaxed">
-            Your account is created immediately upon submission. Once the Student Lead Administrator verifies your profile, your dashboard will <strong>automatically unlock without any access codes</strong>!
-          </p>
-        </div>
-
-        <button type="submit" id="submit-btn"
-          class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition flex items-center justify-center gap-2">
-          <i data-lucide="check-circle" class="w-4 h-4"></i>
-          <span>Create Account & Submit for Review</span>
-        </button>
-      </form>
-
-      <div class="border-t border-slate-100 pt-3 text-center">
-        <a href="/auth/login.html" class="text-xs font-bold text-indigo-600 hover:underline">
-          Already have an account? Sign In &rarr;
-        </a>
       </div>
     </div>
   </div>
@@ -176,12 +164,10 @@
 
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
-
       if (password !== confirmPassword) {
         showToast('Passwords do not match. Please re-enter carefully.', 'error');
         return;
       }
-
       if (password.length < 6) {
         showToast('Password must be at least 6 characters long.', 'error');
         return;
@@ -193,32 +179,25 @@
         division: document.getElementById('division').value.trim().toUpperCase(),
         rollNumber: document.getElementById('rollNumber').value.trim(),
         username: document.getElementById('username').value.trim().toLowerCase(),
-        password: password,
+        password,
         email: document.getElementById('email').value.trim() || null,
       };
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="inline-block animate-spin mr-2">&#9696;</span> Creating account...';
+      submitBtn.textContent = 'Creating account...';
 
       try {
-        const res = await apiRequest('/auth/register', {
-          method: 'POST',
-          body: payload,
-        });
-
+        const res = await apiRequest('/auth/register', { method: 'POST', body: payload });
         if (res.token) {
           setAuthToken(res.token);
           setCurrentUser(res.user);
         }
-
         showToast('Account created! Awaiting admin approval.', 'success');
-        setTimeout(() => {
-          window.location.replace('/auth/pending.html');
-        }, 600);
+        setTimeout(() => window.location.replace('/auth/pending.html'), 500);
       } catch (err) {
         showToast(err.message, 'error');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>Create Account & Submit for Review</span>';
+        submitBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>Create Account &amp; Submit</span>';
         initIcons();
       }
     });

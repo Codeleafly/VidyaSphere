@@ -3,225 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Academic Q&A Forum | VidyaSphere</title>
+  <title>Academic Q&amp;A Forum | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 overflow-x-hidden w-full">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 w-full">
 
-  <!-- Desktop Sidebar -->
-  <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 p-4 shrink-0 h-screen sticky top-0 justify-between">
-    <div class="space-y-6">
-      <div class="flex items-center gap-3 px-2">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h2 class="font-extrabold text-slate-900 leading-tight">VidyaSphere</h2>
-          <span class="text-xs text-slate-400 font-medium">School Edge Portal</span>
-        </div>
-      </div>
-
-      <nav class="space-y-1">
-        <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Notice Board
-        </a>
-        <a href="/dashboard/exams.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i> Exams & Timetable
-        </a>
-        <a href="/dashboard/chat.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="messages-square" class="w-5 h-5"></i> Realtime Chat
-        </a>
-        <a href="/dashboard/notes.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="book-open" class="w-5 h-5"></i> Study Notes
-        </a>
-        <a href="/dashboard/qa.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-sm">
-          <i data-lucide="message-square" class="w-5 h-5"></i> Academic Q&A
-        </a>
-        <a href="/dashboard/polls.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="vote" class="w-5 h-5"></i> School Polls
-        </a>
-        <a href="/dashboard/students.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="users" class="w-5 h-5"></i> Student Directory
-        </a>
-        <div id="admin-nav-link" class="hidden">
-          <a href="/admin/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-700 hover:bg-rose-50 font-bold text-sm transition">
-            <i data-lucide="shield-alert" class="w-5 h-5"></i> Admin Portal
-          </a>
-        </div>
-      </nav>
-    </div>
-
-    <!-- User Profile & Logout -->
-    <div class="border-t border-slate-200 pt-4 px-2">
-      <div class="flex items-center justify-between">
-        <div class="overflow-hidden">
-          <p id="user-display-name" class="font-bold text-sm text-slate-800 truncate"></p>
-          <p id="user-display-role" class="text-xs text-slate-400 capitalize"></p>
-        </div>
-        <button id="logout-btn" title="Sign Out" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-          <i data-lucide="log-out" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Mobile Top Header -->
-  <header class="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-3 py-2.5 flex items-center justify-between shadow-sm w-full">
-    <div class="flex items-center gap-2 overflow-hidden">
-      <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0">
-        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
-      </div>
-      <span class="font-bold text-xs sm:text-sm text-slate-900 truncate">VidyaSphere</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <a href="/admin/index.html" class="admin-mobile-switch hidden px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
-        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Admin
-      </a>
-      <span id="user-display-name-mob" class="text-[11px] font-bold text-slate-700 truncate max-w-[90px]"></span>
-      <button class="logout-btn-trigger p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Logout">
-        <i data-lucide="log-out" class="w-4 h-4"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Mobile Bottom Navigation -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 px-1 py-1 flex items-center justify-around shadow-lg max-w-full">
-    <a href="/dashboard/index.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="layout-dashboard" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notices</span>
-    </a>
-    <a href="/dashboard/chat.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="messages-square" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Chat</span>
-    </a>
-    <a href="/dashboard/notes.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="book-open" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notes</span>
-    </a>
-    <a href="/dashboard/qa.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-600 font-bold text-[9px] truncate">
-      <i data-lucide="message-square" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Q&A</span>
-    </a>
-    <a href="/dashboard/polls.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="vote" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Polls</span>
-    </a>
-  </nav>
-
-  <!-- Main Content Area -->
-  <main class="flex-1 w-full max-w-5xl mx-auto p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 overflow-x-hidden">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+  <main class="flex-1 w-full max-w-5xl mx-auto p-3.5 sm:p-6 lg:p-8 space-y-5">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Academic Q&A Forum</h1>
-        <p class="text-xs text-slate-500">Ask homework questions, collaborate with peers, and find verified answers</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Academic Q&amp;A Forum</h1>
+        <p class="text-xs text-slate-500">Ask homework questions, help classmates, and mark verified solutions</p>
       </div>
       <button id="open-ask-btn"
-        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 transition flex items-center justify-center gap-2">
+        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs transition flex items-center justify-center gap-2">
         <i data-lucide="help-circle" class="w-4 h-4"></i> Ask Question
       </button>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-2 w-full">
-      <select id="qa-subject-filter"
-        class="w-full sm:flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-        <option value="">All Subjects (MH & CBSE)</option>
-        <optgroup label="Languages">
-          <option value="English">English</option>
-          <option value="Marathi">Marathi (मराठी)</option>
-          <option value="Hindi">Hindi (हिंदी)</option>
-          <option value="Sanskrit">Sanskrit (संस्कृत)</option>
-        </optgroup>
-        <optgroup label="Mathematics">
-          <option value="Mathematics">Mathematics</option>
-          <option value="Algebra (Maths I)">Algebra (Maths I)</option>
-          <option value="Geometry (Maths II)">Geometry (Maths II)</option>
-          <option value="Mathematics & Statistics">Mathematics & Statistics</option>
-        </optgroup>
-        <optgroup label="Sciences">
-          <option value="General Science">General Science</option>
-          <option value="Science & Technology (Part 1)">Science & Tech I</option>
-          <option value="Science & Technology (Part 2)">Science & Tech II</option>
-          <option value="Physics">Physics</option>
-          <option value="Chemistry">Chemistry</option>
-          <option value="Biology">Biology</option>
-          <option value="Environmental Studies (EVS)">Environmental Studies (EVS)</option>
-        </optgroup>
-        <optgroup label="Social Sciences">
-          <option value="Social Science">Social Science</option>
-          <option value="History & Political Science">History & Pol Science</option>
-          <option value="Geography & Economics">Geography & Economics</option>
-        </optgroup>
-        <optgroup label="Commerce & Technology">
-          <option value="Book-Keeping & Accountancy (BK)">Book-Keeping (BK)</option>
-          <option value="Economics">Economics</option>
-          <option value="Information Technology (IT)">IT / Computer Science</option>
-        </optgroup>
+    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col sm:flex-row gap-2 w-full">
+      <select id="qa-subject-filter" class="w-full sm:flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
+        <option value="">All Subjects (MH &amp; CBSE)</option>
+        <option value="English">English</option>
+        <option value="Marathi">Marathi</option>
+        <option value="Hindi">Hindi</option>
+        <option value="Sanskrit">Sanskrit</option>
+        <option value="Mathematics">Mathematics</option>
+        <option value="Algebra (Maths I)">Algebra (Maths I)</option>
+        <option value="Geometry (Maths II)">Geometry (Maths II)</option>
+        <option value="General Science">General Science</option>
+        <option value="Science & Technology (Part 1)">Science &amp; Tech I</option>
+        <option value="Science & Technology (Part 2)">Science &amp; Tech II</option>
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Biology">Biology</option>
+        <option value="Social Science">Social Science</option>
+        <option value="History & Political Science">History &amp; Pol Sci</option>
+        <option value="Geography & Economics">Geography &amp; Economics</option>
+        <option value="Book-Keeping & Accountancy (BK)">Book-Keeping (BK)</option>
+        <option value="Economics">Economics</option>
+        <option value="Information Technology (IT)">IT / Computer Science</option>
       </select>
 
-      <select id="qa-status-filter"
-        class="w-full sm:w-48 px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
+      <select id="qa-status-filter" class="w-full sm:w-48 px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
         <option value="">All Questions</option>
-        <option value="resolved">Resolved / Solved</option>
+        <option value="resolved">Solved</option>
         <option value="unanswered">Unanswered</option>
       </select>
     </div>
 
-    <!-- Questions Feed -->
-    <div id="questions-list" class="space-y-3 sm:space-y-4 w-full">
-      <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 text-sm">
-        Loading Q&A discussions...
-      </div>
+    <div id="questions-list" class="space-y-3 w-full">
+      <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading Q&amp;A discussions...</div>
     </div>
   </main>
 
-  <!-- Ask Question Modal (Mobile Friendly) -->
-  <div id="ask-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-lg p-4 sm:p-6 space-y-3.5 shadow-2xl overflow-y-auto max-h-[90vh]">
+  <!-- Ask Question Modal -->
+  <div id="ask-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-lg p-5 space-y-3.5 shadow-2xl border border-slate-200/80 overflow-y-auto max-h-[90vh] modal-enter">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-base sm:text-lg font-bold text-slate-900">Ask a Question</h3>
-        <button id="close-ask-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
+        <h3 class="text-base font-bold text-slate-900">Ask a Question</h3>
+        <button id="close-ask-modal" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-1">&times;</button>
       </div>
-
       <form id="ask-form" class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Question Title</label>
-          <input type="text" id="ask-title" required
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500"
-            placeholder="e.g. How to solve quadratic equations by factoring?">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Question Title</label>
+          <input type="text" id="ask-title" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="e.g. How to solve quadratic equations by factoring?">
         </div>
-
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Subject</label>
-            <select id="ask-subject" required
-              class="w-full px-2 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 bg-white">
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
+            <select id="ask-subject" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white">
               <option value="Mathematics">Mathematics</option>
               <option value="Algebra (Maths I)">Algebra (Maths I)</option>
               <option value="Geometry (Maths II)">Geometry (Maths II)</option>
               <option value="General Science" selected>General Science</option>
-              <option value="Science & Technology (Part 1)">Science & Tech I</option>
-              <option value="Science & Technology (Part 2)">Science & Tech II</option>
+              <option value="Science & Technology (Part 1)">Science &amp; Tech I</option>
+              <option value="Science & Technology (Part 2)">Science &amp; Tech II</option>
               <option value="Physics">Physics</option>
               <option value="Chemistry">Chemistry</option>
               <option value="Biology">Biology</option>
               <option value="English">English</option>
-              <option value="Marathi">Marathi (मराठी)</option>
-              <option value="Hindi">Hindi (हिंदी)</option>
-              <option value="History & Political Science">History & Pol Sci</option>
-              <option value="Geography & Economics">Geography & Eco</option>
+              <option value="Marathi">Marathi</option>
+              <option value="Hindi">Hindi</option>
+              <option value="History & Political Science">History &amp; Pol Sci</option>
+              <option value="Geography & Economics">Geography &amp; Eco</option>
               <option value="Information Technology (IT)">Computer / IT</option>
             </select>
           </div>
-
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Class</label>
-            <select id="ask-class" required
-              class="w-full px-2 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 bg-white">
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Class</label>
+            <select id="ask-class" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white">
               <option value="Class 1">Class 1</option>
               <option value="Class 2">Class 2</option>
               <option value="Class 3">Class 3</option>
@@ -241,107 +115,71 @@
             </select>
           </div>
         </div>
-
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Description / Problem Details</label>
-          <textarea id="ask-desc" rows="3" required
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500"
-            placeholder="Explain what steps you tried and where you need help..."></textarea>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Problem Details</label>
+          <textarea id="ask-desc" rows="3" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="Explain what steps you tried and where you got stuck..."></textarea>
         </div>
-
-        <button type="submit" id="ask-submit-btn"
-          class="w-full py-2.5 sm:py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-100 transition">
-          Post Question
-        </button>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs sm:text-sm transition">Post Question</button>
       </form>
     </div>
   </div>
 
-  <!-- Question Detail & Answers Modal (Mobile Responsive) -->
-  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-2xl p-4 sm:p-6 space-y-3.5 shadow-2xl max-h-[90vh] flex flex-col justify-between overflow-hidden">
+  <!-- Question Detail Modal -->
+  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-2xl p-5 space-y-3.5 shadow-2xl border border-slate-200/80 max-h-[90vh] flex flex-col justify-between overflow-hidden modal-enter">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100 shrink-0">
-        <span id="detail-subject-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700"></span>
-        <button id="close-detail-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
+        <span id="detail-subject-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-100"></span>
+        <button id="close-detail-modal" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-1">&times;</button>
       </div>
 
-      <div class="overflow-y-auto space-y-3 pr-1 flex-1 break-words">
+      <div class="overflow-y-auto space-y-3.5 pr-1 flex-1 break-words">
         <div>
           <h2 id="detail-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug"></h2>
           <p class="text-[11px] text-slate-400 mt-1" id="detail-meta"></p>
-          <div id="detail-desc" class="text-xs sm:text-sm text-slate-700 mt-2 whitespace-pre-line bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200"></div>
+          <div id="detail-desc" class="text-xs sm:text-sm text-slate-700 mt-2.5 whitespace-pre-line bg-slate-50 p-3.5 rounded-xl border border-slate-200/70"></div>
         </div>
 
-        <!-- Answers List -->
-        <div class="space-y-2 pt-2">
+        <div class="space-y-2 pt-1">
           <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
             <i data-lucide="message-circle" class="w-4 h-4 text-indigo-600"></i> Answers
           </h4>
-          <div id="answers-container" class="space-y-2.5"></div>
+          <div id="answers-container" class="space-y-2"></div>
         </div>
       </div>
 
-      <!-- Submit Answer Box -->
-      <form id="answer-form" class="pt-2.5 border-t border-slate-100 flex gap-2 shrink-0">
-        <input type="text" id="answer-text" required
-          class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500"
-          placeholder="Write your answer...">
-        <button type="submit"
-          class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition">
-          Reply
-        </button>
+      <form id="answer-form" class="pt-3 border-t border-slate-100 flex gap-2 shrink-0">
+        <input type="text" id="answer-text" required class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="Write your answer...">
+        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl text-xs sm:text-sm transition">Reply</button>
       </form>
     </div>
   </div>
 
   <script type="module">
     import { apiRequest } from '/js/api.js';
-    import { requireAuth, logout } from '/js/auth.js';
-    import { formatDate, showToast, initIcons } from '/js/ui.js';
+    import { initDashboardShell } from '/js/layout.js';
+    import { escapeHtml, formatDate, showToast, initIcons, bindModalBackdropAndEsc } from '/js/ui.js';
 
-    const user = requireAuth();
-    if (user) {
-      document.getElementById('user-display-name').textContent = user.fullName || user.username;
-      document.getElementById('user-display-name-mob').textContent = user.fullName || user.username;
-      document.getElementById('user-display-role').textContent = `${user.role} ${user.className ? '• ' + user.className : ''}`;
-      if (user.role === 'admin') {
-        document.getElementById('admin-nav-link').classList.remove('hidden');
-        document.querySelectorAll('.admin-mobile-switch').forEach(el => el.classList.remove('hidden'));
-      }
-    }
-
-    document.getElementById('logout-btn')?.addEventListener('click', logout);
-    document.querySelectorAll('.logout-btn-trigger').forEach(btn => btn.addEventListener('click', logout));
+    const user = initDashboardShell({ active: 'qa', mobileTitle: 'Academic Q&A' });
 
     const questionsList = document.getElementById('questions-list');
     const subjectFilter = document.getElementById('qa-subject-filter');
     const statusFilter = document.getElementById('qa-status-filter');
-
     const askModal = document.getElementById('ask-modal');
-    const openAskBtn = document.getElementById('open-ask-btn');
-    const closeAskModal = document.getElementById('close-ask-modal');
-    const askForm = document.getElementById('ask-form');
-
     const detailModal = document.getElementById('detail-modal');
-    const closeDetailModal = document.getElementById('close-detail-modal');
-    const answerForm = document.getElementById('answer-form');
     let currentQuestionId = null;
     let currentQuestionAuthorId = null;
 
-    openAskBtn.addEventListener('click', () => {
+    const closeAsk = () => { askModal.classList.add('hidden'); askModal.classList.remove('flex'); };
+    const closeDetail = () => { detailModal.classList.add('hidden'); detailModal.classList.remove('flex'); };
+
+    document.getElementById('open-ask-btn').addEventListener('click', () => {
       askModal.classList.remove('hidden');
       askModal.classList.add('flex');
     });
-
-    closeAskModal.addEventListener('click', () => {
-      askModal.classList.add('hidden');
-      askModal.classList.remove('flex');
-    });
-
-    closeDetailModal.addEventListener('click', () => {
-      detailModal.classList.add('hidden');
-      detailModal.classList.remove('flex');
-    });
+    document.getElementById('close-ask-modal').addEventListener('click', closeAsk);
+    document.getElementById('close-detail-modal').addEventListener('click', closeDetail);
+    bindModalBackdropAndEsc(askModal, closeAsk);
+    bindModalBackdropAndEsc(detailModal, closeDetail);
 
     async function loadQuestions() {
       const params = new URLSearchParams();
@@ -354,9 +192,9 @@
 
         if (questions.length === 0) {
           questionsList.innerHTML = `
-            <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            <div class="p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
               <i data-lucide="help-circle" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-              <p class="text-sm font-semibold text-slate-600">No questions asked yet.</p>
+              <p class="text-sm font-semibold text-slate-700">No questions asked yet</p>
               <p class="text-xs text-slate-400 mt-1">Be the first to post an academic question!</p>
             </div>
           `;
@@ -365,47 +203,41 @@
         }
 
         questionsList.innerHTML = questions.map(q => `
-          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-2.5 cursor-pointer hover:border-indigo-300 transition view-question-btn w-full break-words" data-id="${q.id}">
+          <article class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 card-hover space-y-2.5 cursor-pointer view-question-btn w-full break-words" data-id="${escapeHtml(q.id)}">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700">
-                  ${q.subject}
-                </span>
-                <span class="text-[11px] text-slate-400">${q.class_name}</span>
-                ${q.is_resolved ? '<span class="text-[10px] font-bold text-emerald-600 flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200"><i data-lucide="check-circle" class="w-3 h-3"></i> Solved</span>' : ''}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-100">${escapeHtml(q.subject)}</span>
+                <span class="text-[11px] text-slate-500 font-medium">${escapeHtml(q.class_name)}</span>
+                ${q.is_resolved ? '<span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200"><i data-lucide="check-circle" class="w-3 h-3"></i> Solved</span>' : ''}
               </div>
-              <span class="text-[11px] text-slate-400">${formatDate(q.created_at)}</span>
+              <span class="text-[11px] text-slate-400 tabular-nums">${escapeHtml(formatDate(q.created_at))}</span>
             </div>
-
-            <h3 class="font-bold text-slate-900 text-sm sm:text-base hover:text-indigo-600 transition leading-snug">${q.title}</h3>
-            <p class="text-xs text-slate-500 line-clamp-2">${q.description}</p>
-
+            <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-snug">${escapeHtml(q.title)}</h3>
+            <p class="text-xs text-slate-500 line-clamp-2">${escapeHtml(q.description)}</p>
             <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Asked by: <strong>${q.author_name || 'Student'}</strong></span>
-              <span class="flex items-center gap-1 font-semibold text-indigo-600">
+              <span>Asked by <strong>${escapeHtml(q.author_name || 'Student')}</strong></span>
+              <span class="flex items-center gap-1 font-bold text-indigo-600 tabular-nums">
                 <i data-lucide="message-square" class="w-3 h-3"></i> ${q.answer_count} Answers
               </span>
             </div>
-          </div>
+          </article>
         `).join('');
 
         initIcons();
-
-        document.querySelectorAll('.view-question-btn').forEach(card => {
+        questionsList.querySelectorAll('.view-question-btn').forEach(card => {
           card.addEventListener('click', () => openQuestionDetail(card.dataset.id));
         });
       } catch (err) {
-        questionsList.innerHTML = `<div class="p-6 text-center text-rose-500 bg-rose-50 rounded-2xl text-sm">${err.message}</div>`;
+        questionsList.innerHTML = `<div class="p-6 text-center text-rose-600 bg-rose-50 rounded-2xl text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
 
     async function openQuestionDetail(id) {
       currentQuestionId = id;
       try {
-        const res = await apiRequest(`/qa/questions/${id}`);
+        const res = await apiRequest(`/qa/questions/${encodeURIComponent(id)}`);
         const q = res.question;
         const answers = res.answers || [];
-
         currentQuestionAuthorId = q.author_id;
 
         document.getElementById('detail-subject-badge').textContent = `${q.subject} • ${q.class_name}`;
@@ -420,28 +252,26 @@
           answersContainer.innerHTML = answers.map(ans => {
             const isAccepted = ans.is_accepted === 1;
             const canAccept = user && (user.id === currentQuestionAuthorId || user.role === 'admin') && !isAccepted;
-
             return `
               <div class="p-3 rounded-xl border ${isAccepted ? 'bg-emerald-50/70 border-emerald-300' : 'bg-white border-slate-200'} space-y-1.5 break-words">
                 <div class="flex items-center justify-between flex-wrap gap-1">
                   <div class="flex items-center gap-2">
-                    <span class="font-bold text-xs text-slate-800">${ans.author_name || 'Peer'}</span>
-                    <span class="text-[10px] text-slate-400">${formatDate(ans.created_at)}</span>
+                    <span class="font-bold text-xs text-slate-900">${escapeHtml(ans.author_name || 'Peer')}</span>
+                    <span class="text-[10px] text-slate-400 tabular-nums">${escapeHtml(formatDate(ans.created_at))}</span>
                   </div>
                   ${isAccepted ? '<span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Accepted Solution</span>' : ''}
-                  ${canAccept ? `<button class="accept-btn text-xs text-indigo-600 hover:underline font-bold" data-ans-id="${ans.id}">Mark Accepted</button>` : ''}
+                  ${canAccept ? `<button class="accept-btn text-xs text-indigo-600 hover:underline font-bold" data-ans-id="${escapeHtml(ans.id)}">Mark Accepted</button>` : ''}
                 </div>
-                <p class="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed">${ans.answer_text}</p>
+                <p class="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed">${escapeHtml(ans.answer_text)}</p>
               </div>
             `;
           }).join('');
 
-          document.querySelectorAll('.accept-btn').forEach(btn => {
+          answersContainer.querySelectorAll('.accept-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
               e.stopPropagation();
-              const ansId = btn.dataset.ansId;
               try {
-                await apiRequest(`/qa/answers/${ansId}/accept`, { method: 'POST' });
+                await apiRequest(`/qa/answers/${encodeURIComponent(btn.dataset.ansId)}/accept`, { method: 'POST' });
                 showToast('Marked as verified solution!', 'success');
                 openQuestionDetail(currentQuestionId);
                 loadQuestions();
@@ -460,7 +290,7 @@
       }
     }
 
-    askForm.addEventListener('submit', async (e) => {
+    document.getElementById('ask-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
         await apiRequest('/qa/questions', {
@@ -472,29 +302,25 @@
             description: document.getElementById('ask-desc').value.trim(),
           },
         });
-
         showToast('Question posted!', 'success');
-        askModal.classList.add('hidden');
-        askModal.classList.remove('flex');
-        askForm.reset();
+        closeAsk();
+        e.target.reset();
         loadQuestions();
       } catch (err) {
         showToast(err.message, 'error');
       }
     });
 
-    answerForm.addEventListener('submit', async (e) => {
+    document.getElementById('answer-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const input = document.getElementById('answer-text');
       const text = input.value.trim();
       if (!text || !currentQuestionId) return;
-
       try {
-        await apiRequest(`/qa/questions/${currentQuestionId}/answers`, {
+        await apiRequest(`/qa/questions/${encodeURIComponent(currentQuestionId)}/answers`, {
           method: 'POST',
           body: { answerText: text },
         });
-
         input.value = '';
         showToast('Answer submitted!', 'success');
         openQuestionDetail(currentQuestionId);
@@ -507,8 +333,7 @@
     subjectFilter.addEventListener('change', loadQuestions);
     statusFilter.addEventListener('change', loadQuestions);
 
-    initIcons();
-    loadQuestions();
+    if (user) loadQuestions();
   </script>
 </body>
 </html>

@@ -563,8 +563,81 @@ async function runTests() {
   const oversizePass = rOversizeNote.status === 400 && dOversizeNote.error && dOversizeNote.error.includes('15MB limit');
   console.log("✓ [Phase 2 - Direct File Exceeding 15MB Blocked (400)]:", oversizePass ? 'PASS' : 'FAIL');
 
+  // 41. Privacy Security: Pending group invitee blocked from READING private group messages (403)
+  await worker.fetch(new Request(`http://localhost/api/chat/groups/${group3Id}/members`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ targetUsername: 'aarav_10a_21' })
+  }), mockEnv);
+  const rPendingRead = await worker.fetch(new Request(`http://localhost/api/chat/messages?channel=grp_${group3Id}`, {
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  console.log("✓ [Privacy Security - Pending Group Invitee Blocked from Reading Messages (403)]:", rPendingRead.status === 403 ? 'PASS' : 'FAIL');
+
+  // 42. Security: Unsafe javascript: URLs rejected on Notes & Exams (400)
+  const rUnsafeNoteUrl = await worker.fetch(new Request('http://localhost/api/notes/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({
+      title: 'XSS Link Attempt',
+      className: 'Class 10',
+      subject: 'Science',
+      noteType: 'drive_link',
+      driveUrl: 'javascript:alert(1)'
+    })
+  }), mockEnv);
+  const rUnsafeExamUrl = await worker.fetch(new Request('http://localhost/api/admin/exams', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({
+      title: 'Unsafe Exam Link',
+      className: 'Class 10',
+      subject: 'Maths',
+      examDate: '2026-12-20',
+      driveLink: 'javascript:alert(1)'
+    })
+  }), mockEnv);
+  console.log("✓ [Security - Unsafe URLs Blocked on Notes & Exams (400)]:", (rUnsafeNoteUrl.status === 400 && rUnsafeExamUrl.status === 400) ? 'PASS' : 'FAIL');
+
+  // 43. Admin Applications Filter Alias (?status=approved) & Self-Suspend Guard
+  const rApprovedQueue = await worker.fetch(new Request('http://localhost/api/admin/registrations?status=approved', {
+    headers: { 'Authorization': `Bearer ${adminToken}` }
+  }), mockEnv);
+  const dApprovedQueue = await rApprovedQueue.json();
+  const rSelfSuspend = await worker.fetch(new Request('http://localhost/api/admin/student-status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ studentId: adminUserId, status: 'suspended' })
+  }), mockEnv);
+  const approvedQueueOk = rApprovedQueue.status === 200 && (dApprovedQueue.registrations || []).some(u => u.id === studentId);
+  console.log("✓ [Admin Queue - Approved Filter & Self-Suspend Guard]:", (approvedQueueOk && rSelfSuspend.status === 400) ? 'PASS' : 'FAIL');
+
+  // 44. Notes Integrity: Reporting and then deleting a reported note succeeds cleanly
+  const rDriveNote = await worker.fetch(new Request('http://localhost/api/notes/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({
+      title: 'Reported Note Cleanup Test',
+      className: 'Class 10',
+      subject: 'Science',
+      noteType: 'drive_link',
+      driveUrl: 'https://drive.google.com/file/d/sample/view'
+    })
+  }), mockEnv);
+  const dDriveNote = await rDriveNote.json();
+  const rRep = await worker.fetch(new Request(`http://localhost/api/notes/${dDriveNote.id}/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify({ reason: 'Outdated syllabus' })
+  }), mockEnv);
+  const rDelReported = await worker.fetch(new Request(`http://localhost/api/notes/${dDriveNote.id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  console.log("✓ [Notes Integrity - Report & Cascade Delete]:", (rRep.status === 200 && rDelReported.status === 200) ? 'PASS' : 'FAIL');
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 40 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 44 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

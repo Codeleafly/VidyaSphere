@@ -3,372 +3,175 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student User Guide & Manual | VidyaSphere</title>
+  <title>Student User Guide &amp; Manual | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#4f46e5">
-  <!-- Tailwind CSS CDN (0 npm, 0 build tools) -->
+  <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
-  <!-- Sticky Top Header -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <a href="/index.html" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-        </a>
-        <div>
-          <span class="text-xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">VidyaSphere</span>
-          <span class="hidden sm:inline-block text-xs text-slate-400 ml-2 font-semibold">Student Knowledge Ecosystem</span>
+  <header class="sticky top-0 z-40 glass border-b border-slate-200/80">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="/index.html" class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="graduation-cap" class="w-5 h-5"></i>
         </div>
-      </div>
-      <div class="flex items-center gap-2 sm:gap-3">
-        <a href="/dashboard/index.html" class="px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5">
+        <div>
+          <span class="text-lg font-extrabold text-slate-900">VidyaSphere</span>
+          <span class="hidden sm:inline-block text-xs text-slate-400 ml-2 font-medium">Student Manual</span>
+        </div>
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="/dashboard/index.html" class="px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition flex items-center gap-1.5">
           <i data-lucide="layout-dashboard" class="w-4 h-4 text-indigo-600"></i> Dashboard
         </a>
-        <a href="/auth/login.html" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition">
-          Sign In
-        </a>
+        <a href="/auth/login.html" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-slate-900 hover:bg-indigo-600 rounded-xl transition">Sign In</a>
       </div>
     </div>
   </header>
 
-  <!-- Hero Banner -->
-  <section class="bg-gradient-to-br from-indigo-900 via-indigo-800 to-purple-900 text-white py-12 px-4 sm:px-6 relative overflow-hidden">
-    <div class="max-w-4xl mx-auto text-center space-y-4">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-xs font-bold tracking-wide uppercase">
+  <section class="bg-slate-950 text-white py-12 px-4 sm:px-6 border-b border-slate-800">
+    <div class="max-w-3xl mx-auto text-center space-y-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-semibold">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        Official Student Handout & Platform Manual
+        Official Student Handout &amp; Platform Guide
       </div>
-      <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-        Master VidyaSphere in 5 Minutes
-      </h1>
-      <p class="text-sm sm:text-base text-indigo-200 max-w-2xl mx-auto leading-relaxed">
-        Everything you need to know about sharing notes, checking exam datesheets, clearing homework doubts, and connecting with classmates without ever sharing personal phone numbers.
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Master VidyaSphere in 5 Minutes</h1>
+      <p class="text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
+        Everything you need to know about sharing notes, checking exam timetables, clearing homework doubts, and messaging safely without personal phone numbers.
       </p>
-      <div class="pt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-indigo-200 font-mono">
-        <span class="bg-indigo-950/60 px-3 py-1 rounded-lg border border-indigo-700/50">Class 1 to Class 12</span>
-        <span class="bg-indigo-950/60 px-3 py-1 rounded-lg border border-indigo-700/50">Consent-First Messaging</span>
-        <span class="bg-indigo-950/60 px-3 py-1 rounded-lg border border-indigo-700/50">15MB Academic Notes</span>
+      <div class="pt-1 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-300 font-mono">
+        <span class="bg-white/5 px-3 py-1 rounded-lg border border-white/10">Class 1 to 12</span>
+        <span class="bg-white/5 px-3 py-1 rounded-lg border border-white/10">Consent-First DMs</span>
+        <span class="bg-white/5 px-3 py-1 rounded-lg border border-white/10">15MB Academic Notes</span>
       </div>
     </div>
   </section>
 
-  <!-- Main Content Container -->
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-10 flex-1">
-
-    <!-- Quick Navigation Pills -->
-    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-2 text-xs font-bold">
-      <a href="#vision" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition">💡 The Story & Vision</a>
-      <a href="#registration" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">📝 Account Setup</a>
-      <a href="#notes" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">📚 Notes (15MB Limit)</a>
-      <a href="#exams" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">📅 Exam Timetables</a>
-      <a href="#chat" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">💬 Consent-First DMs</a>
-      <a href="#qa-polls" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">❓ Q&A & School Polls</a>
-      <a href="#pwa" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">📱 Add to Home Screen</a>
-      <a href="#faqs" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">❓ Troubleshooting</a>
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-6 flex-1 w-full">
+    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 flex flex-wrap gap-2 text-xs font-bold">
+      <a href="#vision" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition">Vision</a>
+      <a href="#registration" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Account Setup</a>
+      <a href="#notes" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Notes (15MB Limit)</a>
+      <a href="#exams" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Exam Timetables</a>
+      <a href="#chat" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Chat &amp; 7-Day Purge</a>
+      <a href="#qa-polls" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Q&amp;A &amp; Polls</a>
+      <a href="#faqs" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">FAQs</a>
     </div>
 
-    <!-- Section 1: Vision & Story -->
-    <article id="vision" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-          <i data-lucide="sparkles" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">What is VidyaSphere & Why Was It Built?</h2>
-          <p class="text-xs text-slate-400">Created by students, for students</p>
-        </div>
-      </div>
-
+    <article id="vision" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-3">
+      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i> What is VidyaSphere &amp; Why Was It Built?
+      </h2>
       <p class="text-sm text-slate-600 leading-relaxed">
-        VidyaSphere is a dedicated, distraction-free digital ecosystem founded and engineered by a <strong>14-year-old student, Sriramik Sanjiv Sahu</strong> (Class 9th Shraddha).
+        VidyaSphere is a distraction-free school ecosystem founded and engineered by <strong>Sriramik Sanjiv Sahu</strong> (Class 9th Shraddha). Instead of sharing personal phone numbers in chaotic messaging groups just to get homework notes or exam datesheets, students get one verified academic space for Class 1 to 12.
       </p>
-
-      <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-2">
-        <p class="font-bold flex items-center gap-2 text-amber-950">
-          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
-          The Real Problem It Solves:
-        </p>
-        <p class="leading-relaxed">
-          Whenever schools have holidays, exam prep weeks, or unexpected closures, students frequently scramble to find study notes. This usually forces students to give out their personal WhatsApp numbers, get added to messy, distracting groups filled with spam, and risk their privacy.
-        </p>
-        <p class="leading-relaxed font-semibold">
-          VidyaSphere eliminates that completely! It gives every student from Class 1 to 12 a unified platform where notes, schedules, homework discussions, and chats live in one clean place—<strong>without ever sharing your phone number</strong>.
-        </p>
-      </div>
     </article>
 
-    <!-- Section 2: Account Registration -->
-    <article id="registration" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
-          <i data-lucide="user-check" class="w-5 h-5"></i>
+    <article id="registration" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
+      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="user-check" class="w-5 h-5 text-purple-600"></i> 1. Direct Registration &amp; 1-Click Approval
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
+          <span class="font-bold text-indigo-600 uppercase text-[10px]">Step 1</span>
+          <h4 class="font-bold text-slate-900">Create Account</h4>
+          <p class="text-slate-600">Select your Class (1–12), division, and roll number, and set your username and password immediately.</p>
         </div>
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">1. Account Registration & Direct Password Setup</h2>
-          <p class="text-xs text-slate-400">No activation codes, zero bureaucratic email delays</p>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
+          <span class="font-bold text-indigo-600 uppercase text-[10px]">Step 2</span>
+          <h4 class="font-bold text-slate-900">Live Waiting Screen</h4>
+          <p class="text-slate-600">After signup, you are logged in to a real-time waiting screen while your profile awaits verification.</p>
         </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <span class="font-bold text-indigo-600 uppercase text-[10px] tracking-wider">Step 1</span>
-          <h4 class="font-bold text-slate-900">Sign Up Directly</h4>
-          <p class="text-slate-600">Provide your school name, select your Class (1 to 12), division, and roll number. Pick your own username and choose your password right away.</p>
-        </div>
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <span class="font-bold text-indigo-600 uppercase text-[10px] tracking-wider">Step 2</span>
-          <h4 class="font-bold text-slate-900">Save Your Tracking Token</h4>
-          <p class="text-slate-600">You will receive a unique token (e.g. <code>track_a1b2c3d4</code>). Keep it safe to look up your verification status anytime.</p>
-        </div>
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <span class="font-bold text-indigo-600 uppercase text-[10px] tracking-wider">Step 3</span>
-          <h4 class="font-bold text-slate-900">1-Click Peer Approval</h4>
-          <p class="text-slate-600">To keep out fake accounts and bots, the Student Lead Administrator approves your profile with 1 click. Your dashboard unlocks automatically!</p>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
+          <span class="font-bold text-indigo-600 uppercase text-[10px]">Step 3</span>
+          <h4 class="font-bold text-slate-900">Automatic Unlock</h4>
+          <p class="text-slate-600">Once the Lead Admin approves with 1 click, your dashboard unlocks automatically—no activation codes needed!</p>
         </div>
       </div>
     </article>
 
-    <!-- Section 3: Notes & Upload Limits -->
-    <article id="notes" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-          <i data-lucide="book-open" class="w-5 h-5"></i>
+    <article id="notes" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
+      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="book-open" class="w-5 h-5 text-emerald-600"></i> 2. Academic Notes Hub &amp; Storage Quotas
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
+          <div class="font-bold text-emerald-900">Max 15 MB Per Direct File</div>
+          <p class="text-emerald-800">Direct PDF and image uploads up to <strong>15 MB</strong> are gzip-compressed automatically (saving 40–60% storage) and stay active for 30 days.</p>
         </div>
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">2. Academic Notes Hub & Strict Storage Quotas</h2>
-          <p class="text-xs text-slate-400">Class, Subject, and Chapter-wise organized repository</p>
-        </div>
-      </div>
-
-      <div class="space-y-3 text-sm text-slate-600 leading-relaxed">
-        <p>
-          Students can browse and download verified study materials, handwritten summaries, and question banks. To protect mobile bandwidth and ensure free edge hosting for the school, strict upload limits are enforced:
-        </p>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1.5">
-            <div class="font-bold text-emerald-900 flex items-center gap-2 text-xs uppercase tracking-wider">
-              <i data-lucide="file-check" class="w-4 h-4 text-emerald-600"></i> Max 25 MB Per File
-            </div>
-            <p class="text-xs text-emerald-800">
-              Direct PDF and image uploads are supported up to <strong>25 MB per file</strong>. Files are automatically compressed using native Gzip streaming to shrink storage by 40-60%.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1.5">
-            <div class="font-bold text-indigo-900 flex items-center gap-2 text-xs uppercase tracking-wider">
-              <i data-lucide="gauge" class="w-4 h-4 text-indigo-600"></i> 4 Uploads / 24 Hours
-            </div>
-            <p class="text-xs text-indigo-800">
-              Each student can upload up to <strong>4 direct PDF notes every 24 hours</strong>. Direct uploads stay active for 30 days before auto-archiving.
-            </p>
-          </div>
-        </div>
-
-        <div class="p-3.5 rounded-xl bg-slate-100 text-xs text-slate-700 flex items-start gap-2.5">
-          <i data-lucide="link" class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5"></i>
-          <div>
-            <strong>Permanent Google Drive Links:</strong> For large textbook scans or entire year syllabi, choose the "Google Drive Link" option when uploading. Drive links are <strong>permanent for the full academic year</strong> and do not count against your 15MB file limit!
-          </div>
+        <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
+          <div class="font-bold text-indigo-900">4 Direct Uploads / 24 Hours</div>
+          <p class="text-indigo-800">Each student can upload up to 4 direct files per 24 hours. <strong>Google Drive links</strong> are unlimited and stay permanent for the full academic year!</p>
         </div>
       </div>
     </article>
 
-    <!-- Section 4: Examination Schedules -->
-    <article id="exams" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
-          <i data-lucide="calendar" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">3. Official Examination Timetables</h2>
-          <p class="text-xs text-slate-400">Never miss datesheets, timings, or hall numbers</p>
-        </div>
-      </div>
-
+    <article id="exams" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
+      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i> 3. Official Examination Timetables
+      </h2>
       <p class="text-sm text-slate-600 leading-relaxed">
-        VidyaSphere features an integrated Exam Timetable viewer (<a href="/dashboard/exams.html" class="text-indigo-600 font-bold underline">Exams & Timetables</a>).
+        Visit <a href="/dashboard/exams.html" class="text-indigo-600 font-bold underline">Exams &amp; Timetable</a> to filter schedules by your class, see live countdowns, hall/room numbers, syllabus topics, and Google Drive datesheet links.
       </p>
-      <ul class="list-disc pl-5 text-xs text-slate-600 space-y-1.5">
-        <li><strong>Class-Specific Filtering:</strong> Filter by your exact class to see upcoming board exams, unit tests, or prelim dates.</li>
-        <li><strong>Detailed Exam Information:</strong> Displays exact start and end times, examination hall or room number, and chapter syllabus.</li>
-        <li><strong>Official Syllabus Links:</strong> Teachers and administrators attach permanent Google Drive links for detailed syllabus handouts and sample question papers.</li>
-      </ul>
     </article>
 
-    <!-- Section 5: Realtime Chat, DMs & Ephemeral Storage -->
-    <article id="chat" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-          <i data-lucide="messages-square" class="w-5 h-5"></i>
+    <article id="chat" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
+      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="messages-square" class="w-5 h-5 text-blue-600"></i> 4. Realtime Chat, Study Groups &amp; 7-Day Auto-Purge
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
+          <h4 class="font-bold text-amber-950">7-Day Ephemeral Auto-Purge</h4>
+          <p class="text-amber-800">All chat messages and attachments automatically vanish after 7 days to keep storage light and privacy clean.</p>
         </div>
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">4. Realtime Chat, Compressed Attachments & 7-Day Auto Purge</h2>
-          <p class="text-xs text-slate-400">Consent-first messaging engineered for privacy and zero storage waste</p>
+        <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
+          <h4 class="font-bold text-indigo-950">Consent-First DMs &amp; Groups</h4>
+          <p class="text-indigo-800">1-on-1 DMs and Study Group invitations require recipient acceptance before messages unlock.</p>
         </div>
-      </div>
-
-      <div class="space-y-4 text-sm text-slate-600 leading-relaxed">
-        <p>
-          VidyaSphere's messaging system is designed as a research-grade student communication protocol:
-        </p>
-
-        <!-- Feature Grid for Chat Upgrades -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-          <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1.5">
-            <h4 class="font-bold text-amber-900 flex items-center gap-2 text-xs uppercase tracking-wider">
-              <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i> ⏱️ 7-Day Ephemeral Auto-Purge
-            </h4>
-            <p class="text-amber-800 leading-relaxed">
-              All messages (public channels, study groups, DMs, and file attachments) <strong>automatically vanish after 7 days</strong>. This ensures students leave zero permanent digital traces and keeps our edge database lightweight and within free tier limits.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1.5">
-            <h4 class="font-bold text-indigo-900 flex items-center gap-2 text-xs uppercase tracking-wider">
-              <i data-lucide="edit-3" class="w-4 h-4 text-indigo-600"></i> Edit & Delete Anytime
-            </h4>
-            <p class="text-indigo-800 leading-relaxed">
-              Sent a typo or changed your mind? Students have full control to <strong>edit</strong> or <strong>delete</strong> their sent messages at any time. Edited messages display an un-intrusive <em>(edited)</em> indicator.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1.5">
-            <h4 class="font-bold text-emerald-900 flex items-center gap-2 text-xs uppercase tracking-wider">
-              <i data-lucide="archive" class="w-4 h-4 text-emerald-600"></i> Scientific Lossless Compression
-            </h4>
-            <p class="text-emerald-800 leading-relaxed">
-              When students attach diagrams, homework photos, or PDFs (up to 15MB), files are compressed using <strong>native Web Standards Gzip streams</strong>. This slashes storage by 30-70% while guaranteeing <strong>100% byte-for-byte exact original quality</strong> when decompressed.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl border border-blue-200 bg-blue-50/50 space-y-1.5">
-            <h4 class="font-bold text-blue-900 flex items-center gap-2 text-xs uppercase tracking-wider">
-              <i data-lucide="download-cloud" class="w-4 h-4 text-blue-600"></i> Zero-Waste Lazy Downloads
-            </h4>
-            <p class="text-blue-800 leading-relaxed">
-              To protect mobile users on strict 1GB/day mobile data plans, attachments are <strong>never automatically downloaded</strong> into the chat feed. Instead, a clean file card with size information is shown, and the file only downloads when explicitly clicked!
-            </p>
-          </div>
+        <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
+          <h4 class="font-bold text-emerald-950">Lossless Compressed Attachments</h4>
+          <p class="text-emerald-800">Files up to 15MB are compressed losslessly with gzip and restore byte-for-byte on download.</p>
         </div>
-
-        <!-- 3 Modes Explanation -->
-        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2 text-xs">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
-            <i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i> Consent-First Direct Messaging (DMs)
-          </h4>
-          <p class="text-slate-600 leading-relaxed">
-            To prevent spam and protect privacy, students must send a <strong>"Request to Chat"</strong> before 1-on-1 messaging unlocks. The recipient must accept the invitation first. No one can send unsolicited messages, and you never have to share personal phone numbers.
-          </p>
+        <div class="p-4 rounded-xl border border-blue-200 bg-blue-50/50 space-y-1">
+          <h4 class="font-bold text-blue-950">Zero-Waste Lazy Downloads</h4>
+          <p class="text-blue-800">Chat attachments never auto-download on mobile data; they download only when you tap <strong>Get</strong>.</p>
         </div>
       </div>
     </article>
 
-    <!-- Section 6: Q&A Forum & Polls -->
-    <article id="qa-polls" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-          <i data-lucide="vote" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">5. Academic Q&A Forum & School Polls</h2>
-          <p class="text-xs text-slate-400">Peer homework help and democratic voting</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600">
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <h4 class="font-bold text-slate-900 text-sm">Academic Q&A Forum</h4>
-          <p>Post questions when stuck on tricky homework problems. Any student can answer with a step-by-step breakdown. The student who asked can mark the best answer as the <strong>Accepted Solution</strong> with a verified green badge.</p>
-        </div>
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <h4 class="font-bold text-slate-900 text-sm">Duplicate-Proof Polls</h4>
-          <p>Participate in class polls and school election surveys. VidyaSphere enforces mathematical <code>UNIQUE(poll_id, user_id)</code> constraints—preventing multi-voting. Votes update live percentage bars instantly.</p>
-        </div>
-      </div>
-    </article>
-
-    <!-- Section 7: Mobile PWA -->
-    <article id="pwa" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
-          <i data-lucide="smartphone" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">6. Install as a Mobile App (10 Seconds)</h2>
-          <p class="text-xs text-slate-400">Zero phone memory used, no app store download required</p>
-        </div>
-      </div>
-
+    <article id="qa-polls" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-3">
+      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="vote" class="w-5 h-5 text-amber-600"></i> 5. Academic Q&amp;A &amp; Duplicate-Proof Polls
+      </h2>
       <p class="text-sm text-slate-600 leading-relaxed">
-        VidyaSphere is a certified Progressive Web App (PWA). You don't need to visit the app store or consume 50MB of phone storage:
+        Ask homework questions in Q&amp;A and mark the best response as the <strong>Accepted Solution</strong>. Vote in school polls backed by unique per-user constraints so every student gets exactly one vote.
       </p>
-
-      <ol class="list-decimal pl-5 text-xs text-slate-600 space-y-2">
-        <li>Open <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700 font-bold">https://vidyasphere.ziprecovery2024-dbc.workers.dev</code> in Chrome on Android or Safari on iOS.</li>
-        <li>Tap the <strong>three dots (⋮)</strong> or the <strong>Share</strong> button.</li>
-        <li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li>
-        <li>The official VidyaSphere icon will appear on your phone home screen, launching full-screen like a native app!</li>
-      </ol>
     </article>
 
-    <!-- Section 8: Troubleshooting & FAQs -->
-    <article id="faqs" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold">
-          <i data-lucide="help-circle" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">7. Frequently Asked Questions & Troubleshooting</h2>
-          <p class="text-xs text-slate-400">Common questions answered</p>
-        </div>
-      </div>
-
-      <div class="space-y-3 text-xs text-slate-600">
-        <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
-          <summary class="font-bold text-slate-900">What should I do if the site loads slowly on mobile data?</summary>
-          <p class="mt-2 text-slate-600 leading-relaxed">
-            Indian mobile carriers (Jio/Airtel) sometimes filter edge hostnames. To fix this instantly, enable <strong>Secure DNS</strong> in Chrome: <em>Settings &gt; Privacy and Security &gt; Use secure DNS &gt; Choose Cloudflare (1.1.1.1) or Google Public DNS</em>. The site will load instantaneously!
-          </p>
-        </details>
-
-        <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
-          <summary class="font-bold text-slate-900">Is my password and data safe?</summary>
-          <p class="mt-2 text-slate-600 leading-relaxed">
-            Yes! All passwords are cryptographic hashed using PBKDF2 with 20,000 rounds and random salts. Plaintext passwords are never saved or sent to anyone. Sessions use 256-bit cryptographically random tokens stored in protected database tables.
-          </p>
-        </details>
-
-        <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
-          <summary class="font-bold text-slate-900">Can other students see my personal phone number?</summary>
-          <p class="mt-2 text-slate-600 leading-relaxed">
-            No! VidyaSphere never asks for your personal phone number. All peer communication happens directly within the platform's consent-first chat and discussion forums.
-          </p>
-        </details>
-
-        <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
-          <summary class="font-bold text-slate-900">Who manages VidyaSphere?</summary>
-          <p class="mt-2 text-slate-600 leading-relaxed">
-            VidyaSphere is managed by <strong>Sriramik Sanjiv Sahu</strong>, a 14-year-old student from Class 9th Shraddha who built this platform for the student community.
-          </p>
-        </details>
-      </div>
+    <article id="faqs" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-3 text-xs">
+      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="help-circle" class="w-5 h-5 text-cyan-600"></i> 6. FAQs &amp; Mobile Install
+      </h2>
+      <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+        <summary class="font-bold text-slate-900 cursor-pointer">How do I install VidyaSphere as an app?</summary>
+        <p class="mt-2 text-slate-600">Open VidyaSphere in Chrome (Android) or Safari (iOS), tap the menu/Share icon, and select <strong>Add to Home Screen</strong> or <strong>Install app</strong>.</p>
+      </details>
+      <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+        <summary class="font-bold text-slate-900 cursor-pointer">What if the site loads slowly on mobile data?</summary>
+        <p class="mt-2 text-slate-600">Enable <strong>Secure DNS</strong> in Chrome (<em>Settings &gt; Privacy and Security &gt; Use secure DNS &gt; Cloudflare 1.1.1.1 or Google Public DNS</em>).</p>
+      </details>
+      <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+        <summary class="font-bold text-slate-900 cursor-pointer">How is my password protected?</summary>
+        <p class="mt-2 text-slate-600">Passwords are hashed with PBKDF2-HMAC-SHA256 (20,000 iterations + random salts). Plaintext passwords are never stored.</p>
+      </details>
     </article>
-
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-    <div class="max-w-4xl mx-auto px-4 space-y-1">
-      <p><strong>VidyaSphere &bull; Supreme Knowledge Edge Ecosystem</strong></p>
-      <p class="text-[11px] text-slate-400">Created by Sriramik Sanjiv Sahu (Class 9th Shraddha, Lead Developer & Founder)</p>
-    </div>
+  <footer class="bg-white border-t border-slate-200/80 py-6 text-center text-xs text-slate-400">
+    Created by Sriramik Sanjiv Sahu (Class 9th Shraddha) • VidyaSphere
   </footer>
 
   <script type="module">

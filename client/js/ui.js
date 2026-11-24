@@ -1,37 +1,72 @@
 /**
- * UI Utilities: Toasts, Modals, Formatters, Navigation
+ * Shared UI Utilities: Safe HTML Escaping, URL Sanitization, Toasts & Formatters
  */
+
+export function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function safeUrl(url) {
+  if (!url) return '';
+  try {
+    const parsed = new URL(String(url).trim(), window.location.origin);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.href;
+    }
+  } catch { /* invalid url */ }
+  return '';
+}
 
 export function showToast(message, type = 'info') {
   let toastContainer = document.getElementById('toast-container');
   if (!toastContainer) {
     toastContainer = document.createElement('div');
     toastContainer.id = 'toast-container';
-    toastContainer.className = 'fixed bottom-20 md:bottom-6 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none';
+    toastContainer.className = 'fixed bottom-20 md:bottom-5 right-4 left-4 md:left-auto z-[70] flex flex-col gap-2 md:max-w-sm pointer-events-none';
     document.body.appendChild(toastContainer);
   }
 
-  const toast = document.createElement('div');
-  const bgColors = {
-    success: 'bg-emerald-600 text-white',
-    error: 'bg-rose-600 text-white',
-    info: 'bg-indigo-600 text-white',
-    warning: 'bg-amber-500 text-white',
+  const styles = {
+    success: 'bg-slate-900 text-white border-emerald-500/40',
+    error: 'bg-rose-600 text-white border-rose-400/40',
+    info: 'bg-slate-900 text-white border-indigo-400/40',
+    warning: 'bg-amber-500 text-slate-950 border-amber-300',
+  };
+  const dotColors = {
+    success: 'bg-emerald-400',
+    error: 'bg-rose-200',
+    info: 'bg-indigo-400',
+    warning: 'bg-amber-950',
   };
 
-  const bg = bgColors[type] || bgColors.info;
-  toast.className = `${bg} px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-medium toast-enter pointer-events-auto`;
-  toast.innerHTML = `
-    <span class="flex-1">${message}</span>
-    <button class="opacity-75 hover:opacity-100 text-lg leading-none" onclick="this.parentElement.remove()">&times;</button>
-  `;
+  const toast = document.createElement('div');
+  toast.className = `${styles[type] || styles.info} border px-4 py-3 rounded-xl shadow-lg shadow-slate-900/15 flex items-center gap-3 text-xs sm:text-sm font-medium toast-enter pointer-events-auto`;
 
+  const dot = document.createElement('span');
+  dot.className = `w-2 h-2 rounded-full shrink-0 ${dotColors[type] || dotColors.info}`;
+
+  const textSpan = document.createElement('span');
+  textSpan.className = 'flex-1 leading-snug';
+  textSpan.textContent = String(message ?? '');
+
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'opacity-70 hover:opacity-100 text-base leading-none px-1';
+  closeBtn.textContent = '×';
+  closeBtn.addEventListener('click', () => toast.remove());
+
+  toast.append(dot, textSpan, closeBtn);
   toastContainer.appendChild(toast);
 
   setTimeout(() => {
     toast.style.opacity = '0';
-    toast.style.transition = 'opacity 0.3s ease';
-    setTimeout(() => toast.remove(), 300);
+    toast.style.transition = 'opacity 0.25s ease';
+    setTimeout(() => toast.remove(), 250);
   }, 4000);
 }
 
@@ -39,7 +74,6 @@ export function parseUtcDate(dateString) {
   if (!dateString) return null;
   if (dateString instanceof Date) return dateString;
   let str = String(dateString).trim();
-  // If SQLite default format "YYYY-MM-DD HH:MM:SS" -> treat as UTC by appending 'Z'
   if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(str)) {
     str = str.replace(' ', 'T') + 'Z';
   } else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str) && !str.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(str)) {
@@ -70,19 +104,14 @@ export function formatDateTime(dateString) {
   yesterday.setDate(yesterday.getDate() - 1);
   const isYesterday = date.toDateString() === yesterday.toDateString();
 
-  // Automatic user local time for their specific country/timezone
   const timeStr = date.toLocaleTimeString(undefined, {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
   });
 
-  if (isToday) {
-    return timeStr;
-  }
-  if (isYesterday) {
-    return `Yesterday, ${timeStr}`;
-  }
+  if (isToday) return timeStr;
+  if (isYesterday) return `Yesterday, ${timeStr}`;
   return `${date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}, ${timeStr}`;
 }
 
@@ -100,7 +129,19 @@ export function initIcons() {
   }
 }
 
-// Purge any stale service workers to guarantee instant, zero-delay direct network loads
+export function bindModalBackdropAndEsc(modalEl, onClose) {
+  if (!modalEl) return;
+  modalEl.addEventListener('click', (e) => {
+    if (e.target === modalEl) onClose();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modalEl.classList.contains('hidden')) {
+      onClose();
+    }
+  });
+}
+
+// Purge stale service workers for zero-delay network loads
 if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     for (const reg of registrations) reg.unregister();

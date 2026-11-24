@@ -10,121 +10,18 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 overflow-x-hidden w-full selection:bg-indigo-500 selection:text-white">
-
-  <!-- Desktop Sidebar -->
-  <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 p-4 shrink-0 h-screen sticky top-0 justify-between">
-    <div class="space-y-6">
-      <div class="flex items-center gap-3 px-2">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h2 class="font-extrabold text-slate-900 leading-tight">VidyaSphere</h2>
-          <span class="text-xs text-slate-400 font-medium">Student Edge Hub</span>
-        </div>
-      </div>
-
-      <nav class="space-y-1">
-        <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Notice Board
-        </a>
-        <a href="/dashboard/exams.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i> Exams & Timetable
-        </a>
-        <a href="/dashboard/chat.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-sm">
-          <i data-lucide="messages-square" class="w-5 h-5"></i> Realtime Chat & DMs
-        </a>
-        <a href="/dashboard/notes.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="book-open" class="w-5 h-5"></i> Study Notes
-        </a>
-        <a href="/dashboard/qa.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="message-square" class="w-5 h-5"></i> Academic Q&A
-        </a>
-        <a href="/dashboard/polls.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="vote" class="w-5 h-5"></i> School Polls
-        </a>
-        <a href="/dashboard/students.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="users" class="w-5 h-5"></i> Student Directory
-        </a>
-        <div id="admin-nav-link" class="hidden">
-          <a href="/admin/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-700 hover:bg-rose-50 font-bold text-sm transition">
-            <i data-lucide="shield-alert" class="w-5 h-5"></i> Admin Portal
-          </a>
-        </div>
-      </nav>
-    </div>
-
-    <!-- User Profile & Logout -->
-    <div class="border-t border-slate-200 pt-4 px-2">
-      <div class="flex items-center justify-between">
-        <div class="overflow-hidden">
-          <p id="user-display-name" class="font-bold text-sm text-slate-800 truncate"></p>
-          <p id="user-display-role" class="text-xs text-slate-400 capitalize"></p>
-        </div>
-        <button id="logout-btn" title="Sign Out" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-          <i data-lucide="log-out" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Mobile Top Header -->
-  <header class="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-3 py-2.5 flex items-center justify-between shadow-sm w-full">
-    <div class="flex items-center gap-2 overflow-hidden">
-      <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0">
-        <i data-lucide="messages-square" class="w-4 h-4"></i>
-      </div>
-      <span class="font-bold text-xs sm:text-sm text-slate-900 truncate">Chat & DMs</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <button id="open-new-dm-mob" class="px-2 py-1 rounded-lg bg-indigo-600 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm">
-        <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> New DM
-      </button>
-      <button class="logout-btn-trigger p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Logout">
-        <i data-lucide="log-out" class="w-4 h-4"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Mobile Bottom Navigation -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 px-1 py-1 flex items-center justify-around shadow-lg max-w-full">
-    <a href="/dashboard/index.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="layout-dashboard" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notices</span>
-    </a>
-    <a href="/dashboard/exams.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="calendar" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Exams</span>
-    </a>
-    <a href="/dashboard/chat.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-600 font-bold text-[9px] truncate">
-      <i data-lucide="messages-square" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Chat</span>
-    </a>
-    <a href="/dashboard/notes.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="book-open" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notes</span>
-    </a>
-    <a href="/dashboard/qa.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="message-square" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Q&A</span>
-    </a>
-    <a href="/dashboard/polls.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="vote" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Polls</span>
-    </a>
-  </nav>
+<body class="bg-slate-50 text-slate-900 h-[100dvh] flex flex-col md:flex-row pb-14 md:pb-0 overflow-hidden w-full selection:bg-indigo-500 selection:text-white">
 
   <!-- Mobile Channels Backdrop -->
-  <div id="channels-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 hidden md:hidden transition-opacity"></div>
+  <div id="channels-backdrop" class="fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-40 hidden md:hidden transition-opacity"></div>
 
-  <!-- Main Content Area: Split View for Channels/DMs & Chat Feed -->
-  <main class="flex-1 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-6 flex flex-col md:flex-row gap-3 h-[calc(100dvh-3.5rem-3.5rem)] md:h-screen overflow-hidden">
-    
-    <!-- Conversations / Channels Sidebar (Slide-over drawer on mobile, static sidebar on desktop) -->
-    <div id="channels-panel" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r md:border border-slate-200 p-3 flex-col shrink-0 h-full overflow-hidden shadow-2xl md:shadow-sm hidden md:flex md:relative md:inset-auto md:z-auto md:rounded-2xl">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+  <!-- Split View Main Area -->
+  <main class="flex-1 min-h-0 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-5 flex flex-col md:flex-row gap-3 overflow-hidden">
+
+    <!-- Conversations / Channels Sidebar -->
+    <div id="channels-panel" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r md:border border-slate-200/80 p-3 flex-col shrink-0 h-full overflow-hidden shadow-2xl md:shadow-[0_1px_2px_rgba(15,23,42,0.04)] hidden md:flex md:relative md:inset-auto md:z-auto md:rounded-2xl">
+      <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
           <i data-lucide="message-circle" class="w-4 h-4 text-indigo-600"></i> Chats & DMs
         </span>
         <div class="flex items-center gap-1">
@@ -137,53 +34,54 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs: Channels / DMs / Groups -->
-      <div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl my-2 text-[10px] font-bold">
-        <button class="chat-tab-btn active py-1 rounded-lg bg-white text-indigo-600 shadow-xs" data-target="channels-list">Hub</button>
-        <button class="chat-tab-btn py-1 rounded-lg text-slate-600 hover:text-slate-900" data-target="dms-list">DMs</button>
-        <button class="chat-tab-btn py-1 rounded-lg text-slate-600 hover:text-slate-900" data-target="groups-list">Groups</button>
+      <!-- Tabs: Hub / DMs / Groups -->
+      <div class="grid grid-cols-3 gap-1 p-1 bg-slate-100/90 rounded-xl my-2.5 text-[11px] font-bold">
+        <button class="chat-tab-btn active py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition" data-target="channels-list">Hub</button>
+        <button class="chat-tab-btn py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition" data-target="dms-list">DMs</button>
+        <button class="chat-tab-btn py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition" data-target="groups-list">Groups</button>
       </div>
 
       <!-- Scrollable List Area -->
       <div class="flex-1 overflow-y-auto space-y-1 pr-1 text-xs" id="chat-tabs-content">
-        <!-- 1. Channels List -->
         <div id="channels-list" class="space-y-1">
-          <button class="channel-item active w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition" data-channel="school" data-title="School Hub">
-            <span class="flex items-center gap-2 font-bold text-slate-800 truncate">
-              <i data-lucide="hash" class="w-3.5 h-3.5 text-indigo-600"></i> #school-hub
+          <button class="channel-item active bg-indigo-50 text-indigo-700 w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80" data-channel="school" data-title="School Hub">
+            <span class="flex items-center gap-2 font-semibold truncate">
+              <i data-lucide="hash" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span class="channel-label">#school-hub</span>
             </span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-bold">All</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 font-bold">All</span>
           </button>
-          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition" data-channel="class" id="class-channel-btn" data-title="My Class Hub">
-            <span class="flex items-center gap-2 font-bold text-slate-800 truncate">
-              <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> #my-class
+          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80" data-channel="class" id="class-channel-btn" data-title="My Class Hub">
+            <span class="flex items-center gap-2 font-semibold text-slate-700 truncate">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i>
+              <span class="channel-label">#my-class</span>
             </span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 font-bold">Class</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-700 font-bold">Class</span>
           </button>
-          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition" data-channel="academics" data-title="Academics & Study">
-            <span class="flex items-center gap-2 font-bold text-slate-800 truncate">
-              <i data-lucide="book" class="w-3.5 h-3.5 text-emerald-600"></i> #academics
+          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80" data-channel="academics" data-title="Academics & Study">
+            <span class="flex items-center gap-2 font-semibold text-slate-700 truncate">
+              <i data-lucide="book" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span class="channel-label">#academics</span>
             </span>
           </button>
-          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition" data-channel="sports" data-title="Sports & Events">
-            <span class="flex items-center gap-2 font-bold text-slate-800 truncate">
-              <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-600"></i> #sports
+          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80" data-channel="sports" data-title="Sports & Events">
+            <span class="flex items-center gap-2 font-semibold text-slate-700 truncate">
+              <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-600"></i>
+              <span class="channel-label">#sports</span>
             </span>
           </button>
         </div>
 
-        <!-- 2. Direct Messages (DMs) List -->
         <div id="dms-list" class="hidden space-y-1">
           <div id="dms-items-container" class="space-y-1">
             <p class="text-center text-slate-400 py-4 text-[11px]">Loading direct chats...</p>
           </div>
         </div>
 
-        <!-- 3. Study Groups List -->
         <div id="groups-list" class="hidden space-y-1">
-          <div class="flex items-center justify-between pb-1">
-            <span class="text-[10px] text-slate-400 font-semibold">Your Study Groups</span>
-            <button id="create-group-btn" class="text-[10px] text-indigo-600 font-bold hover:underline">+ New Group</button>
+          <div class="flex items-center justify-between pb-1.5 px-1">
+            <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Study Groups</span>
+            <button id="create-group-btn" class="text-[11px] text-indigo-600 font-bold hover:underline">+ New Group</button>
           </div>
           <div id="groups-items-container" class="space-y-1">
             <p class="text-center text-slate-400 py-4 text-[11px]">No groups joined yet.</p>
@@ -192,83 +90,74 @@
       </div>
     </div>
 
-    <!-- Right Side: Active Chat Stream Window -->
-    <div class="flex-1 bg-white rounded-2xl border border-slate-200 flex flex-col h-full overflow-hidden shadow-sm">
-      
-      <!-- Top Chat Header -->
-      <div class="p-2.5 sm:p-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
-        <div class="flex items-center gap-2 overflow-hidden">
+    <!-- Active Chat Window -->
+    <div class="flex-1 min-h-0 bg-white rounded-2xl border border-slate-200/80 flex flex-col h-full overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+
+      <!-- Chat Header -->
+      <div class="px-3.5 py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+        <div class="flex items-center gap-2.5 overflow-hidden">
           <button id="toggle-channels-mob-btn" class="md:hidden p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 shrink-0" title="Switch Channel or DMs">
-            <i data-lucide="menu" class="w-4 h-4"></i>
+            <i data-lucide="panel-left" class="w-4 h-4"></i>
           </button>
-          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0" id="current-chat-icon">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0" id="current-chat-icon">
             <i data-lucide="hash" class="w-4 h-4"></i>
           </div>
           <div class="overflow-hidden">
-            <div class="flex items-center gap-1.5">
-              <h2 class="font-extrabold text-slate-900 text-xs sm:text-base truncate" id="channel-name">#school-hub</h2>
+            <div class="flex items-center gap-2">
+              <h2 class="font-bold text-slate-900 text-sm sm:text-base truncate" id="channel-name">School Hub</h2>
               <button id="group-info-btn" class="hidden px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 text-[10px] font-bold items-center gap-1 shrink-0 transition" title="Manage Group Members">
                 <i data-lucide="users" class="w-3 h-3"></i>
                 <span id="group-members-count-badge">Members</span>
               </button>
             </div>
             <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+              <span id="connection-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
               <span id="connection-status">Live Connected</span>
-              <span class="mx-1">•</span>
-              <span id="chat-subtitle" class="truncate">Messages auto-purge after 7 days</span>
+              <span>•</span>
+              <span id="chat-subtitle" class="truncate">Public stream • Auto-purge after 7 days</span>
             </div>
           </div>
         </div>
 
-        <!-- Top Right Actions -->
-        <div class="flex items-center gap-1 sm:gap-2">
-          <span class="hidden sm:inline-flex items-center gap-1 text-[10px] bg-slate-100 text-slate-500 font-medium px-2 py-1 rounded-lg">
+        <div class="flex items-center gap-1.5">
+          <span class="hidden sm:inline-flex items-center gap-1 text-[10px] bg-slate-100 text-slate-500 font-medium px-2.5 py-1 rounded-lg">
             <i data-lucide="clock" class="w-3 h-3 text-amber-500"></i> 7-Day Auto Purge
           </span>
-          <button id="refresh-chat-btn" title="Refresh messages" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+          <button id="refresh-chat-btn" title="Refresh messages" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
             <i data-lucide="rotate-cw" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <!-- Permission Banner (Shown only for pending Direct Messages) -->
-      <div id="dm-permission-banner" class="hidden p-3 bg-amber-50 border-b border-amber-200 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
+      <!-- Consent Banner (Pending DM or Group Invite) -->
+      <div id="dm-permission-banner" class="hidden p-3 bg-amber-50 border-b border-amber-200/80 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
         <div class="flex items-center gap-2 text-amber-900">
           <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 shrink-0"></i>
-          <span id="dm-permission-text">Direct chat request is awaiting approval.</span>
+          <span id="dm-permission-text">Chat request is awaiting approval.</span>
         </div>
         <div id="dm-permission-actions" class="flex items-center gap-2 shrink-0">
-          <button id="accept-dm-btn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow-xs transition">
-            Accept Chat
-          </button>
-          <button id="decline-dm-btn" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-bold text-xs transition">
-            Decline
-          </button>
+          <button id="accept-dm-btn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs transition">Accept</button>
+          <button id="decline-dm-btn" class="px-3 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg font-bold text-xs transition">Decline</button>
         </div>
       </div>
 
-      <!-- Chat Messages Scroll Container -->
-      <div id="messages-container" class="flex-1 bg-slate-50/70 p-3 sm:p-4 overflow-y-auto space-y-2.5">
-        <div class="p-8 text-center text-slate-400 text-xs">
-          Loading messages...
-        </div>
+      <!-- Messages Stream -->
+      <div id="messages-container" class="flex-1 min-h-0 bg-slate-50/60 p-3 sm:p-4 overflow-y-auto space-y-3">
+        <div class="p-8 text-center text-slate-400 text-xs">Loading messages...</div>
       </div>
 
-      <!-- Bottom Chat Input Bar -->
-      <div class="p-2.5 sm:p-3 border-t border-slate-200 bg-white shrink-0 space-y-2">
-        <!-- Selected Attachment Preview Pill -->
-        <div id="attachment-preview-bar" class="hidden flex items-center justify-between text-xs bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-1.5">
+      <!-- Composer Bar -->
+      <div class="p-2.5 sm:p-3 border-t border-slate-100 bg-white shrink-0 space-y-2">
+        <div id="attachment-preview-bar" class="hidden flex items-center justify-between text-xs bg-indigo-50 border border-indigo-200/80 rounded-xl px-3 py-1.5">
           <div class="flex items-center gap-2 overflow-hidden">
             <i data-lucide="paperclip" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i>
             <span id="attachment-name-text" class="font-bold text-indigo-900 truncate"></span>
-            <span id="attachment-size-text" class="text-[10px] text-indigo-500 shrink-0"></span>
+            <span id="attachment-size-text" class="text-[10px] text-indigo-500 shrink-0 tabular-nums"></span>
           </div>
-          <button type="button" id="remove-attachment-btn" class="text-slate-400 hover:text-rose-600 font-bold text-sm px-1 leading-none">&times;</button>
+          <button type="button" id="remove-attachment-btn" class="text-slate-400 hover:text-rose-600 font-bold text-base px-1 leading-none">&times;</button>
         </div>
 
         <form id="chat-form" class="flex items-center gap-2">
-          <!-- Attachment Button & Hidden File Input -->
           <input type="file" id="chat-file-input" class="hidden" accept="image/*,application/pdf,.doc,.docx,.txt">
           <button type="button" id="attach-btn" title="Attach image, PDF or study material (Max 15MB)"
             class="p-2 text-slate-400 hover:text-indigo-600 rounded-xl hover:bg-slate-100 transition shrink-0">
@@ -276,11 +165,11 @@
           </button>
 
           <input type="text" id="chat-input" required autocomplete="off"
-            class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
-            placeholder="Type your message...">
+            class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 min-w-0 transition"
+            placeholder="Message School Hub...">
 
           <button type="submit" id="send-btn"
-            class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shrink-0 shadow-sm shadow-indigo-100">
+            class="px-4 sm:px-5 py-2 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shrink-0">
             <span>Send</span>
             <i data-lucide="send" class="w-3.5 h-3.5"></i>
           </button>
@@ -290,15 +179,15 @@
   </main>
 
   <!-- Edit Message Modal -->
-  <div id="edit-msg-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-4 space-y-3 shadow-2xl border border-slate-100">
-      <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+  <div id="edit-msg-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-4 space-y-3 shadow-2xl border border-slate-200/80 modal-enter">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
           <i data-lucide="edit-3" class="w-3.5 h-3.5 text-indigo-600"></i> Edit Message
         </h3>
-        <button id="close-edit-modal" class="text-slate-400 hover:text-slate-600 text-lg font-bold leading-none">&times;</button>
+        <button id="close-edit-modal" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
       </div>
-      <textarea id="edit-msg-input" rows="3" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"></textarea>
+      <textarea id="edit-msg-input" rows="3" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 focus:outline-none resize-none"></textarea>
       <div class="flex justify-end gap-2">
         <button type="button" id="cancel-edit-btn" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Cancel</button>
         <button type="button" id="save-edit-btn" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">Save Changes</button>
@@ -307,119 +196,91 @@
   </div>
 
   <!-- New Direct Message Modal -->
-  <div id="new-dm-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl border border-slate-100">
+  <div id="new-dm-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-3.5 shadow-2xl border border-slate-200/80 modal-enter">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
           <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600"></i> Start Direct Chat
         </h3>
-        <button id="close-dm-modal" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        <button id="close-dm-modal" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
       </div>
-
-      <p class="text-xs text-slate-500 leading-relaxed">
-        Select a classmate to send a chat request. Private messaging unlocks once they accept your invitation.
-      </p>
-
-      <div class="space-y-2">
-        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Search Classmate</label>
-        <input type="text" id="student-search-input" placeholder="Type name or roll number..."
-          class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-      </div>
-
-      <div id="student-picker-list" class="max-h-48 overflow-y-auto space-y-1.5 text-xs divide-y divide-slate-100">
+      <p class="text-xs text-slate-500 leading-relaxed">Select a classmate to send a chat request. Private messaging unlocks once they accept.</p>
+      <input type="text" id="student-search-input" placeholder="Search by name, @username, or roll #..."
+        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
+      <div id="student-picker-list" class="max-h-52 overflow-y-auto space-y-1 text-xs divide-y divide-slate-100">
         <p class="text-center text-slate-400 py-3 text-[11px]">Type to find classmates</p>
       </div>
     </div>
   </div>
 
   <!-- Create Study Group Modal -->
-  <div id="create-group-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl border border-slate-100">
+  <div id="create-group-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl border border-slate-200/80 modal-enter">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
           <i data-lucide="users" class="w-4 h-4 text-purple-600"></i> Create Study Group
         </h3>
-        <button id="close-group-modal" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        <button id="close-group-modal" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
       </div>
-
       <form id="group-form" class="space-y-3 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-1">Group Name</label>
           <input type="text" id="group-name-input" required placeholder="e.g. Science Board Prep 2026"
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500">
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Description</label>
           <textarea id="group-desc-input" rows="2" placeholder="What is this study group for?"
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+            class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500"></textarea>
         </div>
-        <button type="submit" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-sm transition">
-          Create Group
-        </button>
+        <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-purple-600 text-white font-bold rounded-xl transition">Create Group</button>
       </form>
     </div>
   </div>
 
   <!-- Group Members & Invite Modal -->
-  <div id="group-members-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md p-4 sm:p-5 space-y-3 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col">
+  <div id="group-members-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md p-4 sm:p-5 space-y-3 shadow-2xl border border-slate-200/80 max-h-[90vh] flex flex-col modal-enter">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100 shrink-0">
         <div class="flex items-center gap-2 overflow-hidden">
           <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold shrink-0">
             <i data-lucide="users" class="w-4 h-4"></i>
           </div>
           <div class="overflow-hidden">
-            <h3 class="text-sm font-extrabold text-slate-900 truncate" id="group-modal-title">Study Group</h3>
+            <h3 class="text-sm font-bold text-slate-900 truncate" id="group-modal-title">Study Group</h3>
             <span class="text-[10px] text-slate-400" id="group-modal-member-count">0 members</span>
           </div>
         </div>
-        <button id="close-group-members-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none p-1">&times;</button>
+        <button id="close-group-members-modal" class="text-slate-400 hover:text-slate-700 text-xl font-bold leading-none p-1">&times;</button>
       </div>
 
-      <!-- Navigation Tabs: Members vs Add Classmates -->
       <div class="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-bold shrink-0">
-        <button id="tab-btn-group-members" class="py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition">
-          Members List
-        </button>
+        <button id="tab-btn-group-members" class="py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition">Members List</button>
         <button id="tab-btn-group-add" class="py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1">
           <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Classmates
         </button>
       </div>
 
-      <!-- Panel 1: Current Members -->
       <div id="panel-group-members" class="flex-1 overflow-y-auto space-y-1.5 min-h-0 pr-1">
         <div id="group-members-list-container" class="space-y-1 text-xs">
           <p class="text-center text-slate-400 py-4 text-xs">Loading members...</p>
         </div>
       </div>
 
-      <!-- Panel 2: Add Classmates (Selector like Direct Message) -->
       <div id="panel-group-add" class="hidden flex-1 flex-col space-y-2 min-h-0">
-        <!-- Live Search -->
-        <div class="shrink-0">
-          <input type="text" id="add-member-search-input" placeholder="Search classmate by name, roll # or @username..."
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
-        </div>
-
-        <!-- Classmate Selector Scrollable List -->
+        <input type="text" id="add-member-search-input" placeholder="Search classmate by name, roll # or @username..."
+          class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-purple-500/30 focus:outline-none shrink-0">
         <div id="group-classmate-selector" class="flex-1 overflow-y-auto space-y-1 text-xs divide-y divide-slate-100 pr-1">
           <p class="text-center text-slate-400 py-6 text-[11px]">Loading classmates list...</p>
         </div>
-
-        <!-- Manual Quick Invite Fallback -->
-        <div class="pt-2 border-t border-slate-100 shrink-0">
-          <div class="flex gap-1.5">
-            <input type="text" id="manual-group-invite-input" placeholder="Or type roll # or username directly..."
-              class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
-            <button id="manual-group-invite-btn" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition">
-              Invite
-            </button>
-          </div>
+        <div class="pt-2 border-t border-slate-100 shrink-0 flex gap-1.5">
+          <input type="text" id="manual-group-invite-input" placeholder="Or type roll # or username directly..."
+            class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-purple-500/30 focus:outline-none">
+          <button id="manual-group-invite-btn" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition">Invite</button>
         </div>
       </div>
 
-      <!-- Footer Actions (Leave / Delete) -->
-      <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs shrink-0" id="group-modal-footer">
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs shrink-0">
         <button id="leave-group-btn" class="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold transition flex items-center gap-1">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Leave Group
         </button>
@@ -430,1409 +291,6 @@
     </div>
   </div>
 
-  <script type="module">
-    import { apiRequest } from '/js/api.js';
-    import { requireAuth, logout, getToken } from '/js/auth.js';
-    import { formatDateTime, formatFileSize, initIcons, showToast } from '/js/ui.js';
-
-    const user = requireAuth();
-    if (user) {
-      document.getElementById('user-display-name').textContent = user.fullName || user.username;
-      document.getElementById('user-display-role').textContent = `${user.role} ${user.className ? '• ' + user.className : ''}`;
-      if (user.role === 'admin') {
-        document.getElementById('admin-nav-link')?.classList.remove('hidden');
-      }
-
-      const classBtn = document.getElementById('class-channel-btn');
-      if (classBtn && user.className) {
-        const cleanClass = user.className.toLowerCase().replace(/\s+/g, '_');
-        classBtn.dataset.channel = `class_${cleanClass}`;
-        classBtn.dataset.title = `${user.className} Hub`;
-        classBtn.querySelector('span').innerHTML = `<i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> #${cleanClass}`;
-      }
-    }
-
-    document.getElementById('logout-btn')?.addEventListener('click', logout);
-    document.querySelectorAll('.logout-btn-trigger').forEach(btn => btn.addEventListener('click', logout));
-
-    // Chat state
-    let currentChannel = 'school';
-    let currentChatType = 'channel';
-    let activeDmData = null;
-    let ws = null;
-    let allStudentsCache = [];
-    let selectedAttachmentFile = null;
-    let editingMessageId = null;
-
-    // Mobile Drawer elements
-    const channelsPanel = document.getElementById('channels-panel');
-    const channelsBackdrop = document.getElementById('channels-backdrop');
-    const toggleChannelsMobBtn = document.getElementById('toggle-channels-mob-btn');
-    const closeChannelsMobBtn = document.getElementById('close-channels-mob-btn');
-
-    function openChannelsDrawer() {
-      channelsBackdrop?.classList.remove('hidden');
-      channelsPanel?.classList.remove('hidden');
-      channelsPanel?.classList.add('flex');
-      initIcons();
-    }
-    function closeChannelsDrawer() {
-      channelsBackdrop?.classList.add('hidden');
-      if (window.innerWidth < 768) {
-        channelsPanel?.classList.add('hidden');
-        channelsPanel?.classList.remove('flex');
-      }
-    }
-    toggleChannelsMobBtn?.addEventListener('click', openChannelsDrawer);
-    closeChannelsMobBtn?.addEventListener('click', closeChannelsDrawer);
-    channelsBackdrop?.addEventListener('click', closeChannelsDrawer);
-
-    // Group info & members elements
-    let currentGroupId = null;
-    let currentGroupRole = 'member';
-    let currentGroupName = '';
-    let currentGroupMembers = [];
-    let currentGroupInviteStatus = 'accepted';
-
-    const groupInfoBtn = document.getElementById('group-info-btn');
-    const groupMembersCountBadge = document.getElementById('group-members-count-badge');
-    const groupMembersModal = document.getElementById('group-members-modal');
-    const closeGroupMembersModal = document.getElementById('close-group-members-modal');
-    const groupModalTitle = document.getElementById('group-modal-title');
-    const groupModalMemberCount = document.getElementById('group-modal-member-count');
-    const tabBtnGroupMembers = document.getElementById('tab-btn-group-members');
-    const tabBtnGroupAdd = document.getElementById('tab-btn-group-add');
-    const panelGroupMembers = document.getElementById('panel-group-members');
-    const panelGroupAdd = document.getElementById('panel-group-add');
-    const addMemberSearchInput = document.getElementById('add-member-search-input');
-    const groupClassmateSelector = document.getElementById('group-classmate-selector');
-    const manualGroupInviteInput = document.getElementById('manual-group-invite-input');
-    const manualGroupInviteBtn = document.getElementById('manual-group-invite-btn');
-    const groupMembersListContainer = document.getElementById('group-members-list-container');
-    const leaveGroupBtn = document.getElementById('leave-group-btn');
-    const deleteGroupBtn = document.getElementById('delete-group-btn');
-
-    const messagesContainer = document.getElementById('messages-container');
-    const chatForm = document.getElementById('chat-form');
-    const chatInput = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('send-btn');
-    const channelNameEl = document.getElementById('channel-name');
-    const chatSubtitleEl = document.getElementById('chat-subtitle');
-    const connectionStatus = document.getElementById('connection-status');
-    const currentChatIcon = document.getElementById('current-chat-icon');
-    const dmPermissionBanner = document.getElementById('dm-permission-banner');
-    const dmPermissionText = document.getElementById('dm-permission-text');
-    const dmPermissionActions = document.getElementById('dm-permission-actions');
-    const acceptDmBtn = document.getElementById('accept-dm-btn');
-    const declineDmBtn = document.getElementById('decline-dm-btn');
-
-    // Attachment elements
-    const attachBtn = document.getElementById('attach-btn');
-    const chatFileInput = document.getElementById('chat-file-input');
-    const attachmentPreviewBar = document.getElementById('attachment-preview-bar');
-    const attachmentNameText = document.getElementById('attachment-name-text');
-    const attachmentSizeText = document.getElementById('attachment-size-text');
-    const removeAttachmentBtn = document.getElementById('remove-attachment-btn');
-
-    // Edit modal elements
-    const editMsgModal = document.getElementById('edit-msg-modal');
-    const editMsgInput = document.getElementById('edit-msg-input');
-    const closeEditModal = document.getElementById('close-edit-modal');
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
-    const saveEditBtn = document.getElementById('save-edit-btn');
-
-    // Handle file selection
-    attachBtn.addEventListener('click', () => chatFileInput.click());
-    chatFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      if (file.size > 15 * 1024 * 1024) {
-        showToast('File size exceeds the 15MB limit', 'warning');
-        chatFileInput.value = '';
-        return;
-      }
-
-      selectedAttachmentFile = file;
-      attachmentNameText.textContent = file.name;
-      attachmentSizeText.textContent = `(${formatFileSize(file.size)})`;
-      attachmentPreviewBar.classList.remove('hidden');
-      chatInput.required = false;
-      initIcons();
-    });
-
-    removeAttachmentBtn.addEventListener('click', () => {
-      selectedAttachmentFile = null;
-      chatFileInput.value = '';
-      attachmentPreviewBar.classList.add('hidden');
-      chatInput.required = true;
-    });
-
-    // Tab switching (Channels / DMs / Groups)
-    document.querySelectorAll('.chat-tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.chat-tab-btn').forEach(b => {
-          b.classList.remove('active', 'bg-white', 'text-indigo-600', 'shadow-xs');
-          b.classList.add('text-slate-600');
-        });
-        btn.classList.add('active', 'bg-white', 'text-indigo-600', 'shadow-xs');
-        btn.classList.remove('text-slate-600');
-
-        const targetId = btn.dataset.target;
-        ['channels-list', 'dms-list', 'groups-list'].forEach(id => {
-          document.getElementById(id).classList.toggle('hidden', id !== targetId);
-        });
-
-        if (targetId === 'dms-list') loadDmsList();
-        if (targetId === 'groups-list') loadGroupsList();
-      });
-    });
-
-    // Channel selection
-    document.querySelectorAll('.channel-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.channel-item').forEach(b => b.classList.remove('active', 'bg-indigo-50', 'text-indigo-700'));
-        btn.classList.add('active', 'bg-indigo-50', 'text-indigo-700');
-
-        closeChannelsDrawer();
-
-        currentChatType = 'channel';
-        currentChannel = btn.dataset.channel;
-        activeDmData = null;
-        currentGroupId = null;
-        groupInfoBtn?.classList.add('hidden');
-
-        channelNameEl.textContent = btn.dataset.title;
-        chatSubtitleEl.textContent = 'Public stream • Messages auto-purge after 7 days';
-        currentChatIcon.innerHTML = `<i data-lucide="hash" class="w-4 h-4"></i>`;
-        dmPermissionBanner.classList.add('hidden');
-        chatInput.disabled = false;
-        chatInput.placeholder = `Message ${btn.dataset.title}...`;
-        sendBtn.disabled = false;
-
-        initIcons();
-        loadMessages();
-      });
-    });
-
-    // Realtime Message Tracking & Adaptive Sync Engine
-    let lastMessageCreatedAt = null;
-    let knownMessageIds = new Set();
-    let syncIntervalId = null;
-    let isSyncing = false;
-    let wsPingTimer = null;
-
-    // Load Messages (Full initial channel load)
-    async function loadMessages() {
-      try {
-        const res = await apiRequest(`/chat/messages?channel=${encodeURIComponent(currentChannel)}`);
-        const messages = res.messages || [];
-
-        knownMessageIds.clear();
-        lastMessageCreatedAt = null;
-
-        if (messages.length === 0) {
-          messagesContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No messages yet in the past 7 days. Say hello! 👋</div>';
-          startLiveSync();
-          return;
-        }
-
-        messages.forEach(m => {
-          knownMessageIds.add(m.id);
-          if (m.created_at || m.createdAt) lastMessageCreatedAt = m.created_at || m.createdAt;
-        });
-
-        messagesContainer.innerHTML = messages.map(msg => renderMessageHtml(msg)).join('');
-        attachMessageActionListeners();
-        initIcons();
-        scrollToBottom();
-        startLiveSync();
-      } catch (err) {
-        messagesContainer.innerHTML = `<div class="p-4 text-center text-rose-500 text-xs">${err.message}</div>`;
-      }
-    }
-
-    // Adaptive Live Realtime Sync (Polls new messages every 1.5s - 2s across all edge nodes)
-    async function syncNewMessages() {
-      if (isSyncing || !currentChannel) return;
-      isSyncing = true;
-      try {
-        const queryParams = [`channel=${encodeURIComponent(currentChannel)}`];
-        if (lastMessageCreatedAt) {
-          queryParams.push(`since=${encodeURIComponent(lastMessageCreatedAt)}`);
-        }
-
-        const res = await apiRequest(`/chat/messages?${queryParams.join('&')}`);
-        const newMessages = res.messages || [];
-
-        if (newMessages.length > 0) {
-          // If container currently shows "No messages yet", clear it
-          if (messagesContainer.querySelector('.p-8')) {
-            messagesContainer.innerHTML = '';
-          }
-
-          let addedAny = false;
-          newMessages.forEach(msg => {
-            if (!knownMessageIds.has(msg.id)) {
-              // Check if matches an existing optimistic element
-              const isMyMsg = (msg.sender_id === user.id || msg.senderId === user.id);
-              if (isMyMsg) {
-                const tempEl = messagesContainer.querySelector(`[id^="msg-temp_"]`);
-                if (tempEl) {
-                  tempEl.id = `msg-${msg.id}`;
-                  knownMessageIds.add(msg.id);
-                  return;
-                }
-              }
-
-              knownMessageIds.add(msg.id);
-              messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(msg));
-              addedAny = true;
-            }
-            if (msg.created_at || msg.createdAt) {
-              lastMessageCreatedAt = msg.created_at || msg.createdAt;
-            }
-          });
-
-          if (addedAny) {
-            attachMessageActionListeners();
-            initIcons();
-            scrollToBottom();
-          }
-        }
-      } catch (e) {
-        // Silently ignore background sync errors to avoid interrupting user
-      } finally {
-        isSyncing = false;
-      }
-    }
-
-    function startLiveSync() {
-      if (syncIntervalId) clearInterval(syncIntervalId);
-      syncIntervalId = setInterval(syncNewMessages, 2000);
-    }
-
-    function escapeHtml(str) {
-      return (str || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function renderMarkdownSafe(md, isMe = false) {
-      if (!md) return '';
-      let text = escapeHtml(md);
-      text = text.replace(/`([^`]+)`/g, '<code class="bg-black/10 px-1 py-0.5 rounded text-[11px] font-mono">$1</code>');
-      text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-      return text.replace(/\n/g, '<br>');
-    }
-
-    function renderMessageHtml(msg) {
-      const senderId = msg.sender_id || msg.senderId;
-      const isMe = !!(senderId && user?.id && String(senderId) === String(user.id));
-      const isAdmin = (msg.is_root_admin === 1 || msg.isRootAdmin === true || msg.isRootAdmin === 1);
-      const isEdited = (msg.is_edited === 1 || msg.isEdited === 1 || msg.isEdited === true);
-      const hasAttachment = (msg.has_attachment === 1 || msg.hasAttachment === 1 || msg.hasAttachment === true);
-      const senderName = msg.sender_name || msg.senderName || 'Student';
-      const className = msg.class_name || msg.className || '';
-      const division = msg.division || '';
-      const rollNumber = msg.roll_number || msg.rollNumber || '';
-      const createdAt = msg.created_at || msg.createdAt || new Date().toISOString();
-      const attachmentName = msg.attachment_name || msg.attachmentName || '';
-      const attachmentType = msg.attachment_type || msg.attachmentType || '';
-      const attachmentSize = msg.attachment_size || msg.attachmentSize || 0;
-
-      let attachmentHtml = '';
-      if (hasAttachment && attachmentName) {
-        const isPdf = (attachmentType || '').includes('pdf') || attachmentName.endsWith('.pdf');
-        const isImg = (attachmentType || '').includes('image');
-        const icon = isPdf ? 'file-text' : (isImg ? 'image' : 'file');
-
-        attachmentHtml = `
-          <div class="mt-2 p-2 rounded-xl ${isMe ? 'bg-black/20 text-white' : 'bg-slate-100 text-slate-800'} border border-black/10 flex items-center justify-between gap-2.5">
-            <div class="flex items-center gap-2 overflow-hidden">
-              <div class="w-7 h-7 rounded-lg ${isMe ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center shrink-0">
-                <i data-lucide="${icon}" class="w-3.5 h-3.5"></i>
-              </div>
-              <div class="overflow-hidden">
-                <div class="font-bold text-[11px] truncate max-w-[140px] sm:max-w-[200px]" title="${escapeHtml(attachmentName)}">${escapeHtml(attachmentName)}</div>
-                <div class="text-[9px] opacity-75">${formatFileSize(attachmentSize)} • Tap to download</div>
-              </div>
-            </div>
-            <button type="button" class="download-attachment-btn px-2.5 py-1 rounded-lg ${isMe ? 'bg-white text-indigo-700 hover:bg-slate-50' : 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700'} font-bold text-[10px] flex items-center gap-1 shrink-0 transition shadow-xs"
-              data-msg-id="${msg.id}" data-filename="${escapeHtml(attachmentName)}">
-              <i data-lucide="download" class="w-3 h-3"></i>
-              <span>Get</span>
-            </button>
-          </div>
-        `;
-      }
-
-      let actionsHtml = '';
-      if (isMe || user.role === 'admin') {
-        actionsHtml = `
-          <div class="flex items-center gap-2 mt-1 opacity-60 hover:opacity-100 text-[10px] transition">
-            <button class="edit-msg-btn text-slate-400 hover:text-indigo-600 flex items-center gap-0.5" data-msg-id="${msg.id}" data-content="${escapeHtml(msg.content)}" title="Edit message">
-              <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
-            </button>
-            <button class="delete-msg-btn text-slate-400 hover:text-rose-600 flex items-center gap-0.5" data-msg-id="${msg.id}" title="Delete message">
-              <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
-            </button>
-          </div>
-        `;
-      }
-
-      const academicBadge = [
-        className ? `${className}${division ? ' (' + division + ')' : ''}` : '',
-        rollNumber ? `#${rollNumber}` : ''
-      ].filter(Boolean).join(' • ');
-
-      return `
-        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} group" id="msg-${msg.id}">
-          <div class="flex items-center gap-1.5 mb-1 px-1 flex-wrap ${isMe ? 'justify-end' : ''}">
-            <span class="text-[10px] font-bold ${isAdmin ? 'text-rose-600' : (isMe ? 'text-indigo-700 font-extrabold' : 'text-slate-700')}">
-              ${escapeHtml(senderName)} ${isMe ? '<span class="text-[9px] font-semibold text-indigo-500">(You)</span>' : ''}
-            </span>
-            ${isAdmin ? '<span class="text-[8px] px-1 rounded bg-rose-100 text-rose-700 font-bold uppercase">Admin</span>' : ''}
-            ${academicBadge ? `
-              <span class="text-[9px] px-1.5 py-0.2 rounded ${isMe ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-700'} font-semibold">
-                ${escapeHtml(academicBadge)}
-              </span>
-            ` : ''}
-            <span class="text-[9px] text-slate-400">${formatDateTime(createdAt)}</span>
-            ${isEdited ? '<span class="text-[9px] text-slate-400 italic">(edited)</span>' : ''}
-          </div>
-          <div class="max-w-[85%] sm:max-w-md px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-sm ${
-            isMe
-              ? 'bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 text-white rounded-tr-xs shadow-indigo-100'
-              : 'bg-white border border-slate-200 text-slate-800 rounded-tl-xs shadow-slate-100'
-          }">
-            <div>${renderMarkdownSafe(msg.content, isMe)}</div>
-            ${attachmentHtml}
-          </div>
-          ${actionsHtml}
-        </div>
-      `;
-    }
-
-    function attachMessageActionListeners() {
-      // Lazy Download On Demand (Zero quality loss, zero background bandwidth waste)
-      messagesContainer.querySelectorAll('.download-attachment-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const msgId = btn.dataset.msgId;
-          const filename = btn.dataset.filename;
-          try {
-            showToast('Decompressing attachment losslessly...', 'info');
-            const token = getToken();
-            const res = await fetch(`/api/chat/attachments/${msgId}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!res.ok) {
-              const err = await res.json().catch(() => ({}));
-              throw new Error(err.error || 'Failed to download attachment');
-            }
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-            showToast('Downloaded in 100% original quality!', 'success');
-          } catch (e) {
-            showToast(e.message, 'error');
-          }
-        });
-      });
-
-      // Edit Message Modal Open
-      messagesContainer.querySelectorAll('.edit-msg-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          editingMessageId = btn.dataset.msgId;
-          editMsgInput.value = btn.dataset.content;
-          editMsgModal.classList.remove('hidden');
-          editMsgModal.classList.add('flex');
-          editMsgInput.focus();
-        });
-      });
-
-      // Delete Message confirmation
-      messagesContainer.querySelectorAll('.delete-msg-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const msgId = btn.dataset.msgId;
-          if (!confirm('Are you sure you want to delete this message? Any attached files will also be permanently removed.')) return;
-          try {
-            await apiRequest(`/chat/messages/${msgId}`, { method: 'DELETE' });
-            showToast('Message deleted', 'info');
-            loadMessages();
-          } catch (e) {
-            showToast(e.message, 'error');
-          }
-        });
-      });
-    }
-
-    // Edit modal listeners
-    function closeEditModalHandler() {
-      editingMessageId = null;
-      editMsgModal.classList.add('hidden');
-      editMsgModal.classList.remove('flex');
-    }
-    closeEditModal.addEventListener('click', closeEditModalHandler);
-    cancelEditBtn.addEventListener('click', closeEditModalHandler);
-
-    saveEditBtn.addEventListener('click', async () => {
-      if (!editingMessageId) return;
-      const newContent = editMsgInput.value.trim();
-      if (!newContent) {
-        showToast('Message cannot be empty', 'warning');
-        return;
-      }
-      try {
-        await apiRequest(`/chat/messages/${editingMessageId}`, {
-          method: 'PUT',
-          body: { content: newContent }
-        });
-        showToast('Message updated', 'success');
-        closeEditModalHandler();
-        loadMessages();
-      } catch (e) {
-        showToast(e.message, 'error');
-      }
-    });
-
-    function scrollToBottom() {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    // Load Direct Chats (DMs)
-    async function loadDmsList() {
-      const container = document.getElementById('dms-items-container');
-      try {
-        const res = await apiRequest('/chat/dms');
-        const dms = res.dms || [];
-
-        if (dms.length === 0) {
-          container.innerHTML = `
-            <div class="text-center py-6 px-2 text-slate-400 space-y-2">
-              <p class="text-[11px]">No direct messages yet.</p>
-              <button id="start-first-dm" class="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold rounded-lg text-[10px]">
-                Find a Classmate
-              </button>
-            </div>
-          `;
-          document.getElementById('start-first-dm')?.addEventListener('click', openNewDmModal);
-          return;
-        }
-
-        container.innerHTML = dms.map(dm => {
-          const isPending = dm.status === 'pending';
-          const isIncoming = isPending && !dm.requestedByMe;
-          const academicDetail = `${dm.partner.className || ''}${dm.partner.division ? ' (' + dm.partner.division + ')' : ''}${dm.partner.rollNumber ? ' • Roll #' + dm.partner.rollNumber : ''}`;
-
-          return `
-            <button class="dm-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-50 border border-transparent"
-              data-dm-id="${dm.id}"
-              data-partner-name="${escapeHtml(dm.partner.fullName)}"
-              data-partner-username="${escapeHtml(dm.partner.username)}"
-              data-partner-class="${escapeHtml(dm.partner.className || '')}"
-              data-partner-division="${escapeHtml(dm.partner.division || '')}"
-              data-partner-roll="${escapeHtml(dm.partner.rollNumber || '')}"
-              data-status="${dm.status}"
-              data-requested-by-me="${dm.requestedByMe}">
-              <div class="overflow-hidden">
-                <div class="font-bold text-slate-800 truncate text-[11px]">
-                  ${escapeHtml(dm.partner.fullName)}
-                </div>
-                ${academicDetail ? `<div class="text-[9px] text-indigo-600 font-semibold truncate">${escapeHtml(academicDetail)}</div>` : ''}
-                <div class="text-[9px] text-slate-400 truncate">
-                  ${dm.lastMessage ? escapeHtml(dm.lastMessage) : (isPending ? 'Pending request...' : 'Active conversation')}
-                </div>
-              </div>
-              <div class="shrink-0 text-right">
-                ${isIncoming 
-                  ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold animate-pulse">Request</span>' 
-                  : (isPending 
-                    ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">Pending</span>'
-                    : '<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>'
-                  )
-                }
-              </div>
-            </button>
-          `;
-        }).join('');
-
-        container.querySelectorAll('.dm-item').forEach(btn => {
-          btn.addEventListener('click', () => {
-            selectDmConversation(btn.dataset);
-          });
-        });
-
-      } catch (err) {
-        container.innerHTML = `<div class="p-3 text-rose-500 text-[10px] text-center">${err.message}</div>`;
-      }
-    }
-
-    function selectDmConversation(data) {
-      closeChannelsDrawer();
-      currentChatType = 'dm';
-      const rawDmId = data.dmId || '';
-      currentChannel = rawDmId.startsWith('dm_') ? rawDmId : `dm_${rawDmId}`;
-      activeDmData = data;
-      currentGroupId = null;
-      groupInfoBtn?.classList.add('hidden');
-
-      channelNameEl.textContent = data.partnerName;
-      const detailParts = [
-        data.partnerClass ? `${data.partnerClass}${data.partnerDivision ? ' (' + data.partnerDivision + ')' : ''}` : '',
-        data.partnerRoll ? `Roll #${data.partnerRoll}` : '',
-        `@${data.partnerUsername}`
-      ].filter(Boolean);
-      chatSubtitleEl.textContent = detailParts.length > 0 ? detailParts.join(' • ') : `@${data.partnerUsername} • 1-on-1 DM`;
-      currentChatIcon.innerHTML = `<i data-lucide="lock" class="w-4 h-4 text-emerald-600"></i>`;
-      initIcons();
-
-      if (data.status === 'pending') {
-        dmPermissionBanner.classList.remove('hidden');
-        const isRequestedByMe = data.requestedByMe === 'true';
-
-        if (isRequestedByMe) {
-          dmPermissionText.textContent = `Invitation sent to ${data.partnerName}. Chat will unlock once they accept.`;
-          dmPermissionActions.classList.add('hidden');
-          chatInput.disabled = true;
-          chatInput.placeholder = `Waiting for ${data.partnerName} to accept...`;
-          sendBtn.disabled = true;
-          attachBtn.disabled = true;
-        } else {
-          dmPermissionText.textContent = `${data.partnerName} wants to chat with you. Accept invitation?`;
-          dmPermissionActions.classList.remove('hidden');
-          chatInput.disabled = true;
-          chatInput.placeholder = 'Accept the request above to start messaging...';
-          sendBtn.disabled = true;
-          attachBtn.disabled = true;
-        }
-      } else {
-        dmPermissionBanner.classList.add('hidden');
-        chatInput.disabled = false;
-        chatInput.placeholder = `Message ${data.partnerName}...`;
-        sendBtn.disabled = false;
-        attachBtn.disabled = false;
-      }
-
-      loadMessages();
-    }
-
-    // Accept / Decline DMs or Group Invitations
-    acceptDmBtn?.addEventListener('click', async () => {
-      if (currentChatType === 'dm' && activeDmData) {
-        try {
-          await apiRequest(`/chat/dms/${activeDmData.dmId}/accept`, { method: 'POST' });
-          showToast('Chat request accepted!', 'success');
-          activeDmData.status = 'accepted';
-          selectDmConversation(activeDmData);
-          loadDmsList();
-        } catch (err) {
-          showToast(err.message, 'error');
-        }
-      } else if (currentChatType === 'group' && currentGroupId) {
-        try {
-          await apiRequest(`/chat/groups/${currentGroupId}/accept`, { method: 'POST' });
-          showToast('Joined study group successfully!', 'success');
-          currentGroupInviteStatus = 'accepted';
-          dmPermissionBanner.classList.add('hidden');
-          chatInput.disabled = false;
-          chatInput.placeholder = `Message ${currentGroupName}...`;
-          sendBtn.disabled = false;
-          attachBtn.disabled = false;
-          loadGroupsList();
-          loadMessages();
-        } catch (err) {
-          showToast(err.message, 'error');
-        }
-      }
-    });
-
-    declineDmBtn?.addEventListener('click', async () => {
-      if (currentChatType === 'dm' && activeDmData) {
-        try {
-          await apiRequest(`/chat/dms/${activeDmData.dmId}/decline`, { method: 'POST' });
-          showToast('Chat request declined.', 'info');
-          loadDmsList();
-          document.querySelector('.channel-item[data-channel="school"]')?.click();
-        } catch (err) {
-          showToast(err.message, 'error');
-        }
-      } else if (currentChatType === 'group' && currentGroupId) {
-        try {
-          await apiRequest(`/chat/groups/${currentGroupId}/decline`, { method: 'POST' });
-          showToast('Group invitation declined.', 'info');
-          loadGroupsList();
-          document.querySelector('.channel-item[data-channel="school"]')?.click();
-        } catch (err) {
-          showToast(err.message, 'error');
-        }
-      }
-    });
-
-    let isSendingMessage = false;
-
-    // Send Message (Optimistic Instant 0ms Local Render + REST D1 Persistence + Realtime Streaming)
-    chatForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (isSendingMessage) return;
-
-      const content = chatInput.value.trim();
-      if (!content && !selectedAttachmentFile) return;
-
-      const fileToSend = selectedAttachmentFile;
-      const sendChannel = currentChannel;
-
-      isSendingMessage = true;
-      if (sendBtn) sendBtn.disabled = true;
-
-      // 1. Optimistic Local Render: Display message on sender screen in 0ms!
-      const tempId = 'temp_' + Date.now();
-      knownMessageIds.add(tempId);
-
-      const optimisticMsg = {
-        id: tempId,
-        sender_id: user.id,
-        senderId: user.id,
-        sender_name: user.fullName || user.username,
-        senderName: user.fullName || user.username,
-        role: user.role,
-        class_name: user.className || null,
-        className: user.className || null,
-        division: user.division || null,
-        roll_number: user.rollNumber || null,
-        rollNumber: user.rollNumber || null,
-        is_root_admin: user.isRootAdmin ? 1 : 0,
-        isRootAdmin: user.isRootAdmin || false,
-        channel: sendChannel,
-        content: content || (fileToSend ? `Sharing attachment: ${fileToSend.name}` : ''),
-        is_edited: 0,
-        has_attachment: fileToSend ? 1 : 0,
-        attachment_name: fileToSend ? fileToSend.name : null,
-        attachment_size: fileToSend ? fileToSend.size : 0,
-        created_at: new Date().toISOString(),
-      };
-
-      if (messagesContainer.querySelector('.p-8')) {
-        messagesContainer.innerHTML = '';
-      }
-
-      messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(optimisticMsg));
-      attachMessageActionListeners();
-      initIcons();
-      scrollToBottom();
-
-      // Reset form input immediately for smooth typing
-      chatInput.value = '';
-      selectedAttachmentFile = null;
-      chatFileInput.value = '';
-      attachmentPreviewBar.classList.add('hidden');
-      chatInput.required = true;
-
-      // Persist to D1 Database globally across all Cloudflare isolates (Single authoritative source of truth)
-      try {
-        const formData = new FormData();
-        formData.append('content', content);
-        formData.append('channel', sendChannel);
-        if (fileToSend) {
-          formData.append('file', fileToSend);
-        }
-
-        const token = getToken();
-        const res = await fetch('/api/chat/messages', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.error || 'Failed to send message');
-        }
-
-        const data = await res.json();
-        const tempEl = document.getElementById(`msg-${tempId}`);
-        if (tempEl && data.id) {
-          tempEl.id = `msg-${data.id}`;
-          knownMessageIds.add(data.id);
-        }
-        if (data.createdAt || data.created_at) {
-          lastMessageCreatedAt = data.createdAt || data.created_at;
-        }
-
-        setTimeout(syncNewMessages, 300);
-      } catch (err) {
-        const tempEl = document.getElementById(`msg-${tempId}`);
-        if (tempEl) {
-          tempEl.classList.add('opacity-50');
-          tempEl.title = 'Failed to deliver: ' + err.message;
-        }
-        showToast(err.message, 'error');
-      } finally {
-        isSendingMessage = false;
-        if (sendBtn) sendBtn.disabled = false;
-        chatInput.focus();
-      }
-    });
-
-    // Native WebSocket Connection with Heartbeat & Auto-Recovery
-    function connectWebSocket() {
-      const token = getToken();
-      if (!token) return;
-
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/api/chat/ws?token=${encodeURIComponent(token)}`;
-
-      try {
-        ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-          connectionStatus.textContent = 'Live Connected';
-          connectionStatus.parentElement.querySelector('span').className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0';
-
-          // 20s Heartbeat ping to keep mobile connection alive
-          if (wsPingTimer) clearInterval(wsPingTimer);
-          wsPingTimer = setInterval(() => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ type: 'ping' }));
-            }
-          }, 20000);
-        };
-
-        ws.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === 'pong') return;
-
-            if (data.type === 'new_message' && data.message) {
-              const msg = data.message;
-              const matchesChannel = (msg.channel === currentChannel) ||
-                (currentChannel.startsWith('dm_') && msg.channel.replace('dm_', '') === currentChannel.replace('dm_', ''));
-
-              if (matchesChannel) {
-                // If this message ID is already rendered, skip duplicate
-                if (knownMessageIds.has(msg.id)) return;
-
-                // Reconcile with temporary optimistic element from same user
-                const isMyMessage = (msg.sender_id === user.id || msg.senderId === user.id);
-                if (isMyMessage) {
-                  const tempEl = messagesContainer.querySelector(`[id^="msg-temp_"]`);
-                  if (tempEl) {
-                    tempEl.id = `msg-${msg.id}`;
-                    knownMessageIds.add(msg.id);
-                    return;
-                  }
-                }
-
-                knownMessageIds.add(msg.id);
-                if (messagesContainer.querySelector('.p-8')) {
-                  messagesContainer.innerHTML = '';
-                }
-                messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(msg));
-                attachMessageActionListeners();
-                initIcons();
-                scrollToBottom();
-
-                if (msg.created_at || msg.createdAt) {
-                  lastMessageCreatedAt = msg.created_at || msg.createdAt;
-                }
-              }
-              if (!document.getElementById('dms-list').classList.contains('hidden')) {
-                loadDmsList();
-              }
-            }
-          } catch (e) { /* ignore */ }
-        };
-
-        ws.onclose = () => {
-          if (wsPingTimer) clearInterval(wsPingTimer);
-          connectionStatus.textContent = 'Auto-Sync Active';
-          connectionStatus.parentElement.querySelector('span').className = 'w-2 h-2 rounded-full bg-amber-500 shrink-0';
-          setTimeout(connectWebSocket, 4000);
-        };
-
-        ws.onerror = () => {
-          ws.close();
-        };
-      } catch (err) {
-        setTimeout(connectWebSocket, 5000);
-      }
-    }
-
-    // Auto-Sync triggers on window focus, visibility change, and network reconnect
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        syncNewMessages();
-        if (!ws || ws.readyState !== WebSocket.OPEN) connectWebSocket();
-      }
-    });
-    window.addEventListener('focus', () => syncNewMessages());
-    window.addEventListener('online', () => {
-      syncNewMessages();
-      connectWebSocket();
-    });
-
-    // New Direct Message Modal logic
-    const dmModal = document.getElementById('new-dm-modal');
-    async function openNewDmModal() {
-      dmModal.classList.remove('hidden');
-      dmModal.classList.add('flex');
-      const searchInput = document.getElementById('student-search-input');
-      if (searchInput) searchInput.value = '';
-      const picker = document.getElementById('student-picker-list');
-      if (picker) {
-        if (!allStudentsCache || allStudentsCache.length === 0) {
-          picker.innerHTML = '<p class="text-center text-slate-400 py-4 text-xs animate-pulse">Loading all classmates...</p>';
-        } else {
-          renderStudentPicker(allStudentsCache);
-        }
-      }
-      await loadAllStudents();
-    }
-    function closeNewDmModal() {
-      dmModal.classList.add('hidden');
-      dmModal.classList.remove('flex');
-    }
-
-    document.getElementById('open-new-dm-btn')?.addEventListener('click', openNewDmModal);
-    document.getElementById('open-new-dm-mob')?.addEventListener('click', openNewDmModal);
-    document.getElementById('close-dm-modal')?.addEventListener('click', closeNewDmModal);
-
-    async function loadAllStudents(forceRefresh = false) {
-      const picker = document.getElementById('student-picker-list');
-      try {
-        if (!allStudentsCache || allStudentsCache.length === 0 || forceRefresh) {
-          const res = await apiRequest('/students');
-          allStudentsCache = (res.students || []).filter(s => s.id !== user?.id);
-        }
-        if (picker && !dmModal.classList.contains('hidden')) {
-          renderStudentPicker(allStudentsCache);
-        }
-        if (groupClassmateSelector) {
-          renderGroupClassmateSelector(allStudentsCache);
-        }
-      } catch (err) {
-        console.error("loadAllStudents error:", err);
-        if (picker && (!allStudentsCache || allStudentsCache.length === 0)) {
-          picker.innerHTML = `
-            <div class="space-y-2 pt-2">
-              <p class="text-[11px] text-slate-500">Enter student's exact username or roll #:</p>
-              <div class="flex gap-1.5">
-                <input type="text" id="manual-username-input" placeholder="e.g. 21 or aarav_10a" class="flex-1 px-3 py-1.5 border rounded-lg text-xs">
-                <button id="send-request-manual" class="px-3 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs">Invite</button>
-              </div>
-            </div>
-          `;
-          document.getElementById('send-request-manual')?.addEventListener('click', async () => {
-            const username = document.getElementById('manual-username-input').value.trim();
-            if (!username) return;
-            try {
-              await apiRequest('/chat/dms/request', { method: 'POST', body: { targetUsername: username } });
-              showToast('Chat request sent!', 'success');
-              closeNewDmModal();
-              loadDmsList();
-            } catch (e) {
-              showToast(e.message, 'error');
-            }
-          });
-        }
-      }
-    }
-
-    function renderStudentPicker(students) {
-      const picker = document.getElementById('student-picker-list');
-      if (!picker) return;
-      const list = students || allStudentsCache || [];
-      if (list.length === 0) {
-        picker.innerHTML = '<p class="text-center text-slate-400 py-4 text-xs">No other registered classmates found yet.</p>';
-        return;
-      }
-
-      picker.innerHTML = list.slice(0, 50).map(s => {
-        const academicDetail = [
-          s.class_name ? `${s.class_name}${s.division ? ' (' + s.division + ')' : ''}` : '',
-          s.roll_number ? `Roll #${s.roll_number}` : '',
-          `@${s.username}`
-        ].filter(Boolean).join(' • ');
-
-        return `
-          <div class="py-2.5 px-2 flex items-center justify-between hover:bg-slate-50 rounded-xl transition border-b border-slate-50 last:border-b-0">
-            <div class="overflow-hidden pr-2">
-              <div class="font-bold text-slate-800 text-xs">${escapeHtml(s.full_name)}</div>
-              <div class="text-[10px] text-indigo-600 font-medium truncate mt-0.5">${escapeHtml(academicDetail)}</div>
-            </div>
-            <button class="invite-student-btn px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-xs transition shrink-0"
-              data-user-id="${s.id}">
-              Chat
-            </button>
-          </div>
-        `;
-      }).join('');
-
-      picker.querySelectorAll('.invite-student-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            btn.disabled = true;
-            btn.textContent = 'Starting...';
-            await apiRequest('/chat/dms/request', { method: 'POST', body: { targetUserId: btn.dataset.userId } });
-            showToast('Chat request sent!', 'success');
-            closeNewDmModal();
-            document.querySelector('.chat-tab-btn[data-target="dms-list"]')?.click();
-            loadDmsList();
-          } catch (e) {
-            btn.disabled = false;
-            btn.textContent = 'Chat';
-            showToast(e.message, 'error');
-          }
-        });
-      });
-    }
-
-    document.getElementById('student-search-input')?.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      const filtered = allStudentsCache.filter(s =>
-        (s.full_name && s.full_name.toLowerCase().includes(q)) ||
-        (s.username && s.username.toLowerCase().includes(q)) ||
-        (s.roll_number && s.roll_number.toString().includes(q)) ||
-        (s.class_name && s.class_name.toLowerCase().includes(q))
-      );
-      renderStudentPicker(filtered);
-    });
-
-    // Groups logic
-    async function loadGroupsList() {
-      const container = document.getElementById('groups-items-container');
-      try {
-        const res = await apiRequest('/chat/groups');
-        const groups = res.groups || [];
-
-        if (groups.length === 0) {
-          container.innerHTML = `
-            <div class="text-center py-6 text-slate-400 space-y-2">
-              <p class="text-[11px]">No study groups yet.</p>
-              <button id="create-first-group" class="px-2.5 py-1 bg-purple-50 text-purple-700 font-bold rounded-lg text-[10px]">
-                Create Study Group
-              </button>
-            </div>
-          `;
-          document.getElementById('create-first-group')?.addEventListener('click', () => {
-            document.getElementById('create-group-modal').classList.remove('hidden');
-            document.getElementById('create-group-modal').classList.add('flex');
-          });
-          return;
-        }
-
-        container.innerHTML = groups.map(g => {
-          const isPending = g.invite_status === 'pending';
-          const academicDetail = `${g.creator_name ? 'By ' + g.creator_name : ''}${g.creator_class ? ' • ' + g.creator_class : ''}${g.creator_division ? ' (' + g.creator_division + ')' : ''}${g.creator_roll ? ' • #' + g.creator_roll : ''}`;
-
-          return `
-            <button class="group-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-50 border border-transparent"
-              data-group-id="${g.id}"
-              data-name="${escapeHtml(g.name)}"
-              data-my-role="${g.my_role || 'member'}"
-              data-invite-status="${g.invite_status || 'accepted'}"
-              data-creator-name="${escapeHtml(g.creator_name || '')}"
-              data-creator-username="${escapeHtml(g.creator_username || '')}"
-              data-creator-class="${escapeHtml(g.creator_class || '')}"
-              data-creator-division="${escapeHtml(g.creator_division || '')}"
-              data-creator-roll="${escapeHtml(g.creator_roll || '')}"
-              data-member-count="${g.member_count || 1}">
-              <div class="overflow-hidden">
-                <div class="font-bold text-slate-800 truncate text-[11px] flex items-center gap-1.5">
-                  <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> ${escapeHtml(g.name)}
-                </div>
-                ${academicDetail ? `<div class="text-[9px] text-indigo-600 font-semibold truncate">${escapeHtml(academicDetail)}</div>` : ''}
-              </div>
-              <div class="shrink-0 text-right">
-                ${isPending 
-                  ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold animate-pulse">Invite</span>'
-                  : `<span class="text-[9px] text-slate-400 font-medium">${g.member_count || 1} members</span>`
-                }
-              </div>
-            </button>
-          `;
-        }).join('');
-
-        initIcons();
-
-        container.querySelectorAll('.group-item').forEach(btn => {
-          btn.addEventListener('click', () => {
-            currentChatType = 'group';
-            currentGroupId = btn.dataset.groupId;
-            currentGroupName = btn.dataset.name;
-            currentGroupRole = btn.dataset.myRole || 'member';
-            currentGroupInviteStatus = btn.dataset.inviteStatus || 'accepted';
-            currentChannel = `grp_${btn.dataset.groupId}`;
-            activeDmData = null;
-
-            closeChannelsDrawer();
-
-            channelNameEl.textContent = btn.dataset.name;
-            const creatorAcademic = [
-              btn.dataset.creatorName ? `Created by ${btn.dataset.creatorName}` : '',
-              btn.dataset.creatorClass ? `${btn.dataset.creatorClass}${btn.dataset.creatorDivision ? ' (' + btn.dataset.creatorDivision + ')' : ''}` : '',
-              btn.dataset.creatorRoll ? `Roll #${btn.dataset.creatorRoll}` : ''
-            ].filter(Boolean).join(' • ');
-
-            chatSubtitleEl.textContent = creatorAcademic || 'Custom Study Group (Auto-purge 7 days)';
-            currentChatIcon.innerHTML = `<i data-lucide="users" class="w-4 h-4 text-purple-600"></i>`;
-            groupInfoBtn?.classList.remove('hidden');
-            groupMembersCountBadge.textContent = `${btn.dataset.memberCount || 1} Members`;
-
-            if (currentGroupInviteStatus === 'pending') {
-              dmPermissionBanner.classList.remove('hidden');
-              dmPermissionText.textContent = `${btn.dataset.creatorName || 'A classmate'} invited you to join "${btn.dataset.name}". Accept invitation to join?`;
-              dmPermissionActions.classList.remove('hidden');
-              chatInput.disabled = true;
-              chatInput.placeholder = 'Accept the group invitation above to send messages...';
-              sendBtn.disabled = true;
-              attachBtn.disabled = true;
-            } else {
-              dmPermissionBanner.classList.add('hidden');
-              chatInput.disabled = false;
-              chatInput.placeholder = `Message ${btn.dataset.name}...`;
-              sendBtn.disabled = false;
-              attachBtn.disabled = false;
-            }
-
-            initIcons();
-            loadMessages();
-          });
-        });
-      } catch (err) {
-        container.innerHTML = `<div class="p-3 text-rose-500 text-[10px] text-center">${err.message}</div>`;
-      }
-    }
-
-    // Group Modal Tab Switcher & Management
-    function switchGroupModalTab(tab) {
-      if (tab === 'members') {
-        tabBtnGroupMembers.className = 'py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition';
-        tabBtnGroupAdd.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1';
-        panelGroupMembers.classList.remove('hidden');
-        panelGroupAdd.classList.add('hidden');
-        panelGroupAdd.classList.remove('flex');
-      } else {
-        tabBtnGroupAdd.className = 'py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition flex items-center justify-center gap-1';
-        tabBtnGroupMembers.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
-        panelGroupMembers.classList.add('hidden');
-        panelGroupAdd.classList.remove('hidden');
-        panelGroupAdd.classList.add('flex');
-        renderGroupClassmateSelector(allStudentsCache);
-      }
-      initIcons();
-    }
-    tabBtnGroupMembers?.addEventListener('click', () => switchGroupModalTab('members'));
-    tabBtnGroupAdd?.addEventListener('click', () => switchGroupModalTab('add'));
-
-    async function openGroupModal() {
-      if (!currentGroupId) return;
-      groupModalTitle.textContent = currentGroupName;
-      groupMembersModal.classList.remove('hidden');
-      groupMembersModal.classList.add('flex');
-      switchGroupModalTab('members');
-      await Promise.all([
-        loadGroupMembers(currentGroupId),
-        loadAllStudents()
-      ]);
-      initIcons();
-    }
-
-    function closeGroupModal() {
-      groupMembersModal.classList.add('hidden');
-      groupMembersModal.classList.remove('flex');
-      if (addMemberSearchInput) addMemberSearchInput.value = '';
-    }
-
-    groupInfoBtn?.addEventListener('click', openGroupModal);
-    closeGroupMembersModal?.addEventListener('click', closeGroupModal);
-
-    async function loadGroupMembers(groupId) {
-      groupMembersListContainer.innerHTML = '<p class="text-center text-slate-400 py-3 text-xs">Loading members...</p>';
-      try {
-        const res = await apiRequest(`/chat/groups/${groupId}/members`);
-        currentGroupMembers = res.members || [];
-        const acceptedCount = currentGroupMembers.filter(m => m.invite_status === 'accepted').length;
-        groupModalMemberCount.textContent = `${acceptedCount} active members (${currentGroupMembers.length} total)`;
-        groupMembersCountBadge.textContent = `${acceptedCount} Members`;
-
-        const me = currentGroupMembers.find(m => m.user_id === user.id);
-        if (me) currentGroupRole = me.member_role;
-        const isGroupAdmin = (currentGroupRole === 'admin' || user.role === 'admin');
-
-        if (isGroupAdmin) {
-          deleteGroupBtn.classList.remove('hidden');
-        } else {
-          deleteGroupBtn.classList.add('hidden');
-        }
-
-        renderGroupMembers(currentGroupMembers, isGroupAdmin);
-      } catch (err) {
-        groupMembersListContainer.innerHTML = `<div class="p-2 text-center text-rose-500 text-xs">${err.message}</div>`;
-      }
-    }
-
-    function renderGroupMembers(members, isGroupAdmin) {
-      if (members.length === 0) {
-        groupMembersListContainer.innerHTML = '<p class="text-center text-slate-400 py-3 text-xs">No members found.</p>';
-        return;
-      }
-
-      groupMembersListContainer.innerHTML = members.map(m => {
-        const isMe = m.user_id === user.id;
-        const isAdmin = m.member_role === 'admin';
-        const isPending = m.invite_status === 'pending';
-        const canRemove = isGroupAdmin && !isMe;
-
-        const academicBadge = [
-          m.class_name ? `${m.class_name}${m.division ? ' (' + m.division + ')' : ''}` : '',
-          m.roll_number ? `Roll #${m.roll_number}` : '',
-          `@${m.username}`
-        ].filter(Boolean).join(' • ');
-
-        return `
-          <div class="py-2 px-2.5 rounded-xl flex items-center justify-between hover:bg-slate-50 transition border border-transparent">
-            <div class="overflow-hidden">
-              <div class="font-bold text-slate-800 text-xs truncate flex items-center gap-1.5 flex-wrap">
-                ${escapeHtml(m.full_name)}
-                ${isMe ? '<span class="text-[9px] text-slate-400 font-normal">(You)</span>' : ''}
-                ${isAdmin ? '<span class="text-[8px] px-1.5 py-0.2 rounded bg-purple-100 text-purple-700 font-bold uppercase">Admin</span>' : ''}
-                ${isPending ? '<span class="text-[8px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold">Pending Invite</span>' : ''}
-              </div>
-              <div class="text-[10px] text-indigo-600 font-medium truncate mt-0.5">
-                ${escapeHtml(academicBadge)}
-              </div>
-            </div>
-            ${canRemove ? `
-              <button class="remove-member-btn text-[10px] text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 transition shrink-0"
-                data-user-id="${m.user_id}" data-name="${escapeHtml(m.full_name)}">
-                ${isPending ? 'Cancel Invite' : 'Remove'}
-              </button>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-
-      initIcons();
-
-      groupMembersListContainer.querySelectorAll('.remove-member-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          if (!confirm(`Remove ${btn.dataset.name} from this study group?`)) return;
-          try {
-            await apiRequest(`/chat/groups/${currentGroupId}/members/${btn.dataset.userId}`, { method: 'DELETE' });
-            showToast(`${btn.dataset.name} removed from group`, 'info');
-            await loadGroupMembers(currentGroupId);
-            renderGroupClassmateSelector(allStudentsCache);
-            loadGroupsList();
-          } catch (e) {
-            showToast(e.message, 'error');
-          }
-        });
-      });
-    }
-
-    function renderGroupClassmateSelector(students) {
-      if (!groupClassmateSelector) return;
-      const list = students || allStudentsCache || [];
-      if (list.length === 0) {
-        groupClassmateSelector.innerHTML = '<p class="text-center text-slate-400 py-6 text-[11px]">No classmates found.</p>';
-        return;
-      }
-
-      const existingMap = new Map();
-      currentGroupMembers.forEach(m => existingMap.set(m.user_id, m.invite_status || 'accepted'));
-
-      groupClassmateSelector.innerHTML = list.slice(0, 30).map(s => {
-        const isCurrentMember = existingMap.has(s.id);
-        const status = existingMap.get(s.id);
-        const isMe = s.id === user.id;
-
-        let actionButton = '';
-        if (isMe) {
-          actionButton = '<span class="text-[9px] px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-bold">You</span>';
-        } else if (isCurrentMember) {
-          if (status === 'accepted') {
-            actionButton = '<span class="text-[9px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">In Group</span>';
-          } else {
-            actionButton = '<span class="text-[9px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">Invited</span>';
-          }
-        } else {
-          actionButton = `
-            <button class="invite-classmate-btn px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 font-bold text-[10px] transition shrink-0"
-              data-user-id="${s.id}" data-user-name="${escapeHtml(s.full_name)}">
-              + Invite
-            </button>
-          `;
-        }
-
-        const academicDetail = [
-          s.class_name ? `${s.class_name}${s.division ? ' (' + s.division + ')' : ''}` : '',
-          s.roll_number ? `Roll #${s.roll_number}` : '',
-          `@${s.username}`
-        ].filter(Boolean).join(' • ');
-
-        return `
-          <div class="py-2 px-1 flex items-center justify-between hover:bg-slate-50 rounded-lg transition gap-2">
-            <div class="overflow-hidden">
-              <div class="font-bold text-slate-800 text-[11px] truncate">${escapeHtml(s.full_name)}</div>
-              <div class="text-[9px] text-indigo-600 font-medium truncate">${escapeHtml(academicDetail)}</div>
-            </div>
-            ${actionButton}
-          </div>
-        `;
-      }).join('');
-
-      initIcons();
-
-      groupClassmateSelector.querySelectorAll('.invite-classmate-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const targetId = btn.dataset.userId;
-          const targetName = btn.dataset.userName;
-          try {
-            btn.disabled = true;
-            btn.textContent = 'Inviting...';
-            await apiRequest(`/chat/groups/${currentGroupId}/members`, {
-              method: 'POST',
-              body: { targetUserId: targetId }
-            });
-            showToast(`Invitation sent to ${targetName}!`, 'success');
-            await loadGroupMembers(currentGroupId);
-            renderGroupClassmateSelector(allStudentsCache);
-            loadGroupsList();
-          } catch (e) {
-            btn.disabled = false;
-            btn.textContent = '+ Invite';
-            showToast(e.message, 'error');
-          }
-        });
-      });
-    }
-
-    addMemberSearchInput?.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if (!q) {
-        renderGroupClassmateSelector(allStudentsCache);
-        return;
-      }
-      const filtered = allStudentsCache.filter(s =>
-        (s.full_name && s.full_name.toLowerCase().includes(q)) ||
-        (s.username && s.username.toLowerCase().includes(q)) ||
-        (s.roll_number && s.roll_number.toString().includes(q)) ||
-        (s.class_name && s.class_name.toLowerCase().includes(q)) ||
-        (s.division && s.division.toLowerCase().includes(q))
-      );
-      renderGroupClassmateSelector(filtered);
-    });
-
-    async function handleManualGroupInvite() {
-      const val = manualGroupInviteInput.value.trim();
-      if (!val) {
-        showToast('Please enter a roll number or username', 'warning');
-        return;
-      }
-      try {
-        manualGroupInviteBtn.disabled = true;
-        manualGroupInviteBtn.textContent = 'Inviting...';
-        await apiRequest(`/chat/groups/${currentGroupId}/members`, {
-          method: 'POST',
-          body: { query: val }
-        });
-        showToast(`Invitation sent to ${val}!`, 'success');
-        manualGroupInviteInput.value = '';
-        await loadGroupMembers(currentGroupId);
-        renderGroupClassmateSelector(allStudentsCache);
-        loadGroupsList();
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        manualGroupInviteBtn.disabled = false;
-        manualGroupInviteBtn.textContent = 'Invite';
-      }
-    }
-
-    manualGroupInviteBtn?.addEventListener('click', handleManualGroupInvite);
-    manualGroupInviteInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleManualGroupInvite();
-      }
-    });
-
-    leaveGroupBtn?.addEventListener('click', async () => {
-      if (!currentGroupId) return;
-      if (!confirm(`Are you sure you want to leave ${currentGroupName}?`)) return;
-      try {
-        await apiRequest(`/chat/groups/${currentGroupId}/members/${user.id}`, { method: 'DELETE' });
-        showToast('You left the study group', 'info');
-        closeGroupModal();
-        loadGroupsList();
-        document.querySelector('.channel-item[data-channel="school"]')?.click();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    });
-
-    deleteGroupBtn?.addEventListener('click', async () => {
-      if (!currentGroupId) return;
-      if (!confirm(`Permanently delete ${currentGroupName}? All group messages will be removed.`)) return;
-      try {
-        await apiRequest(`/chat/groups/${currentGroupId}`, { method: 'DELETE' });
-        showToast('Study group deleted', 'info');
-        closeGroupModal();
-        loadGroupsList();
-        document.querySelector('.channel-item[data-channel="school"]')?.click();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    });
-
-    // Create Group Modal
-    const groupModal = document.getElementById('create-group-modal');
-    document.getElementById('create-group-btn')?.addEventListener('click', () => {
-      groupModal.classList.remove('hidden');
-      groupModal.classList.add('flex');
-    });
-    document.getElementById('close-group-modal')?.addEventListener('click', () => {
-      groupModal.classList.add('hidden');
-      groupModal.classList.remove('flex');
-    });
-    document.getElementById('group-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('group-name-input').value.trim();
-      const description = document.getElementById('group-desc-input').value.trim();
-      if (!name) return;
-
-      try {
-        await apiRequest('/chat/groups', {
-          method: 'POST',
-          body: { name, description }
-        });
-        showToast('Study group created!', 'success');
-        groupModal.classList.add('hidden');
-        groupModal.classList.remove('flex');
-        loadGroupsList();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    });
-
-    document.getElementById('refresh-chat-btn')?.addEventListener('click', loadMessages);
-
-    // Initial setups
-    initIcons();
-    loadMessages();
-    loadAllStudents();
-    connectWebSocket();
-  </script>
+  <script type="module" src="/js/chat/main.js"></script>
 </body>
 </html>

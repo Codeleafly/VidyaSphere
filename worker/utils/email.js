@@ -5,13 +5,25 @@
  * and robust audit-logging fallback.
  */
 
+function escapeEmailHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export async function sendActivationEmail(env, { email, fullName, username, code, trackingToken }) {
   if (!email || !email.includes('@')) {
     return { success: false, reason: 'Invalid or missing email address' };
   }
 
   const cleanEmail = email.trim().toLowerCase();
-  const activationUrl = `https://vidyasphere.ziprecovery2024-dbc.workers.dev/auth/status?token=${encodeURIComponent(trackingToken)}`;
+  const baseUrl = (env && env.APP_URL) ? env.APP_URL.replace(/\/$/, '') : 'https://vidyasphere.ziprecovery2024-dbc.workers.dev';
+  const activationUrl = `${baseUrl}/auth/login.html`;
+  const safeName = escapeEmailHtml(fullName);
+  const safeUsername = escapeEmailHtml(username);
 
   const subject = `🎓 VidyaSphere Account Verified - Welcome @${username}`;
   
@@ -61,7 +73,7 @@ Student-to-Student Digital Ecosystem
       <p>Student-to-Student Digital Knowledge Ecosystem</p>
     </div>
     <div class="content">
-      <h2 style="font-size: 18px; font-weight: 700; margin-top: 0;">Welcome, ${fullName}!</h2>
+      <h2 style="font-size: 18px; font-weight: 700; margin-top: 0;">Welcome, ${safeName}!</h2>
       <p style="font-size: 14px; line-height: 1.6; color: #475569;">
         Your student profile on VidyaSphere has been officially verified by the Student Lead Administrator.
       </p>
@@ -69,7 +81,7 @@ Student-to-Student Digital Ecosystem
       <div class="credential-box">
         <div class="row">
           <div class="label">Assigned Username</div>
-          <div class="value">@${username}</div>
+          <div class="value">@${safeUsername}</div>
         </div>
         <div class="row">
           <div class="label">Account Status</div>

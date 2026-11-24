@@ -18,7 +18,7 @@ export async function authenticate(request, env, allowedRoles = [], allowPending
 
   // Verify session token directly against Database
   const sessionRow = await env.DB.prepare(
-    `SELECT s.token, s.user_id, s.expires_at, p.username, p.full_name, p.role, p.account_status, p.class_name, p.division, p.is_root_admin
+    `SELECT s.token, s.user_id, s.expires_at, p.username, p.full_name, p.role, p.account_status, p.class_name, p.division, p.roll_number, p.is_root_admin
      FROM sessions s
      JOIN profiles p ON s.user_id = p.id
      WHERE s.token = ?`
@@ -54,6 +54,7 @@ export async function authenticate(request, env, allowedRoles = [], allowPending
       role: sessionRow.role,
       className: sessionRow.class_name,
       division: sessionRow.division,
+      rollNumber: sessionRow.roll_number,
       token: sessionRow.token,
       accountStatus: sessionRow.account_status,
       isRootAdmin,

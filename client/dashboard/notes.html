@@ -5,139 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Study Notes Library | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 overflow-x-hidden w-full">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 w-full">
 
-  <!-- Desktop Sidebar -->
-  <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 p-4 shrink-0 h-screen sticky top-0 justify-between">
-    <div class="space-y-6">
-      <div class="flex items-center gap-3 px-2">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h2 class="font-extrabold text-slate-900 leading-tight">VidyaSphere</h2>
-          <span class="text-xs text-slate-400 font-medium">School Edge Portal</span>
-        </div>
-      </div>
-
-      <nav class="space-y-1">
-        <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Notice Board
-        </a>
-        <a href="/dashboard/exams.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i> Exams & Timetable
-        </a>
-        <a href="/dashboard/chat.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="messages-square" class="w-5 h-5"></i> Realtime Chat
-        </a>
-        <a href="/dashboard/notes.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-sm">
-          <i data-lucide="book-open" class="w-5 h-5"></i> Study Notes
-        </a>
-        <a href="/dashboard/qa.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="message-square" class="w-5 h-5"></i> Academic Q&A
-        </a>
-        <a href="/dashboard/polls.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="vote" class="w-5 h-5"></i> School Polls
-        </a>
-        <a href="/dashboard/students.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="users" class="w-5 h-5"></i> Student Directory
-        </a>
-        <div id="admin-nav-link" class="hidden">
-          <a href="/admin/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-700 hover:bg-rose-50 font-bold text-sm transition">
-            <i data-lucide="shield-alert" class="w-5 h-5"></i> Admin Portal
-          </a>
-        </div>
-      </nav>
-    </div>
-
-    <!-- User Profile & Logout -->
-    <div class="border-t border-slate-200 pt-4 px-2">
-      <div class="flex items-center justify-between">
-        <div class="overflow-hidden">
-          <p id="user-display-name" class="font-bold text-sm text-slate-800 truncate"></p>
-          <p id="user-display-role" class="text-xs text-slate-400 capitalize"></p>
-        </div>
-        <button id="logout-btn" title="Sign Out" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-          <i data-lucide="log-out" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Mobile Top Header -->
-  <header class="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-3 py-2.5 flex items-center justify-between shadow-sm w-full">
-    <div class="flex items-center gap-2 overflow-hidden">
-      <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0">
-        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
-      </div>
-      <span class="font-bold text-xs sm:text-sm text-slate-900 truncate">VidyaSphere</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <a href="/admin/index.html" class="admin-mobile-switch hidden px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
-        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Admin
-      </a>
-      <span id="user-display-name-mob" class="text-[11px] font-bold text-slate-700 truncate max-w-[90px]"></span>
-      <button class="logout-btn-trigger p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Logout">
-        <i data-lucide="log-out" class="w-4 h-4"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Mobile Bottom Navigation -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 px-1 py-1 flex items-center justify-around shadow-lg max-w-full">
-    <a href="/dashboard/index.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="layout-dashboard" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notices</span>
-    </a>
-    <a href="/dashboard/chat.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="messages-square" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Chat</span>
-    </a>
-    <a href="/dashboard/notes.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-600 font-bold text-[9px] truncate">
-      <i data-lucide="book-open" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notes</span>
-    </a>
-    <a href="/dashboard/qa.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="message-square" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Q&A</span>
-    </a>
-    <a href="/dashboard/polls.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="vote" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Polls</span>
-    </a>
-  </nav>
-
-  <!-- Main Content Area -->
-  <main class="flex-1 w-full max-w-5xl mx-auto p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 overflow-x-hidden">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+  <main class="flex-1 w-full max-w-5xl mx-auto p-3.5 sm:p-6 lg:p-8 space-y-5">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Academic Notes & Materials</h1>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Academic Notes &amp; Materials</h1>
         <p class="text-xs text-slate-500">Download verified lecture notes, revision summaries, and worksheets</p>
       </div>
       <button id="open-upload-btn"
-        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 transition flex items-center justify-center gap-2">
+        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs transition flex items-center justify-center gap-2">
         <i data-lucide="upload" class="w-4 h-4"></i> Upload Material
       </button>
     </div>
 
-    <!-- Filter Bar (Grid on Mobile, Zero Overflow) -->
-    <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 w-full">
+    <!-- Filter Bar -->
+    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 w-full">
       <div class="relative w-full">
         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
           <i data-lucide="search" class="w-4 h-4"></i>
         </span>
         <input type="text" id="note-search"
-          class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          placeholder="Search by topic, chapter...">
+          class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+          placeholder="Search topic, chapter...">
       </div>
 
-      <select id="note-class-filter"
-        class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
+      <select id="note-class-filter" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
         <option value="">All Classes (1st - 12th)</option>
         <option value="Class 1">Class 1</option>
         <option value="Class 2">Class 2</option>
@@ -157,87 +55,73 @@
         <option value="Class 12 (Arts)">Class 12 - Arts</option>
       </select>
 
-      <select id="note-subject-filter"
-        class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-        <option value="">All Subjects (MH & CBSE)</option>
+      <select id="note-subject-filter" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
+        <option value="">All Subjects (MH &amp; CBSE)</option>
         <optgroup label="Languages">
           <option value="English">English</option>
-          <option value="Marathi">Marathi (मराठी)</option>
-          <option value="Hindi">Hindi (हिंदी)</option>
-          <option value="Sanskrit">Sanskrit (संस्कृत)</option>
+          <option value="Marathi">Marathi</option>
+          <option value="Hindi">Hindi</option>
+          <option value="Sanskrit">Sanskrit</option>
         </optgroup>
         <optgroup label="Mathematics">
           <option value="Mathematics">Mathematics</option>
           <option value="Algebra (Maths I)">Algebra (Maths I)</option>
           <option value="Geometry (Maths II)">Geometry (Maths II)</option>
-          <option value="Mathematics & Statistics">Mathematics & Statistics</option>
+          <option value="Mathematics & Statistics">Mathematics &amp; Statistics</option>
         </optgroup>
         <optgroup label="Sciences">
           <option value="General Science">General Science</option>
-          <option value="Science & Technology (Part 1)">Science & Tech I (Physics/Chem)</option>
-          <option value="Science & Technology (Part 2)">Science & Tech II (Biology/EVS)</option>
+          <option value="Science & Technology (Part 1)">Science &amp; Tech I</option>
+          <option value="Science & Technology (Part 2)">Science &amp; Tech II</option>
           <option value="Physics">Physics</option>
           <option value="Chemistry">Chemistry</option>
           <option value="Biology">Biology</option>
-          <option value="Environmental Studies (EVS)">Environmental Studies (EVS)</option>
+          <option value="Environmental Studies (EVS)">EVS</option>
         </optgroup>
         <optgroup label="Social Sciences">
           <option value="Social Science">Social Science</option>
-          <option value="History & Political Science">History & Political Science</option>
-          <option value="Geography & Economics">Geography & Economics</option>
-          <option value="Political Science">Political Science</option>
-          <option value="Sociology">Sociology</option>
-          <option value="Psychology">Psychology</option>
+          <option value="History & Political Science">History &amp; Pol Sci</option>
+          <option value="Geography & Economics">Geography &amp; Economics</option>
         </optgroup>
-        <optgroup label="Commerce (HSC / CBSE)">
-          <option value="Book-Keeping & Accountancy (BK)">Book-Keeping & Accountancy (BK)</option>
-          <option value="Organization of Commerce (OCM)">Organization of Commerce (OCM)</option>
-          <option value="Secretarial Practice (SP)">Secretarial Practice (SP)</option>
+        <optgroup label="Commerce &amp; Technology">
+          <option value="Book-Keeping & Accountancy (BK)">Book-Keeping (BK)</option>
+          <option value="Organization of Commerce (OCM)">OCM</option>
+          <option value="Secretarial Practice (SP)">Secretarial Practice</option>
           <option value="Economics">Economics</option>
-        </optgroup>
-        <optgroup label="Technology & Vocational">
           <option value="Computer Science">Computer Science</option>
-          <option value="Information Technology (IT)">Information Technology (IT)</option>
-          <option value="Physical Education">Physical Education</option>
+          <option value="Information Technology (IT)">IT</option>
         </optgroup>
       </select>
 
-      <select id="note-sort"
-        class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
+      <select id="note-sort" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
         <option value="newest">Newest First</option>
         <option value="downloads">Most Downloaded</option>
       </select>
     </div>
 
-    <!-- Notes Grid -->
-    <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 w-full">
-      <div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 text-sm">
-        Loading notes repository...
-      </div>
+    <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 w-full">
+      <div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading notes repository...</div>
     </div>
   </main>
 
-  <!-- Upload Modal (Mobile Friendly) -->
-  <div id="upload-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-md p-4 sm:p-6 space-y-3.5 shadow-2xl overflow-y-auto max-h-[90vh]">
+  <!-- Upload Modal -->
+  <div id="upload-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-md p-5 space-y-3.5 shadow-2xl border border-slate-200/80 overflow-y-auto max-h-[90vh] modal-enter">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-base sm:text-lg font-bold text-slate-900">Upload Study Material</h3>
-        <button id="close-upload-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
+        <h3 class="text-base font-bold text-slate-900">Upload Study Material</h3>
+        <button id="close-upload-modal" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-1">&times;</button>
       </div>
 
       <form id="upload-form" class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Title / Topic</label>
-          <input type="text" id="up-title" required
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500"
-            placeholder="e.g. Chapter 4: Carbon Compounds">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Title / Topic</label>
+          <input type="text" id="up-title" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="e.g. Chapter 4: Carbon Compounds">
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Class</label>
-            <select id="up-class" required
-              class="w-full px-2 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 bg-white">
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Class</label>
+            <select id="up-class" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white">
               <option value="Class 1">Class 1</option>
               <option value="Class 2">Class 2</option>
               <option value="Class 3">Class 3</option>
@@ -257,87 +141,70 @@
             </select>
           </div>
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Subject</label>
-            <select id="up-subject" required
-              class="w-full px-2 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 bg-white">
-              <optgroup label="Languages">
-                <option value="English">English</option>
-                <option value="Marathi">Marathi (मराठी)</option>
-                <option value="Hindi">Hindi (हिंदी)</option>
-                <option value="Sanskrit">Sanskrit (संस्कृत)</option>
-              </optgroup>
-              <optgroup label="Mathematics & Science">
-                <option value="Mathematics">Mathematics</option>
-                <option value="Algebra (Maths I)">Algebra (Maths I)</option>
-                <option value="Geometry (Maths II)">Geometry (Maths II)</option>
-                <option value="General Science" selected>General Science</option>
-                <option value="Science & Technology (Part 1)">Science & Tech I</option>
-                <option value="Science & Technology (Part 2)">Science & Tech II</option>
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Biology">Biology</option>
-              </optgroup>
-              <optgroup label="Social Sciences">
-                <option value="Social Science">Social Science</option>
-                <option value="History & Political Science">History & Pol Sci</option>
-                <option value="Geography & Economics">Geography & Eco</option>
-              </optgroup>
-              <optgroup label="Commerce & Others">
-                <option value="Book-Keeping & Accountancy (BK)">Book-Keeping (BK)</option>
-                <option value="Organization of Commerce (OCM)">OCM</option>
-                <option value="Secretarial Practice (SP)">Secretarial Practice</option>
-                <option value="Economics">Economics</option>
-                <option value="Information Technology (IT)">IT / Computer</option>
-              </optgroup>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
+            <select id="up-subject" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              <option value="English">English</option>
+              <option value="Marathi">Marathi</option>
+              <option value="Hindi">Hindi</option>
+              <option value="Sanskrit">Sanskrit</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Algebra (Maths I)">Algebra (Maths I)</option>
+              <option value="Geometry (Maths II)">Geometry (Maths II)</option>
+              <option value="General Science" selected>General Science</option>
+              <option value="Science & Technology (Part 1)">Science &amp; Tech I</option>
+              <option value="Science & Technology (Part 2)">Science &amp; Tech II</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Social Science">Social Science</option>
+              <option value="History & Political Science">History &amp; Pol Sci</option>
+              <option value="Geography & Economics">Geography &amp; Eco</option>
+              <option value="Book-Keeping & Accountancy (BK)">Book-Keeping (BK)</option>
+              <option value="Organization of Commerce (OCM)">OCM</option>
+              <option value="Secretarial Practice (SP)">Secretarial Practice</option>
+              <option value="Economics">Economics</option>
+              <option value="Information Technology (IT)">IT / Computer</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Chapter Name / Number</label>
-          <input type="text" id="up-chapter"
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500"
-            placeholder="e.g. Chapter 4">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Chapter</label>
+          <input type="text" id="up-chapter" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="e.g. Chapter 4">
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Description</label>
-          <textarea id="up-desc" rows="2"
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500"
-            placeholder="Important formulas, solved examples..."></textarea>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Description</label>
+          <textarea id="up-desc" rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="Important formulas, solved examples..."></textarea>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">Storage Mode</label>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Storage Mode</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="cursor-pointer border border-indigo-200 bg-indigo-50/70 p-2.5 rounded-xl flex items-center gap-2 hover:bg-indigo-50">
-              <input type="radio" name="note-type-radio" value="drive_link" checked class="text-indigo-600 focus:ring-indigo-500">
-              <span class="text-xs font-bold text-indigo-900 leading-tight">☁️ Google Drive<br><span class="text-[10px] font-normal text-emerald-700">Amar • Year 2026-2027</span></span>
+            <label class="cursor-pointer border border-indigo-200 bg-indigo-50/70 p-2.5 rounded-xl flex items-center gap-2">
+              <input type="radio" name="note-type-radio" value="drive_link" checked class="text-indigo-600">
+              <span class="text-xs font-bold text-indigo-900 leading-tight">Google Drive<br><span class="text-[10px] font-normal text-emerald-700">Permanent • Full Session</span></span>
             </label>
-            <label class="cursor-pointer border border-slate-200 bg-slate-50 p-2.5 rounded-xl flex items-center gap-2 hover:bg-slate-100">
-              <input type="radio" name="note-type-radio" value="file" class="text-indigo-600 focus:ring-indigo-500">
-              <span class="text-xs font-bold text-slate-800 leading-tight">📁 Direct PDF<br><span class="text-[10px] font-normal text-amber-600">Max 15MB • 30 Days</span></span>
+            <label class="cursor-pointer border border-slate-200 bg-slate-50 p-2.5 rounded-xl flex items-center gap-2">
+              <input type="radio" name="note-type-radio" value="file" class="text-indigo-600">
+              <span class="text-xs font-bold text-slate-800 leading-tight">Direct PDF/Img<br><span class="text-[10px] font-normal text-amber-600">Max 15MB • 30 Days</span></span>
             </label>
           </div>
         </div>
 
         <div id="drive-link-box">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Public Google Drive / Cloud Link</label>
-          <input type="url" id="up-drive-url"
-            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 font-mono"
-            placeholder="https://drive.google.com/file/d/.../view">
-          <p class="text-[10px] text-slate-500 mt-1">💡 Ensure your Google Drive link permission is set to "Anyone with the link can view".</p>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Public Google Drive / Cloud Link</label>
+          <input type="url" id="up-drive-url" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono" placeholder="https://drive.google.com/file/d/.../view">
+          <p class="text-[10px] text-slate-500 mt-1">Ensure permission is set to "Anyone with the link can view".</p>
         </div>
 
         <div id="direct-file-box" class="hidden">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Select PDF File (Max 15MB)</label>
-          <input type="file" id="up-file" accept="application/pdf,image/*"
-            class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-          <p class="text-[10px] text-amber-600 font-medium mt-1">⚠️ Max 15MB limit. To conserve server storage, direct file uploads auto-expire after 30 days.</p>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Select PDF or Image (Max 15MB)</label>
+          <input type="file" id="up-file" accept="application/pdf,image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700">
+          <p class="text-[10px] text-amber-600 font-medium mt-1">Direct uploads expire after 30 days (max 4/day per student).</p>
         </div>
 
-        <button type="submit" id="up-submit-btn"
-          class="w-full py-2.5 sm:py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-100 transition">
+        <button type="submit" id="up-submit-btn" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs sm:text-sm transition">
           Publish to Library
         </button>
       </form>
@@ -346,43 +213,29 @@
 
   <script type="module">
     import { apiRequest } from '/js/api.js';
-    import { requireAuth, logout } from '/js/auth.js';
-    import { formatDate, showToast, initIcons } from '/js/ui.js';
+    import { initDashboardShell } from '/js/layout.js';
+    import { escapeHtml, safeUrl, formatDate, showToast, initIcons, bindModalBackdropAndEsc } from '/js/ui.js';
 
-    const user = requireAuth();
-    if (user) {
-      document.getElementById('user-display-name').textContent = user.fullName || user.username;
-      document.getElementById('user-display-name-mob').textContent = user.fullName || user.username;
-      document.getElementById('user-display-role').textContent = `${user.role} ${user.className ? '• ' + user.className : ''}`;
-      if (user.role === 'admin') {
-        document.getElementById('admin-nav-link').classList.remove('hidden');
-        document.querySelectorAll('.admin-mobile-switch').forEach(el => el.classList.remove('hidden'));
-      }
-    }
-
-    document.getElementById('logout-btn')?.addEventListener('click', logout);
-    document.querySelectorAll('.logout-btn-trigger').forEach(btn => btn.addEventListener('click', logout));
+    const user = initDashboardShell({ active: 'notes', mobileTitle: 'Study Notes' });
 
     const searchInput = document.getElementById('note-search');
     const classFilter = document.getElementById('note-class-filter');
     const subjectFilter = document.getElementById('note-subject-filter');
     const sortFilter = document.getElementById('note-sort');
     const grid = document.getElementById('notes-grid');
-
     const uploadModal = document.getElementById('upload-modal');
-    const openUploadBtn = document.getElementById('open-upload-btn');
-    const closeUploadModal = document.getElementById('close-upload-modal');
     const uploadForm = document.getElementById('upload-form');
 
-    openUploadBtn.addEventListener('click', () => {
+    const closeModal = () => {
+      uploadModal.classList.add('hidden');
+      uploadModal.classList.remove('flex');
+    };
+    document.getElementById('open-upload-btn').addEventListener('click', () => {
       uploadModal.classList.remove('hidden');
       uploadModal.classList.add('flex');
     });
-
-    closeUploadModal.addEventListener('click', () => {
-      uploadModal.classList.add('hidden');
-      uploadModal.classList.remove('flex');
-    });
+    document.getElementById('close-upload-modal').addEventListener('click', closeModal);
+    bindModalBackdropAndEsc(uploadModal, closeModal);
 
     async function loadNotes() {
       const params = new URLSearchParams();
@@ -397,10 +250,10 @@
 
         if (notes.length === 0) {
           grid.innerHTML = `
-            <div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            <div class="col-span-full p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
               <i data-lucide="book-open" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-              <p class="text-sm font-semibold text-slate-600">Study notes library is empty.</p>
-              <p class="text-xs text-slate-400 mt-1">Click "Upload Material" above to share study materials.</p>
+              <p class="text-sm font-semibold text-slate-700">No study notes match this filter</p>
+              <p class="text-xs text-slate-400 mt-1">Click "Upload Material" above to share study resources.</p>
             </div>
           `;
           initIcons();
@@ -409,76 +262,64 @@
 
         grid.innerHTML = notes.map(note => {
           const isDrive = note.note_type === 'drive_link';
+          const driveHref = safeUrl(note.drive_url);
           const canDelete = user && (user.id === note.uploader_id || user.role === 'admin');
+
           return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-2.5 flex flex-col justify-between w-full break-words">
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between gap-2 flex-wrap">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-100">
-                  ${note.subject}
-                </span>
-                ${isDrive ? `
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                    ☁️ Drive &bull; ${note.academic_year || '2026-2027'}
-                  </span>
-                ` : `
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
-                    📁 PDF &bull; ${note.expires_at ? 'Exp ' + formatDate(note.expires_at) : '30-Day'}
-                  </span>
-                `}
+            <article class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 card-hover space-y-3 flex flex-col justify-between w-full break-words">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-100">${escapeHtml(note.subject)}</span>
+                  ${isDrive
+                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Drive • ${escapeHtml(note.academic_year || '2026-2027')}</span>`
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 tabular-nums">PDF • ${note.expires_at ? 'Exp ' + escapeHtml(formatDate(note.expires_at)) : '30-Day'}</span>`
+                  }
+                </div>
+                <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-snug">${escapeHtml(note.title)}</h3>
+                <p class="text-xs text-slate-500 line-clamp-2">${escapeHtml(note.description || 'No description provided')}</p>
               </div>
 
-              <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-snug">${note.title}</h3>
-              <p class="text-xs text-slate-500 line-clamp-2">${note.description || 'No description provided'}</p>
-            </div>
+              <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
+                <div class="flex items-center gap-1.5 text-slate-500 text-[11px] truncate tabular-nums">
+                  <span class="font-semibold text-slate-700">${escapeHtml(note.class_name)}</span>
+                  <span>•</span>
+                  <span class="flex items-center gap-0.5"><i data-lucide="eye" class="w-3 h-3"></i> ${note.download_count}</span>
+                  ${note.uploader_name ? `<span>•</span><span class="truncate max-w-[110px]">By ${escapeHtml(note.uploader_name)}</span>` : ''}
+                </div>
 
-            <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
-              <div class="flex items-center gap-1.5 text-slate-500 text-[11px] truncate">
-                <span class="font-semibold text-slate-700">${note.class_name}</span>
-                <span>&bull;</span>
-                <span class="flex items-center gap-0.5"><i data-lucide="eye" class="w-3 h-3"></i> ${note.download_count}</span>
-                ${note.uploader_name ? `<span>&bull;</span><span class="truncate max-w-[90px] sm:max-w-[120px]" title="Uploaded by ${note.uploader_name}">By ${note.uploader_name}</span>` : ''}
+                <div class="flex items-center gap-1.5 shrink-0">
+                  ${canDelete ? `
+                    <button data-note-id="${escapeHtml(note.id)}" data-note-title="${escapeHtml(note.title)}" class="delete-note-btn p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Delete Note">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  ` : ''}
+                  ${isDrive && driveHref ? `
+                    <a href="${escapeHtml(driveHref)}" target="_blank" rel="noopener noreferrer"
+                      class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition">
+                      <i data-lucide="external-link" class="w-3 h-3"></i> Open Drive
+                    </a>
+                  ` : `
+                    <a href="/api/notes/${encodeURIComponent(note.id)}/file" target="_blank"
+                      class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs flex items-center gap-1 transition">
+                      <i data-lucide="arrow-down-to-line" class="w-3 h-3"></i> Download
+                    </a>
+                  `}
+                </div>
               </div>
-
-              <div class="flex items-center gap-1.5 shrink-0">
-                ${canDelete ? `
-                  <button data-note-id="${note.id}" data-note-title="${(note.title || '').replace(/"/g, '&quot;')}" class="delete-note-btn p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Delete Note">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
-                ` : ''}
-                ${isDrive && note.drive_url ? `
-                  <a href="${note.drive_url}" target="_blank" rel="noopener noreferrer"
-                    class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
-                    <i data-lucide="external-link" class="w-3 h-3"></i> Open Drive
-                  </a>
-                ` : `
-                  <a href="/api/notes/${note.id}/file" target="_blank"
-                    class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
-                    <i data-lucide="arrow-down-to-line" class="w-3 h-3"></i> Download
-                  </a>
-                `}
-              </div>
-            </div>
-          </div>
-        `;
+            </article>
+          `;
         }).join('');
 
         initIcons();
 
-        // Bind delete buttons
         grid.querySelectorAll('.delete-note-btn').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const noteId = btn.dataset.noteId;
-            const noteTitle = btn.dataset.noteTitle || 'this note';
-            if (!confirm(`Are you sure you want to delete "${noteTitle}"? This will permanently remove the study material.`)) return;
-
+          btn.addEventListener('click', async () => {
+            if (!confirm(`Delete "${btn.dataset.noteTitle || 'this note'}" permanently?`)) return;
             try {
               btn.disabled = true;
-              await apiRequest(`/notes/${noteId}`, { method: 'DELETE' });
+              await apiRequest(`/notes/${encodeURIComponent(btn.dataset.noteId)}`, { method: 'DELETE' });
               showToast('Study note deleted successfully', 'success');
-              await loadNotes();
+              loadNotes();
             } catch (err) {
               showToast(err.message || 'Failed to delete note', 'error');
               btn.disabled = false;
@@ -486,22 +327,17 @@
           });
         });
       } catch (err) {
-        grid.innerHTML = `<div class="col-span-full p-6 text-center text-rose-500 bg-rose-50 rounded-2xl text-sm">${err.message}</div>`;
+        grid.innerHTML = `<div class="col-span-full p-6 text-center text-rose-600 bg-rose-50 rounded-2xl text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
 
-    // Toggle Storage Mode in modal
     const driveBox = document.getElementById('drive-link-box');
     const fileBox = document.getElementById('direct-file-box');
     document.querySelectorAll('input[name="note-type-radio"]').forEach(radio => {
       radio.addEventListener('change', (e) => {
-        if (e.target.value === 'drive_link') {
-          driveBox.classList.remove('hidden');
-          fileBox.classList.add('hidden');
-        } else {
-          driveBox.classList.add('hidden');
-          fileBox.classList.remove('hidden');
-        }
+        const isDrive = e.target.value === 'drive_link';
+        driveBox.classList.toggle('hidden', !isDrive);
+        fileBox.classList.toggle('hidden', isDrive);
       });
     });
 
@@ -511,8 +347,7 @@
       submitBtn.disabled = true;
 
       const selectedType = document.querySelector('input[name="note-type-radio"]:checked')?.value || 'drive_link';
-      const fileInput = document.getElementById('up-file');
-      const file = fileInput.files[0];
+      const file = document.getElementById('up-file').files[0];
       const driveUrl = document.getElementById('up-drive-url').value.trim();
 
       try {
@@ -524,11 +359,10 @@
             return;
           }
           if (file.size > 15 * 1024 * 1024) {
-            showToast('File size exceeds the 15MB limit. Please compress the file or use Google Drive.', 'warning');
+            showToast('File size exceeds the 15MB limit. Please compress or use Google Drive.', 'warning');
             submitBtn.disabled = false;
             return;
           }
-
           const formData = new FormData();
           formData.append('title', document.getElementById('up-title').value.trim());
           formData.append('className', document.getElementById('up-class').value);
@@ -537,9 +371,13 @@
           formData.append('description', document.getElementById('up-desc').value.trim());
           formData.append('noteType', 'file');
           formData.append('file', file);
-
           res = await apiRequest('/notes/upload', { method: 'POST', body: formData });
         } else {
+          if (!safeUrl(driveUrl)) {
+            showToast('Please enter a valid http:// or https:// Google Drive link', 'warning');
+            submitBtn.disabled = false;
+            return;
+          }
           res = await apiRequest('/notes/upload', {
             method: 'POST',
             body: {
@@ -548,16 +386,17 @@
               subject: document.getElementById('up-subject').value,
               chapter: document.getElementById('up-chapter').value.trim(),
               description: document.getElementById('up-desc').value.trim(),
-              noteType: selectedType,
-              driveUrl: driveUrl,
+              noteType: 'drive_link',
+              driveUrl,
             },
           });
         }
 
         showToast(res.message || 'Study material published!', 'success');
-        uploadModal.classList.add('hidden');
-        uploadModal.classList.remove('flex');
+        closeModal();
         uploadForm.reset();
+        driveBox.classList.remove('hidden');
+        fileBox.classList.add('hidden');
         loadNotes();
       } catch (err) {
         showToast(err.message, 'error');
@@ -574,8 +413,7 @@
     subjectFilter.addEventListener('change', loadNotes);
     sortFilter.addEventListener('change', loadNotes);
 
-    initIcons();
-    loadNotes();
+    if (user) loadNotes();
   </script>
 </body>
 </html>

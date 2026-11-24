@@ -9,6 +9,7 @@
  */
 
 import { jsonResponse, errorResponse, successResponse } from '../utils/response.js';
+import { validateHttpUrl } from '../utils/compression.js';
 import { generateId } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
 
@@ -62,6 +63,12 @@ export async function handleExamsRoutes(request, env, path, method) {
         return errorResponse('Exam title, subject, and date (YYYY-MM-DD) are required', 400);
       }
 
+      const urlCheck = validateHttpUrl(driveLink);
+      if (urlCheck && urlCheck.error) {
+        return errorResponse(`Invalid Google Drive link: ${urlCheck.error}`, 400);
+      }
+      const cleanDriveLink = urlCheck ? urlCheck.url : null;
+
       // Fetch active academic year
       const yearSetting = await env.DB.prepare(`SELECT value FROM school_settings WHERE key = 'academic_year'`).first();
       const academicYear = yearSetting?.value || '2026-2027';
@@ -81,7 +88,7 @@ export async function handleExamsRoutes(request, env, path, method) {
         endTime.trim(),
         roomOrHall.trim(),
         syllabus.trim(),
-        driveLink ? driveLink.trim() : null,
+        cleanDriveLink,
         academicYear,
         auth.user.id
       ).run();
@@ -132,6 +139,12 @@ export async function handleExamsRoutes(request, env, path, method) {
         return errorResponse('Exam title, subject, and date are required', 400);
       }
 
+      const urlCheck = validateHttpUrl(driveLink);
+      if (urlCheck && urlCheck.error) {
+        return errorResponse(`Invalid Google Drive link: ${urlCheck.error}`, 400);
+      }
+      const cleanDriveLink = urlCheck ? urlCheck.url : null;
+
       const existing = await env.DB.prepare(`SELECT id FROM exams WHERE id = ?`).bind(examId).first();
       if (!existing) {
         return errorResponse('Exam not found', 404);
@@ -159,7 +172,7 @@ export async function handleExamsRoutes(request, env, path, method) {
         endTime.trim(),
         roomOrHall.trim(),
         syllabus.trim(),
-        driveLink ? driveLink.trim() : null,
+        cleanDriveLink,
         examId
       ).run();
 

@@ -3,165 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Exam Timetable & Schedule | VidyaSphere</title>
+  <title>Exam Timetable &amp; Schedule | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#7c3aed">
+  <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 overflow-x-hidden w-full">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 w-full">
 
-  <!-- Desktop Sidebar -->
-  <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 p-4 shrink-0 h-screen sticky top-0 justify-between">
-    <div class="space-y-6">
-      <div class="flex items-center gap-3 px-2">
-        <div class="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-md shadow-purple-200">
-          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h2 class="font-extrabold text-slate-900 leading-tight">VidyaSphere</h2>
-          <span class="text-xs text-slate-400 font-medium">School Edge Portal</span>
-        </div>
-      </div>
-
-      <nav class="space-y-1">
-        <a href="/dashboard/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Notice Board
-        </a>
-        <a href="/dashboard/exams.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-purple-50 text-purple-700 font-bold text-sm">
-          <i data-lucide="calendar" class="w-5 h-5"></i> Exams & Timetable
-        </a>
-        <a href="/dashboard/chat.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="messages-square" class="w-5 h-5"></i> Realtime Chat
-        </a>
-        <a href="/dashboard/notes.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="book-open" class="w-5 h-5"></i> Study Notes
-        </a>
-        <a href="/dashboard/qa.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="message-square" class="w-5 h-5"></i> Academic Q&A
-        </a>
-        <a href="/dashboard/polls.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="vote" class="w-5 h-5"></i> School Polls
-        </a>
-        <a href="/dashboard/students.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
-          <i data-lucide="users" class="w-5 h-5"></i> Student Directory
-        </a>
-        <div id="admin-nav-link" class="hidden">
-          <a href="/admin/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-700 hover:bg-rose-50 font-bold text-sm transition">
-            <i data-lucide="shield-alert" class="w-5 h-5"></i> Admin Portal
-          </a>
-        </div>
-      </nav>
-    </div>
-
-    <!-- User Profile & Logout -->
-    <div class="border-t border-slate-200 pt-4 px-2">
-      <div class="flex items-center justify-between">
-        <div class="overflow-hidden">
-          <p id="user-display-name" class="font-bold text-sm text-slate-800 truncate"></p>
-          <p id="user-display-role" class="text-xs text-slate-400 capitalize"></p>
-        </div>
-        <button id="logout-btn" title="Sign Out" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-          <i data-lucide="log-out" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Mobile Top Header -->
-  <header class="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-3 py-2.5 flex items-center justify-between shadow-sm w-full">
-    <div class="flex items-center gap-2 overflow-hidden">
-      <div class="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white shrink-0">
-        <i data-lucide="calendar" class="w-4 h-4"></i>
-      </div>
-      <span class="font-bold text-xs sm:text-sm text-slate-900 truncate">Exams Timetable</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <a href="/admin/index.html" class="admin-mobile-switch hidden px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
-        <i data-lucide="shield-check" class="w-3 h-3"></i> Admin
-      </a>
-      <span id="user-display-name-mob" class="text-[11px] font-bold text-slate-700 truncate max-w-[90px]"></span>
-      <button class="logout-btn-trigger p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Logout">
-        <i data-lucide="log-out" class="w-4 h-4"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Mobile Bottom Navigation -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 px-1 py-1 flex items-center justify-around shadow-lg max-w-full">
-    <a href="/dashboard/index.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="layout-dashboard" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notices</span>
-    </a>
-    <a href="/dashboard/exams.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-purple-700 font-bold text-[9px] truncate">
-      <i data-lucide="calendar" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Exams</span>
-    </a>
-    <a href="/dashboard/notes.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="book-open" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Notes</span>
-    </a>
-    <a href="/dashboard/chat.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="messages-square" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Chat</span>
-    </a>
-    <a href="/dashboard/qa.html" class="flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-500 font-medium text-[9px] truncate">
-      <i data-lucide="message-square" class="w-4 h-4 mb-0.5"></i>
-      <span class="truncate">Q&A</span>
-    </a>
-  </nav>
-
-  <!-- Main Content Area -->
-  <main class="flex-1 w-full max-w-5xl mx-auto p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 overflow-x-hidden">
-    <!-- Top Welcome Card -->
-    <div class="bg-gradient-to-r from-purple-700 via-indigo-700 to-violet-800 rounded-2xl p-4 sm:p-6 text-white shadow-md shadow-purple-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
+  <main class="flex-1 w-full max-w-5xl mx-auto p-3.5 sm:p-6 lg:p-8 space-y-5">
+    <div class="bg-slate-950 rounded-2xl p-5 sm:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-slate-800">
       <div class="space-y-1">
-        <span class="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-semibold uppercase tracking-wider backdrop-blur inline-block">
-          Official Examination Portal &bull; 2026-2027
+        <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 text-[10px] font-bold uppercase tracking-wider inline-block">
+          Official Examination Portal
         </span>
-        <h1 class="text-xl sm:text-2xl font-extrabold truncate">School Examination Schedules</h1>
-        <p class="text-purple-100 text-xs sm:text-sm">Official datesheets, exam timings, room numbers, and syllabus instructions.</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">School Examination Schedules</h1>
+        <p class="text-slate-400 text-xs sm:text-sm">Confirmed datesheets, timings, room numbers, and syllabus instructions.</p>
       </div>
       <div id="admin-quick-action" class="hidden shrink-0">
-        <a href="/admin/index.html" class="px-3.5 py-2 bg-white text-purple-800 font-bold text-xs rounded-xl hover:bg-purple-50 shadow-sm transition inline-flex items-center gap-1.5">
-          <i data-lucide="plus-circle" class="w-4 h-4 text-purple-600"></i> Manage / Change Exams
+        <a href="/admin/index.html" class="px-3.5 py-2 bg-white text-slate-900 font-bold text-xs rounded-xl hover:bg-slate-100 transition inline-flex items-center gap-1.5">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-purple-600"></i> Manage Exams
         </a>
       </div>
     </div>
 
-    <!-- Security & Official Verification Policy Banner -->
-    <div class="p-3 sm:p-4 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 flex items-start gap-3">
-      <div class="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center shrink-0 mt-0.5">
-        <i data-lucide="shield-check" class="w-5 h-5"></i>
-      </div>
-      <div class="space-y-0.5 text-xs">
-        <h4 class="font-bold text-purple-950">Official Schedule Security</h4>
-        <p class="text-purple-800 leading-relaxed">
-          Exam schedules and datesheets are strictly published and updated by the <strong>School Administration / Lead Admin</strong>. Students have read-only access to view confirmed dates, syllabus, and download Google Drive timetables.
-        </p>
-      </div>
-    </div>
-
-    <!-- Search & Class Filters Bar -->
-    <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <!-- Search Box -->
+    <!-- Filters Bar -->
+    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <div class="relative flex-1">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
           <input type="text" id="exam-search" placeholder="Search by subject, title, or exam room..."
-            class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-purple-500">
+            class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-xs sm:text-sm focus:ring-2 focus:ring-purple-500/30 focus:outline-none">
         </div>
-
-        <!-- Class Filter Select for Mobile & Fast Jump -->
         <div class="flex items-center gap-2">
           <span class="text-xs text-slate-500 font-semibold shrink-0">Class:</span>
-          <select id="class-filter-select"
-            class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 focus:ring-2 focus:ring-purple-500">
+          <select id="class-filter-select" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 focus:ring-2 focus:ring-purple-500/30">
             <option value="all">All Classes</option>
             <option value="my_class" id="my-class-option">My Class</option>
             <option value="Class 10">Class 10 (SSC/CBSE)</option>
             <option value="Class 12">Class 12 (HSC/CBSE)</option>
+            <option value="Class 11">Class 11</option>
             <option value="Class 9">Class 9</option>
             <option value="Class 8">Class 8</option>
             <option value="Class 7">Class 7</option>
@@ -171,51 +53,37 @@
             <option value="Class 3">Class 3</option>
             <option value="Class 2">Class 2</option>
             <option value="Class 1">Class 1</option>
-            <option value="Class 11">Class 11</option>
           </select>
         </div>
       </div>
 
-      <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs text-slate-500">
-        <span id="exams-count-info">Loading timetable...</span>
-        <span class="text-[11px] text-slate-400">Timetable synced in real-time</span>
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+        <span id="exams-count-info" class="tabular-nums font-medium">Loading timetable...</span>
+        <span class="text-slate-400">Read-only verified schedule</span>
       </div>
     </div>
 
-    <!-- Exam Cards Container -->
-    <div id="exams-container" class="space-y-3 sm:space-y-4 w-full">
-      <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 text-sm">
-        Loading scheduled exams...
-      </div>
+    <div id="exams-container" class="space-y-3 w-full">
+      <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading scheduled exams...</div>
     </div>
   </main>
 
   <script type="module">
     import { apiRequest } from '/js/api.js';
-    import { requireAuth, logout } from '/js/auth.js';
-    import { formatDate, initIcons } from '/js/ui.js';
+    import { initDashboardShell } from '/js/layout.js';
+    import { escapeHtml, safeUrl, initIcons } from '/js/ui.js';
 
-    const user = requireAuth();
+    const user = initDashboardShell({ active: 'exams', mobileTitle: 'Exams Timetable' });
     if (user) {
-      document.getElementById('user-display-name').textContent = user.fullName || user.username;
-      document.getElementById('user-display-name-mob').textContent = user.fullName || user.username;
-      document.getElementById('user-display-role').textContent = `${user.role} ${user.className ? '• ' + user.className : ''}`;
-
       if (user.className) {
         document.getElementById('my-class-option').textContent = `My Class (${user.className})`;
       } else {
         document.getElementById('my-class-option').remove();
       }
-
       if (user.role === 'admin') {
-        document.getElementById('admin-nav-link').classList.remove('hidden');
         document.getElementById('admin-quick-action').classList.remove('hidden');
-        document.querySelectorAll('.admin-mobile-switch').forEach(el => el.classList.remove('hidden'));
       }
     }
-
-    document.getElementById('logout-btn')?.addEventListener('click', logout);
-    document.querySelectorAll('.logout-btn-trigger').forEach(btn => btn.addEventListener('click', logout));
 
     let allExams = [];
     const searchInput = document.getElementById('exam-search');
@@ -229,31 +97,31 @@
         allExams = res.exams || [];
         renderExams();
       } catch (err) {
-        container.innerHTML = `<div class="p-6 text-center text-rose-500 bg-rose-50 rounded-2xl border border-rose-200 text-sm">${err.message}</div>`;
+        container.innerHTML = `<div class="p-6 text-center text-rose-600 bg-rose-50 rounded-2xl border border-rose-200 text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
 
     function calculateCountdown(dateStr) {
+      const parts = String(dateStr || '').split('-').map(Number);
+      if (parts.length !== 3 || parts.some(isNaN)) {
+        return { label: 'Scheduled', color: 'bg-slate-100 text-slate-600 border-slate-200', prettyDate: dateStr || '-' };
+      }
+
+      const [y, m, d] = parts;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-
-      const [y, m, d] = dateStr.split('-').map(Number);
       const examDate = new Date(y, m - 1, d);
       examDate.setHours(0, 0, 0, 0);
 
-      const diffMs = examDate - today;
-      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      const diffDays = Math.round((examDate - today) / (1000 * 60 * 60 * 24));
+      const dayName = examDate.toLocaleDateString('en-US', { weekday: 'short' });
+      const monthName = examDate.toLocaleDateString('en-US', { month: 'short' });
+      const prettyDate = `${dayName}, ${String(d).padStart(2, '0')} ${monthName} ${y}`;
 
-      if (diffDays < 0) {
-        return { label: 'Completed', color: 'bg-slate-100 text-slate-500 border-slate-200', isPast: true };
-      }
-      if (diffDays === 0) {
-        return { label: '🔴 TODAY', color: 'bg-rose-100 text-rose-700 border-rose-300 font-extrabold animate-pulse', isToday: true };
-      }
-      if (diffDays === 1) {
-        return { label: '🟠 TOMORROW', color: 'bg-amber-100 text-amber-800 border-amber-300 font-bold' };
-      }
-      return { label: `⏳ In ${diffDays} Days`, color: 'bg-purple-100 text-purple-700 border-purple-200 font-bold' };
+      if (diffDays < 0) return { label: 'Completed', color: 'bg-slate-100 text-slate-500 border-slate-200', prettyDate };
+      if (diffDays === 0) return { label: 'TODAY', color: 'bg-rose-50 text-rose-700 border-rose-300 font-extrabold animate-pulse', prettyDate };
+      if (diffDays === 1) return { label: 'TOMORROW', color: 'bg-amber-50 text-amber-800 border-amber-300 font-bold', prettyDate };
+      return { label: `In ${diffDays} Days`, color: 'bg-purple-50 text-purple-700 border-purple-200 font-bold', prettyDate };
     }
 
     function renderExams() {
@@ -261,24 +129,19 @@
       const selectedClass = classFilter.value;
 
       const filtered = allExams.filter(ex => {
-        // Class matching
         if (selectedClass === 'my_class' && user?.className) {
-          const matchClass = ex.class_name === 'all' || ex.class_name === 'All Classes' || ex.class_name === user.className;
-          if (!matchClass) return false;
+          const match = ex.class_name === 'all' || ex.class_name === 'All Classes' || ex.class_name === user.className;
+          if (!match) return false;
         } else if (selectedClass !== 'all') {
-          const matchClass = ex.class_name === 'all' || ex.class_name === 'All Classes' || ex.class_name === selectedClass;
-          if (!matchClass) return false;
+          const match = ex.class_name === 'all' || ex.class_name === 'All Classes' || ex.class_name === selectedClass;
+          if (!match) return false;
         }
 
-        // Search matching
         if (searchTerm) {
-          const matchTitle = (ex.title || '').toLowerCase().includes(searchTerm);
-          const matchSub = (ex.subject || '').toLowerCase().includes(searchTerm);
-          const matchRoom = (ex.room_or_hall || '').toLowerCase().includes(searchTerm);
-          const matchSyl = (ex.syllabus || '').toLowerCase().includes(searchTerm);
-          if (!matchTitle && !matchSub && !matchRoom && !matchSyl) return false;
+          const hit = [ex.title, ex.subject, ex.room_or_hall, ex.syllabus]
+            .some(v => (v || '').toLowerCase().includes(searchTerm));
+          if (!hit) return false;
         }
-
         return true;
       });
 
@@ -286,10 +149,10 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+          <div class="p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
             <i data-lucide="calendar-check" class="w-8 h-8 mx-auto mb-2 opacity-40 text-purple-600"></i>
-            <p class="text-sm font-semibold text-slate-700">No scheduled exams found for this selection.</p>
-            <p class="text-xs text-slate-400 mt-1">Keep studying and check back regularly for updates from school administration.</p>
+            <p class="text-sm font-semibold text-slate-700">No scheduled exams found</p>
+            <p class="text-xs text-slate-400 mt-1">Try selecting All Classes or check back later.</p>
           </div>
         `;
         initIcons();
@@ -298,79 +161,56 @@
 
       container.innerHTML = filtered.map(ex => {
         const countdown = calculateCountdown(ex.exam_date);
-
-        // Date pretty formatting
-        const [y, m, d] = ex.exam_date.split('-');
-        const dateObj = new Date(y, m - 1, d);
-        const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-        const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
+        const safeDrive = safeUrl(ex.drive_link);
 
         return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3 w-full break-words transition hover:border-purple-300">
+          <article class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 card-hover space-y-3 w-full break-words">
             <div class="flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-2">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase border ${countdown.color}">
-                  ${countdown.label}
-                </span>
-                <span class="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
-                  ${ex.class_name}
-                </span>
-                <span class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                  ${ex.subject}
-                </span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase border tabular-nums ${countdown.color}">${escapeHtml(countdown.label)}</span>
+                <span class="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">${escapeHtml(ex.class_name)}</span>
+                <span class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${escapeHtml(ex.subject)}</span>
               </div>
-              <span class="text-[11px] text-slate-400 font-medium">Session: ${ex.academic_year}</span>
+              <span class="text-[11px] text-slate-400 font-medium tabular-nums">Session: ${escapeHtml(ex.academic_year)}</span>
             </div>
 
-            <!-- Title & Subject -->
-            <div>
-              <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">${ex.title}</h3>
-            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">${escapeHtml(ex.title)}</h3>
 
-            <!-- Time, Date, Room Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 px-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-              <div class="flex items-center gap-2 text-slate-700">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 px-3 bg-slate-50 rounded-xl border border-slate-200/60 text-xs tabular-nums">
+              <div class="flex items-center gap-2 text-slate-800 font-semibold">
                 <i data-lucide="calendar" class="w-4 h-4 text-purple-600 shrink-0"></i>
-                <span class="font-bold">${dayName}, ${d} ${monthName} ${y}</span>
+                <span>${escapeHtml(countdown.prettyDate)}</span>
               </div>
               <div class="flex items-center gap-2 text-slate-600">
                 <i data-lucide="clock" class="w-4 h-4 text-indigo-600 shrink-0"></i>
-                <span>${ex.start_time ? `${ex.start_time} - ${ex.end_time || ''}` : 'As per session hall'}</span>
+                <span>${ex.start_time ? `${escapeHtml(ex.start_time)}${ex.end_time ? ' - ' + escapeHtml(ex.end_time) : ''}` : 'As per schedule'}</span>
               </div>
               <div class="flex items-center gap-2 text-slate-600">
                 <i data-lucide="map-pin" class="w-4 h-4 text-rose-600 shrink-0"></i>
-                <span class="truncate">${ex.room_or_hall || 'Main Examination Block'}</span>
+                <span class="truncate">${escapeHtml(ex.room_or_hall || 'Main Examination Block')}</span>
               </div>
             </div>
 
-            <!-- Syllabus / Guidelines -->
             ${ex.syllabus ? `
-              <div class="p-3 bg-amber-50/60 rounded-xl border border-amber-100 text-xs text-amber-950 space-y-1">
+              <div class="p-3 bg-amber-50/70 rounded-xl border border-amber-200/70 text-xs text-amber-950 space-y-1">
                 <div class="flex items-center gap-1.5 font-bold text-amber-900">
                   <i data-lucide="book-marked" class="w-3.5 h-3.5 text-amber-700"></i>
-                  <span>Syllabus & Instructions:</span>
+                  <span>Syllabus &amp; Instructions</span>
                 </div>
-                <p class="text-[11px] text-amber-900 leading-relaxed whitespace-pre-line">${ex.syllabus}</p>
+                <p class="text-[11px] text-amber-900 leading-relaxed whitespace-pre-line">${escapeHtml(ex.syllabus)}</p>
               </div>
             ` : ''}
 
-            <!-- Google Drive Detailed Timetable Link -->
             <div class="pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2 text-xs">
-              <span class="text-[11px] text-slate-400">
-                Verified by: <strong class="text-slate-600">${ex.author_name || 'Lead Admin'}</strong>
-              </span>
-
-              ${ex.drive_link ? `
-                <a href="${ex.drive_link}" target="_blank" rel="noopener noreferrer"
+              <span class="text-[11px] text-slate-400">Verified by <strong class="text-slate-600">${escapeHtml(ex.author_name || 'Lead Admin')}</strong></span>
+              ${safeDrive ? `
+                <a href="${escapeHtml(safeDrive)}" target="_blank" rel="noopener noreferrer"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs border border-emerald-200 transition">
-                  <i data-lucide="cloud-download" class="w-3.5 h-3.5"></i>
-                  <span>Full Timetable PDF (Google Drive)</span>
+                  <i data-lucide="cloud-download" class="w-3.5 h-3.5"></i> Timetable PDF
                 </a>
-              ` : `
-                <span class="text-[10px] text-slate-400 font-mono">Exam ID: ${ex.id}</span>
-              `}
+              ` : `<span class="text-[10px] text-slate-400 font-mono">ID: ${escapeHtml(ex.id)}</span>`}
             </div>
-          </div>
+          </article>
         `;
       }).join('');
 
@@ -380,8 +220,7 @@
     searchInput.addEventListener('input', renderExams);
     classFilter.addEventListener('change', renderExams);
 
-    initIcons();
-    loadExams();
+    if (user) loadExams();
   </script>
 </body>
 </html>

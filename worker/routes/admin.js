@@ -16,13 +16,14 @@ export async function handleAdminRoutes(request, env, path, method) {
   // GET /api/admin/registrations or /api/admin/applications
   if ((path === '/api/admin/registrations' || path === '/api/admin/applications') && method === 'GET') {
     const url = new URL(request.url);
-    const status = url.searchParams.get('status');
+    let status = url.searchParams.get('status');
+    if (status === 'approved') status = 'active';
 
     let query = `
       SELECT id, username, full_name, class_name, division, roll_number, email, role,
              account_status, account_status as review_status, rejection_reason, created_at
       FROM profiles
-      WHERE role = 'student'
+      WHERE is_root_admin = 0 AND username != 'admin'
     `;
     const params = [];
 
@@ -161,14 +162,21 @@ export async function handleAdminRoutes(request, env, path, method) {
       }
 
       const target = await env.DB.prepare(
-        `SELECT id, username, is_root_admin FROM profiles WHERE id = ?`
+        `SELECT id, username, role, is_root_admin FROM profiles WHERE id = ?`
       ).bind(studentId).first();
 
       if (!target) return errorResponse('User not found', 404);
 
-      // ROOT ADMIN IMMUNITY: Secondary admins cannot suspend Root Admin!
+      if (target.id === auth.user.id) {
+        return errorResponse('You cannot suspend or modify your own account status', 400);
+      }
+
+      // ROOT ADMIN IMMUNITY: Secondary admins cannot suspend Root Admin or other Admins!
       if (target.is_root_admin === 1 || target.username === 'admin') {
         return errorResponse('Forbidden: Root Lead Admin is permanently protected and cannot be suspended or disabled.', 403);
+      }
+      if (target.role === 'admin' && !(auth.user.isRootAdmin || auth.user.username === 'admin')) {
+        return errorResponse('Forbidden: Only the Lead Root Admin can suspend or reactivate Secondary Admins.', 403);
       }
 
       await env.DB.batch([

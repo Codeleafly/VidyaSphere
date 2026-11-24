@@ -115,6 +115,11 @@ export async function handleQARoutes(request, env, path, method) {
         return errorResponse('Answer text cannot be empty');
       }
 
+      const questionExists = await env.DB.prepare(`SELECT id FROM questions WHERE id = ?`).bind(questionId).first();
+      if (!questionExists) {
+        return errorResponse('Question not found', 404);
+      }
+
       const answerId = generateId('ans', 8);
 
       await env.DB.prepare(
