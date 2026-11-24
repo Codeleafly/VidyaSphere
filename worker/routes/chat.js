@@ -66,6 +66,11 @@ export async function handleChatRoutes(request, env, path, method) {
     server.addEventListener('message', async (event) => {
       try {
         const data = JSON.parse(event.data);
+        if (data.type === 'ping') {
+          server.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+          return;
+        }
+
         if (data.type === 'message' && data.content?.trim()) {
           const channel = data.channel || 'school';
           const content = data.content.trim();
@@ -631,20 +636,38 @@ export async function handleChatRoutes(request, env, path, method) {
       }
     }
 
-    // Strict 7-Day Auto-Purge window with ISO 8601 UTC Z formatting
-    const { results } = await env.DB.prepare(`
-      SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.has_attachment,
-             m.attachment_name, m.attachment_type, m.attachment_size,
-             strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
-             strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
-             p.full_name as sender_name, p.role as sender_role, p.class_name, p.division, p.roll_number, p.is_root_admin
-      FROM messages m
-      JOIN profiles p ON m.sender_id = p.id
-      WHERE m.channel = ? AND m.created_at >= datetime('now', '-7 days')
-      ORDER BY m.created_at DESC LIMIT 80
-    `).bind(channel).all();
+    // Strict 7-Day Auto-Purge window with ISO 8601 UTC Z formatting & since query support for adaptive real-time sync
+    const since = url.searchParams.get('since');
 
-    const messages = (results || []).reverse();
+    let messages = [];
+    if (since) {
+      const { results } = await env.DB.prepare(`
+        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.has_attachment,
+               m.attachment_name, m.attachment_type, m.attachment_size,
+               strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
+               strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
+               p.full_name as sender_name, p.role as sender_role, p.class_name, p.division, p.roll_number, p.is_root_admin
+        FROM messages m
+        JOIN profiles p ON m.sender_id = p.id
+        WHERE m.channel = ? AND datetime(m.created_at) > datetime(?)
+        ORDER BY m.created_at ASC LIMIT 100
+      `).bind(channel, since).all();
+      messages = results || [];
+    } else {
+      const { results } = await env.DB.prepare(`
+        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.has_attachment,
+               m.attachment_name, m.attachment_type, m.attachment_size,
+               strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
+               strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
+               p.full_name as sender_name, p.role as sender_role, p.class_name, p.division, p.roll_number, p.is_root_admin
+        FROM messages m
+        JOIN profiles p ON m.sender_id = p.id
+        WHERE m.channel = ? AND m.created_at >= datetime('now', '-7 days')
+        ORDER BY m.created_at DESC LIMIT 80
+      `).bind(channel).all();
+      messages = (results || []).reverse();
+    }
+
     return successResponse({ messages });
   }
 

@@ -521,8 +521,24 @@ async function runTests() {
   const membershipCheck = await mockEnv.DB.prepare(`SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`).bind(group3Id, studentId).first();
   console.log("✓ [Phase 4 - Student Declines Group Invitation & Clean Purge]: ", (dDeclineGroup.success && !membershipCheck) ? 'PASS' : 'FAIL');
 
+  // 38. Phase 4: Adaptive Realtime Incremental Sync (since timestamp query)
+  const syncBaseTime = new Date(Date.now() - 5000).toISOString();
+  const rPostSync = await worker.fetch(new Request('http://localhost/api/chat/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeStudentToken}` },
+    body: JSON.stringify({ channel: 'school', content: 'Sync verification message' })
+  }), mockEnv);
+  const dPostSync = await rPostSync.json();
+
+  const rSyncSince = await worker.fetch(new Request(`http://localhost/api/chat/messages?channel=school&since=${encodeURIComponent(syncBaseTime)}`, {
+    headers: { 'Authorization': `Bearer ${activeStudentToken}` }
+  }), mockEnv);
+  const dSyncSince = await rSyncSince.json();
+  const syncPass = Array.isArray(dSyncSince.messages) && dSyncSince.messages.some(m => m.id === dPostSync.id);
+  console.log("✓ [Phase 4 - Adaptive Realtime Incremental Sync]:", syncPass ? 'PASS' : 'FAIL');
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 37 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 38 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

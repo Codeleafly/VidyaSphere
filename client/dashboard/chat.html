@@ -615,24 +615,90 @@
       });
     });
 
-    // Load Messages
+    // Realtime Message Tracking & Adaptive Sync Engine
+    let lastMessageCreatedAt = null;
+    let knownMessageIds = new Set();
+    let syncIntervalId = null;
+    let isSyncing = false;
+    let wsPingTimer = null;
+
+    // Load Messages (Full initial channel load)
     async function loadMessages() {
       try {
         const res = await apiRequest(`/chat/messages?channel=${encodeURIComponent(currentChannel)}`);
         const messages = res.messages || [];
 
+        knownMessageIds.clear();
+        lastMessageCreatedAt = null;
+
         if (messages.length === 0) {
           messagesContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No messages yet in the past 7 days. Say hello! 👋</div>';
+          startLiveSync();
           return;
         }
+
+        messages.forEach(m => {
+          knownMessageIds.add(m.id);
+          if (m.created_at || m.createdAt) lastMessageCreatedAt = m.created_at || m.createdAt;
+        });
 
         messagesContainer.innerHTML = messages.map(msg => renderMessageHtml(msg)).join('');
         attachMessageActionListeners();
         initIcons();
         scrollToBottom();
+        startLiveSync();
       } catch (err) {
         messagesContainer.innerHTML = `<div class="p-4 text-center text-rose-500 text-xs">${err.message}</div>`;
       }
+    }
+
+    // Adaptive Live Realtime Sync (Polls new messages every 1.5s - 2s across all edge nodes)
+    async function syncNewMessages() {
+      if (isSyncing || !currentChannel) return;
+      isSyncing = true;
+      try {
+        const queryParams = [`channel=${encodeURIComponent(currentChannel)}`];
+        if (lastMessageCreatedAt) {
+          queryParams.push(`since=${encodeURIComponent(lastMessageCreatedAt)}`);
+        }
+
+        const res = await apiRequest(`/chat/messages?${queryParams.join('&')}`);
+        const newMessages = res.messages || [];
+
+        if (newMessages.length > 0) {
+          // If container currently shows "No messages yet", clear it
+          if (messagesContainer.querySelector('.p-8')) {
+            messagesContainer.innerHTML = '';
+          }
+
+          let addedAny = false;
+          newMessages.forEach(msg => {
+            if (!knownMessageIds.has(msg.id)) {
+              knownMessageIds.add(msg.id);
+              messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(msg));
+              addedAny = true;
+            }
+            if (msg.created_at || msg.createdAt) {
+              lastMessageCreatedAt = msg.created_at || msg.createdAt;
+            }
+          });
+
+          if (addedAny) {
+            attachMessageActionListeners();
+            initIcons();
+            scrollToBottom();
+          }
+        }
+      } catch (e) {
+        // Silently ignore background sync errors to avoid interrupting user
+      } finally {
+        isSyncing = false;
+      }
+    }
+
+    function startLiveSync() {
+      if (syncIntervalId) clearInterval(syncIntervalId);
+      syncIntervalId = setInterval(syncNewMessages, 2000);
     }
 
     function escapeHtml(str) {
@@ -1001,35 +1067,72 @@
       }
     });
 
-    // Send Message (Form submit with optional compressed attachment)
+    // Send Message (Optimistic Instant 0ms Local Render + REST D1 Persistence + Realtime Streaming)
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const content = chatInput.value.trim();
       if (!content && !selectedAttachmentFile) return;
 
       const fileToSend = selectedAttachmentFile;
-      // Reset input immediately for responsive feel
+      const sendChannel = currentChannel;
+
+      // 1. Optimistic Local Render: Display message on sender screen in 0ms!
+      const tempId = 'temp_' + Date.now();
+      const optimisticMsg = {
+        id: tempId,
+        sender_id: user.id,
+        senderId: user.id,
+        sender_name: user.fullName || user.username,
+        senderName: user.fullName || user.username,
+        role: user.role,
+        class_name: user.className || null,
+        className: user.className || null,
+        division: user.division || null,
+        roll_number: user.rollNumber || null,
+        rollNumber: user.rollNumber || null,
+        is_root_admin: user.isRootAdmin ? 1 : 0,
+        isRootAdmin: user.isRootAdmin || false,
+        channel: sendChannel,
+        content: content || (fileToSend ? `Sharing attachment: ${fileToSend.name}` : ''),
+        is_edited: 0,
+        has_attachment: fileToSend ? 1 : 0,
+        attachment_name: fileToSend ? fileToSend.name : null,
+        attachment_size: fileToSend ? fileToSend.size : 0,
+        created_at: new Date().toISOString(),
+      };
+
+      if (messagesContainer.querySelector('.p-8')) {
+        messagesContainer.innerHTML = '';
+      }
+
+      messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(optimisticMsg));
+      attachMessageActionListeners();
+      initIcons();
+      scrollToBottom();
+
+      // Reset form input immediately for smooth typing
       chatInput.value = '';
       selectedAttachmentFile = null;
       chatFileInput.value = '';
       attachmentPreviewBar.classList.add('hidden');
       chatInput.required = true;
 
-      // If text-only and WebSocket connected, stream instantly
+      // Also stream via WebSocket if connected
       if (!fileToSend && ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          type: 'message',
-          channel: currentChannel,
-          content
-        }));
-        return;
+        try {
+          ws.send(JSON.stringify({
+            type: 'message',
+            channel: sendChannel,
+            content
+          }));
+        } catch (e) { /* ignore */ }
       }
 
-      // REST upload for attachments or fallback
+      // Persist to D1 Database globally across all Cloudflare isolates
       try {
         const formData = new FormData();
         formData.append('content', content);
-        formData.append('channel', currentChannel);
+        formData.append('channel', sendChannel);
         if (fileToSend) {
           formData.append('file', fileToSend);
         }
@@ -1046,13 +1149,29 @@
           throw new Error(err.error || 'Failed to send message');
         }
 
-        loadMessages();
+        const data = await res.json();
+        const tempEl = document.getElementById(`msg-${tempId}`);
+        if (tempEl && data.id) {
+          tempEl.id = `msg-${data.id}`;
+          knownMessageIds.add(data.id);
+        }
+        if (data.createdAt || data.created_at) {
+          lastMessageCreatedAt = data.createdAt || data.created_at;
+        }
+
+        // Trigger fast sync
+        setTimeout(syncNewMessages, 300);
       } catch (err) {
+        const tempEl = document.getElementById(`msg-${tempId}`);
+        if (tempEl) {
+          tempEl.classList.add('opacity-50');
+          tempEl.title = 'Failed to deliver: ' + err.message;
+        }
         showToast(err.message, 'error');
       }
     });
 
-    // Native WebSocket Connection
+    // Native WebSocket Connection with Heartbeat & Auto-Recovery
     function connectWebSocket() {
       const token = getToken();
       if (!token) return;
@@ -1066,17 +1185,37 @@
         ws.onopen = () => {
           connectionStatus.textContent = 'Live Connected';
           connectionStatus.parentElement.querySelector('span').className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0';
+
+          // 20s Heartbeat ping to keep mobile connection alive
+          if (wsPingTimer) clearInterval(wsPingTimer);
+          wsPingTimer = setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ type: 'ping' }));
+            }
+          }, 20000);
         };
 
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
+            if (data.type === 'pong') return;
+
             if (data.type === 'new_message' && data.message) {
-              if (data.message.channel === currentChannel) {
-                messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(data.message));
-                attachMessageActionListeners();
-                initIcons();
-                scrollToBottom();
+              const msg = data.message;
+              if (msg.channel === currentChannel) {
+                if (!knownMessageIds.has(msg.id)) {
+                  knownMessageIds.add(msg.id);
+                  if (messagesContainer.querySelector('.p-8')) {
+                    messagesContainer.innerHTML = '';
+                  }
+                  messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(msg));
+                  attachMessageActionListeners();
+                  initIcons();
+                  scrollToBottom();
+                }
+                if (msg.created_at || msg.createdAt) {
+                  lastMessageCreatedAt = msg.created_at || msg.createdAt;
+                }
               }
               if (!document.getElementById('dms-list').classList.contains('hidden')) {
                 loadDmsList();
@@ -1086,7 +1225,8 @@
         };
 
         ws.onclose = () => {
-          connectionStatus.textContent = 'Reconnecting...';
+          if (wsPingTimer) clearInterval(wsPingTimer);
+          connectionStatus.textContent = 'Auto-Sync Active';
           connectionStatus.parentElement.querySelector('span').className = 'w-2 h-2 rounded-full bg-amber-500 shrink-0';
           setTimeout(connectWebSocket, 4000);
         };
@@ -1098,6 +1238,19 @@
         setTimeout(connectWebSocket, 5000);
       }
     }
+
+    // Auto-Sync triggers on window focus, visibility change, and network reconnect
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        syncNewMessages();
+        if (!ws || ws.readyState !== WebSocket.OPEN) connectWebSocket();
+      }
+    });
+    window.addEventListener('focus', () => syncNewMessages());
+    window.addEventListener('online', () => {
+      syncNewMessages();
+      connectWebSocket();
+    });
 
     // New Direct Message Modal logic
     const dmModal = document.getElementById('new-dm-modal');
