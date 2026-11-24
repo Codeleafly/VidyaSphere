@@ -674,6 +674,17 @@
           let addedAny = false;
           newMessages.forEach(msg => {
             if (!knownMessageIds.has(msg.id)) {
+              // Check if matches an existing optimistic element
+              const isMyMsg = (msg.sender_id === user.id || msg.senderId === user.id);
+              if (isMyMsg) {
+                const tempEl = messagesContainer.querySelector(`[id^="msg-temp_"]`);
+                if (tempEl) {
+                  tempEl.id = `msg-${msg.id}`;
+                  knownMessageIds.add(msg.id);
+                  return;
+                }
+              }
+
               knownMessageIds.add(msg.id);
               messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(msg));
               addedAny = true;
@@ -970,7 +981,8 @@
     function selectDmConversation(data) {
       closeChannelsDrawer();
       currentChatType = 'dm';
-      currentChannel = `dm_${data.dmId}`;
+      const rawDmId = data.dmId || '';
+      currentChannel = rawDmId.startsWith('dm_') ? rawDmId : `dm_${rawDmId}`;
       activeDmData = data;
       currentGroupId = null;
       groupInfoBtn?.classList.add('hidden');
@@ -1067,17 +1079,26 @@
       }
     });
 
+    let isSendingMessage = false;
+
     // Send Message (Optimistic Instant 0ms Local Render + REST D1 Persistence + Realtime Streaming)
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (isSendingMessage) return;
+
       const content = chatInput.value.trim();
       if (!content && !selectedAttachmentFile) return;
 
       const fileToSend = selectedAttachmentFile;
       const sendChannel = currentChannel;
 
+      isSendingMessage = true;
+      if (sendBtn) sendBtn.disabled = true;
+
       // 1. Optimistic Local Render: Display message on sender screen in 0ms!
       const tempId = 'temp_' + Date.now();
+      knownMessageIds.add(tempId);
+
       const optimisticMsg = {
         id: tempId,
         sender_id: user.id,
@@ -1117,18 +1138,7 @@
       attachmentPreviewBar.classList.add('hidden');
       chatInput.required = true;
 
-      // Also stream via WebSocket if connected
-      if (!fileToSend && ws && ws.readyState === WebSocket.OPEN) {
-        try {
-          ws.send(JSON.stringify({
-            type: 'message',
-            channel: sendChannel,
-            content
-          }));
-        } catch (e) { /* ignore */ }
-      }
-
-      // Persist to D1 Database globally across all Cloudflare isolates
+      // Persist to D1 Database globally across all Cloudflare isolates (Single authoritative source of truth)
       try {
         const formData = new FormData();
         formData.append('content', content);
@@ -1159,7 +1169,6 @@
           lastMessageCreatedAt = data.createdAt || data.created_at;
         }
 
-        // Trigger fast sync
         setTimeout(syncNewMessages, 300);
       } catch (err) {
         const tempEl = document.getElementById(`msg-${tempId}`);
@@ -1168,6 +1177,10 @@
           tempEl.title = 'Failed to deliver: ' + err.message;
         }
         showToast(err.message, 'error');
+      } finally {
+        isSendingMessage = false;
+        if (sendBtn) sendBtn.disabled = false;
+        chatInput.focus();
       }
     });
 
@@ -1202,17 +1215,33 @@
 
             if (data.type === 'new_message' && data.message) {
               const msg = data.message;
-              if (msg.channel === currentChannel) {
-                if (!knownMessageIds.has(msg.id)) {
-                  knownMessageIds.add(msg.id);
-                  if (messagesContainer.querySelector('.p-8')) {
-                    messagesContainer.innerHTML = '';
+              const matchesChannel = (msg.channel === currentChannel) ||
+                (currentChannel.startsWith('dm_') && msg.channel.replace('dm_', '') === currentChannel.replace('dm_', ''));
+
+              if (matchesChannel) {
+                // If this message ID is already rendered, skip duplicate
+                if (knownMessageIds.has(msg.id)) return;
+
+                // Reconcile with temporary optimistic element from same user
+                const isMyMessage = (msg.sender_id === user.id || msg.senderId === user.id);
+                if (isMyMessage) {
+                  const tempEl = messagesContainer.querySelector(`[id^="msg-temp_"]`);
+                  if (tempEl) {
+                    tempEl.id = `msg-${msg.id}`;
+                    knownMessageIds.add(msg.id);
+                    return;
                   }
-                  messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(msg));
-                  attachMessageActionListeners();
-                  initIcons();
-                  scrollToBottom();
                 }
+
+                knownMessageIds.add(msg.id);
+                if (messagesContainer.querySelector('.p-8')) {
+                  messagesContainer.innerHTML = '';
+                }
+                messagesContainer.insertAdjacentHTML('beforeend', renderMessageHtml(msg));
+                attachMessageActionListeners();
+                initIcons();
+                scrollToBottom();
+
                 if (msg.created_at || msg.createdAt) {
                   lastMessageCreatedAt = msg.created_at || msg.createdAt;
                 }

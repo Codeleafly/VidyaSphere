@@ -29,6 +29,38 @@ async function decompressData(compressedArrayBuffer) {
 // In-memory active WebSocket connections map for Edge runtime broadcasting
 const activeSockets = new Map(); // ws -> session
 
+// Helper to broadcast a chat message to active edge WebSocket subscribers
+function broadcastChatMessage(messagePayload, targetUsers = null) {
+  const payloadStr = JSON.stringify({
+    type: 'new_message',
+    message: messagePayload
+  });
+
+  for (const [ws, userSession] of activeSockets.entries()) {
+    try {
+      if (targetUsers) {
+        if (targetUsers.has(userSession.user_id)) {
+          ws.send(payloadStr);
+        }
+      } else {
+        ws.send(payloadStr);
+      }
+    } catch (err) {
+      activeSockets.delete(ws);
+    }
+  }
+}
+
+// Helper to normalize and parse DM channel IDs consistently
+function parseDmId(channel) {
+  if (!channel) return null;
+  let clean = channel;
+  while (clean.startsWith('dm_')) {
+    clean = clean.substring(3);
+  }
+  return clean ? `dm_${clean}` : null;
+}
+
 export async function handleChatRoutes(request, env, path, method) {
   // GET /api/chat/ws - WebSocket connection upgrade
   if (path === '/api/chat/ws') {
@@ -71,84 +103,10 @@ export async function handleChatRoutes(request, env, path, method) {
           return;
         }
 
-        if (data.type === 'message' && data.content?.trim()) {
-          const channel = data.channel || 'school';
-          const content = data.content.trim();
-
-          // Permission check for DM channel
-          let targetUsers = null;
-          if (channel.startsWith('dm_')) {
-            const dmId = channel.replace('dm_', '');
-            const dm = await env.DB.prepare(
-              `SELECT * FROM direct_chats WHERE id = ?`
-            ).bind(dmId).first();
-
-            if (!dm || (dm.user1_id !== session.user_id && dm.user2_id !== session.user_id) || dm.status !== 'accepted') {
-              server.send(JSON.stringify({ type: 'error', error: 'Direct chat not accepted or unauthorized' }));
-              return;
-            }
-            targetUsers = new Set([dm.user1_id, dm.user2_id]);
-          } else if (channel.startsWith('grp_')) {
-            const grpId = channel.replace('grp_', '');
-            const member = await env.DB.prepare(
-              `SELECT user_id, invite_status FROM group_members WHERE group_id = ? AND user_id = ?`
-            ).bind(grpId, session.user_id).first();
-
-            if (!member || member.invite_status !== 'accepted') {
-              server.send(JSON.stringify({ type: 'error', error: 'You must accept the group invitation before sending messages' }));
-              return;
-            }
-          }
-
-          const msgId = generateId('msg', 8);
-
-          // Persist to D1
-          await env.DB.prepare(
-            `INSERT INTO messages (id, sender_id, channel, content) VALUES (?, ?, ?, ?)`
-          ).bind(msgId, session.user_id, channel, content).run();
-
-          const broadcastPayload = JSON.stringify({
-            type: 'new_message',
-            message: {
-              id: msgId,
-              sender_id: session.user_id,
-              senderId: session.user_id,
-              sender_name: session.full_name,
-              senderName: session.full_name,
-              sender_role: session.role,
-              senderRole: session.role,
-              class_name: session.class_name || null,
-              className: session.class_name || null,
-              division: session.division || null,
-              roll_number: session.roll_number || null,
-              rollNumber: session.roll_number || null,
-              is_root_admin: session.is_root_admin === 1 ? 1 : 0,
-              isRootAdmin: session.is_root_admin === 1,
-              channel,
-              content,
-              is_edited: 0,
-              isEdited: 0,
-              has_attachment: 0,
-              hasAttachment: 0,
-              created_at: new Date().toISOString(),
-              createdAt: new Date().toISOString(),
-            }
-          });
-
-          // Broadcast appropriately
-          for (const [ws, userSession] of activeSockets.entries()) {
-            try {
-              if (targetUsers) {
-                if (targetUsers.has(userSession.user_id)) {
-                  ws.send(broadcastPayload);
-                }
-              } else {
-                ws.send(broadcastPayload);
-              }
-            } catch (err) {
-              activeSockets.delete(ws);
-            }
-          }
+        if (data.type === 'message') {
+          // Note: Message persistence and broadcast are authoritative via POST /api/chat/messages.
+          // Raw WS messages are not double-inserted to prevent duplicate rows.
+          return;
         }
       } catch (err) {
         console.error('WebSocket message error:', err);
@@ -609,11 +567,12 @@ export async function handleChatRoutes(request, env, path, method) {
     const channel = url.searchParams.get('channel') || 'school';
 
     // Direct message security verification
+    let matchChannels = [channel];
     if (channel.startsWith('dm_')) {
-      const dmId = channel.replace('dm_', '');
+      const canonicalDmId = parseDmId(channel);
       const dm = await env.DB.prepare(
-        `SELECT * FROM direct_chats WHERE id = ?`
-      ).bind(dmId).first();
+        `SELECT * FROM direct_chats WHERE id = ? OR id = ?`
+      ).bind(canonicalDmId, canonicalDmId.replace('dm_', '')).first();
 
       if (!dm) return errorResponse('Direct chat conversation not found', 404);
       if (dm.user1_id !== auth.user.id && dm.user2_id !== auth.user.id) {
@@ -625,6 +584,7 @@ export async function handleChatRoutes(request, env, path, method) {
       if (dm.status === 'rejected') {
         return errorResponse('This chat invitation was declined.', 403);
       }
+      matchChannels = [canonicalDmId, `dm_${canonicalDmId}`, channel];
     } else if (channel.startsWith('grp_')) {
       const grpId = channel.replace('grp_', '');
       const member = await env.DB.prepare(
@@ -640,6 +600,7 @@ export async function handleChatRoutes(request, env, path, method) {
     const since = url.searchParams.get('since');
 
     let messages = [];
+    const placeholders = matchChannels.map(() => '?').join(',');
     if (since) {
       const { results } = await env.DB.prepare(`
         SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.has_attachment,
@@ -649,9 +610,9 @@ export async function handleChatRoutes(request, env, path, method) {
                p.full_name as sender_name, p.role as sender_role, p.class_name, p.division, p.roll_number, p.is_root_admin
         FROM messages m
         JOIN profiles p ON m.sender_id = p.id
-        WHERE m.channel = ? AND datetime(m.created_at) > datetime(?)
+        WHERE m.channel IN (${placeholders}) AND datetime(m.created_at) > datetime(?)
         ORDER BY m.created_at ASC LIMIT 100
-      `).bind(channel, since).all();
+      `).bind(...matchChannels, since).all();
       messages = results || [];
     } else {
       const { results } = await env.DB.prepare(`
@@ -662,9 +623,9 @@ export async function handleChatRoutes(request, env, path, method) {
                p.full_name as sender_name, p.role as sender_role, p.class_name, p.division, p.roll_number, p.is_root_admin
         FROM messages m
         JOIN profiles p ON m.sender_id = p.id
-        WHERE m.channel = ? AND m.created_at >= datetime('now', '-7 days')
+        WHERE m.channel IN (${placeholders}) AND m.created_at >= datetime('now', '-7 days')
         ORDER BY m.created_at DESC LIMIT 80
-      `).bind(channel).all();
+      `).bind(...matchChannels).all();
       messages = (results || []).reverse();
     }
 
@@ -719,11 +680,12 @@ export async function handleChatRoutes(request, env, path, method) {
       }
 
       // Direct message security verification
+      let targetUsers = null;
       if (channel.startsWith('dm_')) {
-        const dmId = channel.replace('dm_', '');
+        const canonicalDmId = parseDmId(channel);
         const dm = await env.DB.prepare(
-          `SELECT * FROM direct_chats WHERE id = ?`
-        ).bind(dmId).first();
+          `SELECT * FROM direct_chats WHERE id = ? OR id = ?`
+        ).bind(canonicalDmId, canonicalDmId.replace('dm_', '')).first();
 
         if (!dm) return errorResponse('Direct chat conversation not found', 404);
         if (dm.user1_id !== auth.user.id && dm.user2_id !== auth.user.id) {
@@ -736,7 +698,10 @@ export async function handleChatRoutes(request, env, path, method) {
           return errorResponse('Cannot send message. Chat invitation was declined.', 403);
         }
 
-        await env.DB.prepare(`UPDATE direct_chats SET updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(dmId).run();
+        channel = canonicalDmId;
+        targetUsers = new Set([dm.user1_id, dm.user2_id]);
+
+        await env.DB.prepare(`UPDATE direct_chats SET updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(dm.id).run();
       } else if (channel.startsWith('grp_')) {
         const grpId = channel.replace('grp_', '');
         const member = await env.DB.prepare(
@@ -748,6 +713,27 @@ export async function handleChatRoutes(request, env, path, method) {
         }
         if (member.invite_status !== 'accepted') {
           return errorResponse('Cannot send message. Please accept the group invitation first.', 403);
+        }
+      }
+
+      // Duplicate message prevention (Debounce duplicate HTTP clicks / dual sends)
+      if (content && !fileBuffer) {
+        const dup = await env.DB.prepare(`
+          SELECT id, created_at FROM messages
+          WHERE sender_id = ? AND channel = ? AND content = ?
+            AND datetime(created_at) >= datetime('now', '-2 seconds')
+          ORDER BY created_at DESC LIMIT 1
+        `).bind(auth.user.id, channel, content).first();
+
+        if (dup) {
+          return successResponse({
+            id: dup.id,
+            channel,
+            content,
+            created_at: dup.created_at,
+            createdAt: dup.created_at,
+            duplicateIgnored: true
+          }, 'Message already delivered', 200);
         }
       }
 
@@ -810,6 +796,9 @@ export async function handleChatRoutes(request, env, path, method) {
         created_at: new Date().toISOString(),
         createdAt: new Date().toISOString(),
       };
+
+      // Broadcast to connected active edge WebSockets
+      broadcastChatMessage(responsePayload, targetUsers);
 
       return successResponse(responsePayload, 'Message sent', 201);
     } catch (err) {
@@ -900,8 +889,8 @@ export async function handleChatRoutes(request, env, path, method) {
     if (!msg) return errorResponse('Attachment message not found or expired', 404);
 
     if (msg.channel.startsWith('dm_')) {
-      const dmId = msg.channel.replace('dm_', '');
-      const dm = await env.DB.prepare(`SELECT * FROM direct_chats WHERE id = ?`).bind(dmId).first();
+      const canonicalDmId = parseDmId(msg.channel);
+      const dm = await env.DB.prepare(`SELECT * FROM direct_chats WHERE id = ? OR id = ?`).bind(canonicalDmId, canonicalDmId.replace('dm_', '')).first();
       if (!dm || (dm.user1_id !== auth.user.id && dm.user2_id !== auth.user.id)) {
         return errorResponse('Access denied to private attachment', 403);
       }
