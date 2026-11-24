@@ -18,7 +18,7 @@ export async function handleStudentsRoutes(request, env, path, method) {
     const className = (url.searchParams.get('className') || '').trim();
 
     let query = `
-      SELECT id, username, full_name, class_name, division, roll_number, role, is_root_admin, created_at
+      SELECT id, username, full_name, class_name, division, roll_number, role, account_status, is_root_admin, created_at
       FROM profiles
       WHERE account_status = 'active'
     `;
