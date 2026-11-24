@@ -53,7 +53,7 @@ async function runTests() {
     body: JSON.stringify({ username: 'admin', password: 'shishuvan@2026' })
   }), mockEnv);
   const dLogin = await rLogin.json();
-  console.log("✓ [Root Admin Auth]:", dLogin.success && dLogin.user.isRootAdmin ? 'PASS' : 'FAIL', `(Root: @${dLogin.user.username})`);
+  console.log("✓ [Root Admin Auth]:", dLogin.success && dLogin.user.isRootAdmin && dLogin.user.fullName === 'Admin' ? 'PASS' : 'FAIL', `(Root: @${dLogin.user.username}, Name: ${dLogin.user.fullName})`);
   const adminToken = dLogin.token;
   const adminUserId = dLogin.user.id;
 

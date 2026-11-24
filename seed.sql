@@ -7,7 +7,7 @@ VALUES (
     'admin',
     '7f618b9b659c43083b0fd1351f60725ec58df3ae592fe3c803fa1a6985134fb7',
     '0a141e28323c46505a646e78828c96a0',
-    'Sriramik Sanjiv Sahu',
+    'Admin',
     '9th',
     'Shraddha',
     '01',
