@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>School Polls &amp; Elections | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
@@ -33,9 +33,9 @@
   <div id="create-poll-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-3.5 shadow-2xl overflow-y-auto max-h-[90vh] modal-enter">
       <div class="m3-sheet-handle sm:hidden"></div>
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+      <div class="flex items-center justify-between pb-2 border-b border-[var(--md-outline)]">
         <h3 class="text-base font-extrabold">Create a School Poll</h3>
-        <button id="close-poll-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500">&times;</button>
+        <button id="close-poll-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form id="poll-form" class="space-y-3">
         <div>
@@ -51,6 +51,10 @@
           <input type="text" class="poll-option-input m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs sm:text-sm" placeholder="Option 2" required>
           <input type="text" class="poll-option-input m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs sm:text-sm" placeholder="Option 3 (Optional)">
         </div>
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Closing Date &amp; Time <span class="font-normal lowercase">(optional)</span></label>
+          <input type="datetime-local" id="poll-expires" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs bg-white">
+        </div>
         <button type="submit" class="m3-btn-primary w-full py-3 text-xs sm:text-sm">Launch Poll</button>
       </form>
     </div>
@@ -59,7 +63,7 @@
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { initDashboardShell } from '/js/layout.js';
-    import { escapeHtml, formatDate, showToast, initIcons, bindModalBackdropAndEsc } from '/js/ui.js';
+    import { escapeHtml, formatDate, renderRoleBadgeHtml, showToast, initIcons, bindModalBackdropAndEsc } from '/js/ui.js';
 
     const user = initDashboardShell({ active: 'polls', mobileTitle: 'School Polls' });
 
@@ -83,7 +87,7 @@
       }
       const input = document.createElement('input');
       input.type = 'text';
-      input.className = 'poll-option-input w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm';
+      input.className = 'poll-option-input m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs sm:text-sm';
       input.placeholder = `Option ${count + 1} (Optional)`;
       list.appendChild(input);
     });
@@ -95,10 +99,10 @@
 
         if (polls.length === 0) {
           pollsContainer.innerHTML = `
-            <div class="p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
+            <div class="m3-card p-10 text-center text-slate-400">
               <i data-lucide="vote" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-              <p class="text-sm font-semibold text-slate-700">No active polls right now</p>
-              <p class="text-xs text-slate-400 mt-1">Teachers and students can launch polls above.</p>
+              <p class="text-sm font-bold text-slate-700">No active polls right now</p>
+              <p class="text-xs text-slate-400 mt-1">Teachers, admins, and students can launch polls above.</p>
             </div>
           `;
           initIcons();
@@ -108,17 +112,24 @@
         pollsContainer.innerHTML = polls.map(poll => {
           const hasVoted = poll.userVotedOption !== null;
           const canVote = !hasVoted && !poll.isExpired;
+          const canManage = user && (user.id === poll.creatorId || user.role === 'admin');
 
           return `
-            <article class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3.5 w-full break-words">
+            <article class="m3-card p-5 sm:p-6 space-y-3.5 w-full break-words">
               <div class="flex items-start justify-between flex-wrap gap-2">
                 <div>
-                  <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">${escapeHtml(poll.question)}</h3>
-                  <p class="text-[11px] text-slate-400 mt-0.5 tabular-nums">By ${escapeHtml(poll.creatorName || 'School')} • ${poll.totalVotes} votes</p>
+                  <h3 class="text-base sm:text-lg font-extrabold leading-snug">${escapeHtml(poll.question)}</h3>
+                  <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap tabular-nums">
+                    <span>By <strong>${escapeHtml(poll.creatorName || 'School')}</strong></span>
+                    ${renderRoleBadgeHtml(poll.creatorRole, poll.creatorTeacherType, poll.creatorIsRootAdmin)}
+                    <span>• ${poll.totalVotes} vote${poll.totalVotes === 1 ? '' : 's'}</span>
+                  </p>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  ${poll.isExpired ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-600 border border-slate-200">Closed</span>' : ''}
-                  ${hasVoted ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">Voted</span>' : ''}
+                  ${poll.isExpired ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-600">Closed</span>' : ''}
+                  ${hasVoted ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">Voted</span>' : ''}
+                  ${canManage && !poll.isExpired ? `<button class="close-poll-btn px-2.5 py-1 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-[10px]" data-id="${escapeHtml(poll.id)}">Close</button>` : ''}
+                  ${canManage ? `<button class="del-poll-btn p-1.5 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" data-id="${escapeHtml(poll.id)}" title="Delete Poll"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
                 </div>
               </div>
 
@@ -126,26 +137,26 @@
                 ${poll.options.map(opt => {
                   const isUserSelection = poll.userVotedOption === opt.index;
                   return `
-                    <div class="relative overflow-hidden rounded-xl border ${isUserSelection ? 'border-indigo-500 ring-2 ring-indigo-500/15' : 'border-slate-200/80'} p-3 transition">
-                      <div class="absolute inset-y-0 left-0 ${isUserSelection ? 'bg-indigo-100/70' : 'bg-slate-100/80'} transition-all duration-500" style="width: ${opt.percentage}%"></div>
+                    <div class="relative overflow-hidden rounded-2xl border ${isUserSelection ? 'border-[var(--md-primary)] ring-2 ring-[var(--md-ring)]' : 'border-[var(--md-outline)]'} p-3 transition">
+                      <div class="absolute inset-y-0 left-0 ${isUserSelection ? 'bg-[var(--md-primary-container)]/75' : 'bg-[var(--md-surface-container)]'} transition-all duration-500" style="width: ${opt.percentage}%"></div>
                       <div class="relative z-10 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5 overflow-hidden">
                           ${canVote ? `
-                            <button class="vote-action-btn w-5 h-5 rounded-full border-2 border-slate-300 hover:border-indigo-600 hover:bg-indigo-50 flex items-center justify-center shrink-0 transition"
+                            <button class="vote-action-btn w-5 h-5 rounded-full border-2 border-slate-400 hover:border-[var(--md-primary)] flex items-center justify-center shrink-0 transition"
                               data-poll-id="${escapeHtml(poll.id)}" data-opt-idx="${opt.index}" title="Cast Vote">
-                              <span class="w-2 h-2 rounded-full bg-indigo-600 opacity-0 hover:opacity-100"></span>
+                              <span class="w-2.5 h-2.5 rounded-full bg-[var(--md-primary)] opacity-0 hover:opacity-100"></span>
                             </button>
-                          ` : (isUserSelection ? '<i data-lucide="check-circle" class="w-4 h-4 text-indigo-600 shrink-0"></i>' : '')}
-                          <span class="text-xs sm:text-sm font-semibold text-slate-800 break-words">${escapeHtml(opt.label)}</span>
+                          ` : (isUserSelection ? '<i data-lucide="check-circle" class="w-4 h-4 text-[var(--md-primary)] shrink-0"></i>' : '')}
+                          <span class="text-xs sm:text-sm font-bold break-words">${escapeHtml(opt.label)}</span>
                         </div>
-                        <span class="text-[11px] sm:text-xs font-bold text-slate-600 shrink-0 tabular-nums">${opt.percentage}% (${opt.votes})</span>
+                        <span class="text-[11px] sm:text-xs font-extrabold text-[var(--md-on-surface-variant)] shrink-0 tabular-nums">${opt.percentage}% (${opt.votes})</span>
                       </div>
                     </div>
                   `;
                 }).join('')}
               </div>
 
-              <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+              <div class="pt-2 border-t border-[var(--md-outline)] flex items-center justify-between text-[11px] text-slate-400">
                 <span>${poll.expiresAt ? 'Ends: ' + escapeHtml(formatDate(poll.expiresAt)) : 'Open Poll'}</span>
                 <span>${hasVoted ? 'Duplicate votes locked' : (poll.isExpired ? 'Voting ended' : 'Tap circle to cast vote')}</span>
               </div>
@@ -169,8 +180,34 @@
             }
           });
         });
+
+        pollsContainer.querySelectorAll('.close-poll-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Close voting for this poll early?')) return;
+            try {
+              await apiRequest(`/polls/${encodeURIComponent(btn.dataset.id)}/close`, { method: 'POST' });
+              showToast('Poll closed', 'info');
+              loadPolls();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
+
+        pollsContainer.querySelectorAll('.del-poll-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Permanently delete this poll and its votes?')) return;
+            try {
+              await apiRequest(`/polls/${encodeURIComponent(btn.dataset.id)}`, { method: 'DELETE' });
+              showToast('Poll deleted', 'info');
+              loadPolls();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
       } catch (err) {
-        pollsContainer.innerHTML = `<div class="p-6 text-center text-rose-600 bg-rose-50 rounded-2xl text-xs">${escapeHtml(err.message)}</div>`;
+        pollsContainer.innerHTML = `<div class="m3-card p-6 text-center text-rose-600 text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
 
@@ -178,12 +215,16 @@
       e.preventDefault();
       const question = document.getElementById('poll-question').value.trim();
       const options = Array.from(document.querySelectorAll('.poll-option-input')).map(i => i.value.trim()).filter(Boolean);
+      const expiresAtVal = document.getElementById('poll-expires').value;
       if (options.length < 2) {
         showToast('Please provide at least 2 options', 'error');
         return;
       }
       try {
-        await apiRequest('/polls', { method: 'POST', body: { question, options } });
+        await apiRequest('/polls', {
+          method: 'POST',
+          body: { question, options, expiresAt: expiresAtVal || null }
+        });
         showToast('Poll created successfully!', 'success');
         closePoll();
         e.target.reset();

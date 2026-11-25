@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import worker from './worker/index.js';
 import { runModerationAndNoticeTests } from './tests/moderation.js';
 import { runTeacherEcosystemTests } from './tests/teachers.js';
+import { runExtrasVerificationTests } from './tests/extras.js';
 
 console.log("=================================================");
 console.log("   🎓 VIDYASPHERE MASTER VERIFICATION SUITE      ");
@@ -664,8 +665,16 @@ async function runTests() {
     studentId,
   });
 
+  await runExtrasVerificationTests({
+    worker,
+    mockEnv,
+    adminToken,
+    secAdminToken: secAdminTokenP6,
+    studentToken: priyaTokenP6,
+  });
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 62 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 70 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

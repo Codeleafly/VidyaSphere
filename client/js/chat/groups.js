@@ -1,23 +1,30 @@
 /**
- * Study Groups & Member Invitation UI Module
+ * Study Groups & Consent-First Membership UI Module (Material You)
  */
 
 import { apiRequest } from '/js/api.js';
-import { escapeHtml, initIcons, showToast, bindModalBackdropAndEsc } from '/js/ui.js';
+import { escapeHtml, initIcons, showToast, bindModalBackdropAndEsc, formatMemberSubline, renderRoleBadgeHtml, isRootUser } from '/js/ui.js';
 import { chatState, getDom, closeChannelsDrawer, loadAllStudents } from '/js/chat/state.js';
-import { loadMessages } from '/js/chat/realtime.js';
+import { loadMessages, clearReplyTarget } from '/js/chat/realtime.js';
 
-export async function loadGroupsList() {
+export async function loadGroupsList(openGroupId = null) {
   const container = document.getElementById('groups-items-container');
+  const badgeEl = document.getElementById('groups-badge-count');
   try {
     const res = await apiRequest('/chat/groups');
     const groups = res.groups || [];
 
+    const pendingCount = groups.filter(g => g.invite_status === 'pending').length;
+    if (badgeEl) {
+      badgeEl.textContent = pendingCount;
+      badgeEl.classList.toggle('hidden', pendingCount === 0);
+    }
+
     if (groups.length === 0) {
       container.innerHTML = `
-        <div class="text-center py-6 text-slate-400 space-y-2">
+        <div class="text-center py-6 text-slate-400 space-y-2.5">
           <p class="text-[11px]">No study groups yet.</p>
-          <button id="create-first-group" class="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-lg text-[11px] transition">
+          <button id="create-first-group" class="m3-btn-tonal px-3.5 py-1.5 text-[11px]">
             Create Study Group
           </button>
         </div>
@@ -32,31 +39,44 @@ export async function loadGroupsList() {
 
     container.innerHTML = groups.map(g => {
       const isPending = g.invite_status === 'pending';
-      const academicDetail = `${g.creator_name ? 'By ' + g.creator_name : ''}${g.creator_class ? ' • ' + g.creator_class : ''}${g.creator_division ? ' (' + g.creator_division + ')' : ''}${g.creator_roll ? ' • #' + g.creator_roll : ''}`;
+      const isCreatorRoot = g.creator_is_root_admin === 1 || g.creator_username === 'admin';
+      const creatorScope = (isCreatorRoot || g.creator_role === 'admin')
+        ? 'Admin'
+        : [g.creator_class ? `${g.creator_class}${g.creator_division ? ' (' + g.creator_division + ')' : ''}` : '', g.creator_roll ? `#${g.creator_roll}` : ''].filter(Boolean).join(' • ');
+      const academicDetail = g.creator_name ? `By ${g.creator_name}${creatorScope ? ' • ' + creatorScope : ''}` : '';
+      const isActive = chatState.currentChatType === 'group' && chatState.currentGroupId === g.id;
 
       return `
-        <button class="group-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80 border border-transparent"
+        <button class="group-item w-full px-3 py-2.5 rounded-2xl text-left flex items-center justify-between transition border ${
+          isActive
+            ? 'bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] border-transparent'
+            : 'bg-transparent hover:bg-[var(--md-surface-container)] border-transparent'
+        }"
           data-group-id="${escapeHtml(g.id)}"
           data-name="${escapeHtml(g.name)}"
           data-my-role="${escapeHtml(g.my_role || 'member')}"
           data-invite-status="${escapeHtml(g.invite_status || 'accepted')}"
           data-creator-name="${escapeHtml(g.creator_name || '')}"
           data-creator-username="${escapeHtml(g.creator_username || '')}"
-          data-creator-class="${escapeHtml(g.creator_class || '')}"
-          data-creator-division="${escapeHtml(g.creator_division || '')}"
-          data-creator-roll="${escapeHtml(g.creator_roll || '')}"
+          data-creator-role="${escapeHtml(g.creator_role || 'student')}"
+          data-creator-is-root="${isCreatorRoot}"
+          data-creator-class="${escapeHtml(isCreatorRoot ? '' : (g.creator_class || ''))}"
+          data-creator-division="${escapeHtml(isCreatorRoot ? '' : (g.creator_division || ''))}"
+          data-creator-roll="${escapeHtml(isCreatorRoot ? '' : (g.creator_roll || ''))}"
           data-member-count="${g.member_count || 1}">
-          <div class="overflow-hidden pr-2">
-            <div class="font-bold text-slate-800 truncate text-xs flex items-center gap-1.5">
-              <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600 shrink-0"></i>
-              <span class="truncate">${escapeHtml(g.name)}</span>
+          <div class="overflow-hidden pr-2 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center shrink-0">
+              <i data-lucide="users" class="w-4 h-4"></i>
             </div>
-            ${academicDetail ? `<div class="text-[10px] text-indigo-600 font-medium truncate">${escapeHtml(academicDetail)}</div>` : ''}
+            <div class="overflow-hidden">
+              <div class="font-bold truncate text-xs">${escapeHtml(g.name)}</div>
+              ${academicDetail ? `<div class="text-[10px] text-[var(--md-primary)] font-medium truncate">${escapeHtml(academicDetail)}</div>` : ''}
+            </div>
           </div>
           <div class="shrink-0 text-right">
             ${isPending
-              ? '<span class="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold animate-pulse">Invite</span>'
-              : `<span class="text-[10px] text-slate-400 font-medium tabular-nums">${g.member_count || 1}</span>`
+              ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold animate-pulse">Invite</span>'
+              : `<span class="text-[10px] text-[var(--md-on-surface-variant)] font-bold tabular-nums px-2 py-0.5 rounded-full bg-white/80">${g.member_count || 1}</span>`
             }
           </div>
         </button>
@@ -68,12 +88,18 @@ export async function loadGroupsList() {
     container.querySelectorAll('.group-item').forEach(btn => {
       btn.addEventListener('click', () => selectGroupConversation(btn.dataset));
     });
+
+    if (openGroupId) {
+      const target = Array.from(container.querySelectorAll('.group-item')).find(b => b.dataset.groupId === openGroupId);
+      if (target) selectGroupConversation(target.dataset);
+    }
   } catch (err) {
     container.innerHTML = `<div class="p-3 text-rose-500 text-[11px] text-center">${escapeHtml(err.message)}</div>`;
   }
 }
 
-function selectGroupConversation(data) {
+export function selectGroupConversation(data) {
+  clearReplyTarget();
   const {
     channelNameEl, chatSubtitleEl, currentChatIcon,
     groupInfoBtn, groupMembersCountBadge, dmPermissionBanner,
@@ -90,16 +116,20 @@ function selectGroupConversation(data) {
 
   closeChannelsDrawer();
 
+  const isCreatorRoot = data.creatorIsRoot === 'true' || data.creatorUsername === 'admin' || data.creatorRole === 'admin';
   channelNameEl.textContent = data.name;
-  const creatorAcademic = [
-    data.creatorName ? `Created by ${data.creatorName}` : '',
-    data.creatorClass ? `${data.creatorClass}${data.creatorDivision ? ' (' + data.creatorDivision + ')' : ''}` : '',
-    data.creatorRoll ? `Roll #${data.creatorRoll}` : ''
-  ].filter(Boolean).join(' • ');
+  const creatorAcademic = isCreatorRoot
+    ? `Created by ${data.creatorName || 'Admin'} (Admin)`
+    : [
+        data.creatorName ? `Created by ${data.creatorName}` : '',
+        data.creatorClass ? `${data.creatorClass}${data.creatorDivision ? ' (' + data.creatorDivision + ')' : ''}` : '',
+        data.creatorRoll ? `Roll #${data.creatorRoll}` : ''
+      ].filter(Boolean).join(' • ');
 
   chatSubtitleEl.textContent = creatorAcademic || 'Custom Study Group • Auto-purge 7 days';
-  currentChatIcon.innerHTML = `<i data-lucide="users" class="w-4 h-4 text-purple-600"></i>`;
+  currentChatIcon.innerHTML = `<i data-lucide="users" class="w-4 h-4"></i>`;
   groupInfoBtn?.classList.remove('hidden');
+  groupInfoBtn?.classList.add('inline-flex');
   groupMembersCountBadge.textContent = `${data.memberCount || 1} Members`;
 
   if (chatState.currentGroupInviteStatus === 'pending') {
@@ -118,6 +148,15 @@ function selectGroupConversation(data) {
     attachBtn.disabled = false;
   }
 
+  document.querySelectorAll('.group-item').forEach(b => {
+    const active = b.dataset.groupId === data.groupId;
+    b.className = `group-item w-full px-3 py-2.5 rounded-2xl text-left flex items-center justify-between transition border ${
+      active
+        ? 'bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] border-transparent'
+        : 'bg-transparent hover:bg-[var(--md-surface-container)] border-transparent'
+    }`;
+  });
+
   initIcons();
   loadMessages();
 }
@@ -129,14 +168,14 @@ function switchGroupModalTab(tab) {
   const panelAdd = document.getElementById('panel-group-add');
 
   if (tab === 'members') {
-    tabMembers.className = 'py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition';
-    tabAdd.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1';
+    tabMembers.className = 'py-1.5 rounded-full bg-white text-[var(--md-primary)] shadow-xs transition';
+    tabAdd.className = 'py-1.5 rounded-full text-[var(--md-on-surface-variant)] transition flex items-center justify-center gap-1';
     panelMembers.classList.remove('hidden');
     panelAdd.classList.add('hidden');
     panelAdd.classList.remove('flex');
   } else {
-    tabAdd.className = 'py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition flex items-center justify-center gap-1';
-    tabMembers.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
+    tabAdd.className = 'py-1.5 rounded-full bg-white text-[var(--md-primary)] shadow-xs transition flex items-center justify-center gap-1';
+    tabMembers.className = 'py-1.5 rounded-full text-[var(--md-on-surface-variant)] transition';
     panelMembers.classList.add('hidden');
     panelAdd.classList.remove('hidden');
     panelAdd.classList.add('flex');
@@ -199,26 +238,25 @@ function renderGroupMembers(members, isGroupAdmin) {
     const isAdmin = m.member_role === 'admin';
     const isPending = m.invite_status === 'pending';
     const canRemove = isGroupAdmin && !isMe;
+    const isRoot = isRootUser(m);
+    const role = m.user_role || (isRoot ? 'admin' : 'student');
 
-    const academicBadge = [
-      m.class_name ? `${m.class_name}${m.division ? ' (' + m.division + ')' : ''}` : '',
-      m.roll_number ? `Roll #${m.roll_number}` : '',
-      `@${m.username}`
-    ].filter(Boolean).join(' • ');
+    const sub = formatMemberSubline({ ...m, role });
 
     return `
-      <div class="py-2 px-2.5 rounded-xl flex items-center justify-between hover:bg-slate-50 transition">
+      <div class="py-2 px-2.5 rounded-2xl flex items-center justify-between hover:bg-[var(--md-surface-container)] transition">
         <div class="overflow-hidden">
-          <div class="font-bold text-slate-800 text-xs truncate flex items-center gap-1.5 flex-wrap">
+          <div class="font-bold text-xs truncate flex items-center gap-1.5 flex-wrap">
             ${escapeHtml(m.full_name)}
             ${isMe ? '<span class="text-[9px] text-slate-400 font-normal">(You)</span>' : ''}
-            ${isAdmin ? '<span class="text-[8px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 font-bold uppercase">Admin</span>' : ''}
-            ${isPending ? '<span class="text-[8px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">Pending</span>' : ''}
+            ${renderRoleBadgeHtml(role, m.teacher_type, isRoot)}
+            ${isAdmin ? '<span class="text-[8px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-800 font-bold uppercase">Group Owner</span>' : ''}
+            ${isPending ? '<span class="text-[8px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">Pending</span>' : ''}
           </div>
-          <div class="text-[10px] text-indigo-600 font-medium truncate mt-0.5">${escapeHtml(academicBadge)}</div>
+          <div class="text-[10px] text-[var(--md-primary)] font-medium truncate mt-0.5">${escapeHtml(sub)} • @${escapeHtml(m.username)}</div>
         </div>
         ${canRemove ? `
-          <button class="remove-member-btn text-[10px] text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 transition shrink-0"
+          <button class="remove-member-btn text-[10px] text-rose-600 font-bold px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 transition shrink-0"
             data-user-id="${escapeHtml(m.user_id)}" data-name="${escapeHtml(m.full_name)}">
             ${isPending ? 'Cancel' : 'Remove'}
           </button>
@@ -250,45 +288,45 @@ function renderGroupClassmateSelector(students) {
   if (!selector) return;
   const list = students || chatState.allStudentsCache || [];
   if (list.length === 0) {
-    selector.innerHTML = '<p class="text-center text-slate-400 py-6 text-[11px]">No classmates found.</p>';
+    selector.innerHTML = '<p class="text-center text-slate-400 py-6 text-[11px]">No members found.</p>';
     return;
   }
 
   const existingMap = new Map();
   chatState.currentGroupMembers.forEach(m => existingMap.set(m.user_id, m.invite_status || 'accepted'));
 
-  selector.innerHTML = list.slice(0, 30).map(s => {
+  selector.innerHTML = list.slice(0, 40).map(s => {
     const isCurrentMember = existingMap.has(s.id);
     const status = existingMap.get(s.id);
     const isMe = s.id === chatState.user?.id;
+    const isRoot = isRootUser(s);
 
     let actionButton = '';
     if (isMe) {
-      actionButton = '<span class="text-[9px] px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-bold">You</span>';
+      actionButton = '<span class="text-[9px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-bold">You</span>';
     } else if (isCurrentMember) {
       actionButton = status === 'accepted'
-        ? '<span class="text-[9px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">In Group</span>'
-        : '<span class="text-[9px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">Invited</span>';
+        ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">In Group</span>'
+        : '<span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">Invited</span>';
     } else {
       actionButton = `
-        <button class="invite-classmate-btn px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 font-bold text-[10px] transition shrink-0"
+        <button class="invite-classmate-btn m3-btn-tonal px-3 py-1 text-[10px] shrink-0"
           data-user-id="${escapeHtml(s.id)}" data-user-name="${escapeHtml(s.full_name)}">
           + Invite
         </button>
       `;
     }
 
-    const academicDetail = [
-      s.class_name ? `${s.class_name}${s.division ? ' (' + s.division + ')' : ''}` : '',
-      s.roll_number ? `Roll #${s.roll_number}` : '',
-      `@${s.username}`
-    ].filter(Boolean).join(' • ');
+    const sub = formatMemberSubline(s);
 
     return `
-      <div class="py-2 px-1 flex items-center justify-between hover:bg-slate-50 rounded-lg transition gap-2">
+      <div class="py-2 px-1.5 flex items-center justify-between hover:bg-[var(--md-surface-container)] rounded-xl transition gap-2">
         <div class="overflow-hidden">
-          <div class="font-bold text-slate-800 text-[11px] truncate">${escapeHtml(s.full_name)}</div>
-          <div class="text-[9px] text-indigo-600 font-medium truncate">${escapeHtml(academicDetail)}</div>
+          <div class="font-bold text-[11px] truncate flex items-center gap-1">
+            <span>${escapeHtml(s.full_name)}</span>
+            ${renderRoleBadgeHtml(s.role, s.teacher_type, isRoot)}
+          </div>
+          <div class="text-[9px] text-[var(--md-primary)] font-medium truncate">${escapeHtml(sub)} • @${escapeHtml(s.username)}</div>
         </div>
         ${actionButton}
       </div>
@@ -427,11 +465,11 @@ export function initGroupsUi() {
     const description = document.getElementById('group-desc-input').value.trim();
     if (!name) return;
     try {
-      await apiRequest('/chat/groups', { method: 'POST', body: { name, description } });
+      const res = await apiRequest('/chat/groups', { method: 'POST', body: { name, description } });
       showToast('Study group created!', 'success');
       e.target.reset();
       closeCreateGroup();
-      loadGroupsList();
+      await loadGroupsList(res.id);
     } catch (err) {
       showToast(err.message, 'error');
     }

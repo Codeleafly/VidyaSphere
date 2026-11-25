@@ -1,9 +1,13 @@
 /**
- * Material You (M3) Navigation Rail, Top App Bar, Android Bottom Bar & Modal Sheet
+ * Material You (M3) Navigation Rail, Top App Bar, Android Bottom Bar, More Sheet & Account Profile Modal
  */
 
-import { requireAuth, logout } from '/js/auth.js';
-import { escapeHtml, initIcons, initM3Theme, renderThemePickerHtml, bindThemePicker } from '/js/ui.js';
+import { apiRequest } from '/js/api.js';
+import { requireAuth, setCurrentUser, clearSession, logout } from '/js/auth.js';
+import {
+  escapeHtml, initIcons, initM3Theme, renderThemePickerHtml, bindThemePicker,
+  showToast, bindModalBackdropAndEsc, isRootUser
+} from '/js/ui.js';
 
 const NAV_ITEMS = [
   { key: 'notices', href: '/dashboard/index.html', icon: 'layout-dashboard', label: 'Notice Board', short: 'Notices' },
@@ -19,19 +23,153 @@ const NAV_ITEMS = [
 
 const PRIMARY_MOBILE_KEYS = ['notices', 'lessons', 'chat', 'notes'];
 
+function getRoleSubtitle(user) {
+  if (isRootUser(user) || user.role === 'admin') {
+    return 'Admin';
+  }
+  if (user.role === 'teacher') {
+    return user.teacherType === 'class' ? 'Class Teacher' : 'Teacher';
+  }
+  return `Student${user.className ? ' • ' + user.className : ''}`;
+}
+
+export function openAccountModal(user) {
+  let modal = document.getElementById('vs-account-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'vs-account-modal';
+    modal.className = 'm3-modal-backdrop fixed inset-0 z-[65] bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4';
+    document.body.appendChild(modal);
+  }
+
+  const isRoot = isRootUser(user);
+  const isAdmin = user.role === 'admin';
+  const isTeacher = user.role === 'teacher';
+  const displayName = user.fullName || user.username;
+  const sub = getRoleSubtitle(user);
+
+  const infoRows = [];
+  if (isAdmin) {
+    infoRows.push(`<div class="p-3 rounded-2xl bg-[var(--md-surface-container)] text-xs space-y-1">
+      <p class="font-bold text-[var(--md-on-surface)] flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-[var(--md-primary)]"></i> Role: Admin</p>
+      <p class="text-[11px] text-[var(--md-on-surface-variant)]">${isRoot ? 'Lead Admin access across Student Portal, Teacher Studio & Admin Core.' : 'Admin access across Student Portal, Teacher Studio & Admin Core.'}</p>
+    </div>`);
+  } else if (isTeacher) {
+    infoRows.push(`<div class="p-3 rounded-2xl bg-[var(--md-surface-container)] text-xs space-y-1.5">
+      <p class="font-bold">${escapeHtml(user.teacherType === 'class' ? 'Class Teacher' : 'Subject Teacher')}${user.teacherDesignation ? ' • ' + escapeHtml(user.teacherDesignation) : ''}</p>
+      ${user.assignedClasses?.length ? `<p class="text-[11px] text-[var(--md-on-surface-variant)]"><strong>Classes:</strong> ${escapeHtml(user.assignedClasses.join(', '))}</p>` : ''}
+      ${user.assignedSubjects?.length ? `<p class="text-[11px] text-[var(--md-on-surface-variant)]"><strong>Subjects:</strong> ${escapeHtml(user.assignedSubjects.join(', '))}</p>` : ''}
+      ${user.teacherInfo ? `<p class="text-[11px] text-[var(--md-on-surface-variant)]">${escapeHtml(user.teacherInfo)}</p>` : ''}
+    </div>`);
+  } else {
+    infoRows.push(`<div class="p-3 rounded-2xl bg-[var(--md-surface-container)] text-xs">
+      <p class="font-bold">${escapeHtml(user.className || 'Student')}${user.division ? ' • Div ' + escapeHtml(user.division) : ''}${user.rollNumber ? ' • Roll #' + escapeHtml(user.rollNumber) : ''}</p>
+    </div>`);
+  }
+
+  modal.innerHTML = `
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2.5 border-b border-[var(--md-outline)]">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-10 h-10 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] font-extrabold flex items-center justify-center shrink-0">
+            ${escapeHtml(displayName.charAt(0).toUpperCase())}
+          </div>
+          <div class="overflow-hidden">
+            <h3 class="text-sm font-extrabold truncate">${escapeHtml(displayName)}</h3>
+            <p class="text-[11px] font-mono text-[var(--md-primary)] truncate">@${escapeHtml(user.username)} • ${escapeHtml(sub)}</p>
+          </div>
+        </div>
+        <button type="button" id="vs-acc-close" class="p-2 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      ${infoRows.join('')}
+
+      <div class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-[var(--md-surface-container)]">
+        <span class="text-xs font-bold">Material You Color</span>
+        ${renderThemePickerHtml()}
+      </div>
+
+      <form id="vs-profile-form" class="space-y-2.5 text-xs border-t border-[var(--md-outline)] pt-3">
+        <p class="font-extrabold text-[11px] uppercase tracking-wider text-slate-500">Profile Details</p>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Email Address</label>
+          <input type="email" id="vs-acc-email" value="${escapeHtml(user.email || '')}" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="name@school.edu">
+        </div>
+        ${isTeacher ? `
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Designation / Qualification</label>
+            <input type="text" id="vs-acc-desig" value="${escapeHtml(user.teacherDesignation || '')}" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="e.g. M.Sc., B.Ed • Senior Faculty">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Bio / Purpose</label>
+            <textarea id="vs-acc-info" rows="2" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Subjects focus or mentoring details...">${escapeHtml(user.teacherInfo || '')}</textarea>
+          </div>
+        ` : ''}
+        <button type="submit" class="m3-btn-tonal w-full py-2 text-xs">Save Profile</button>
+      </form>
+
+      <form id="vs-pw-form" class="space-y-2.5 text-xs border-t border-[var(--md-outline)] pt-3">
+        <p class="font-extrabold text-[11px] uppercase tracking-wider text-slate-500">Change Password</p>
+        <input type="password" id="vs-cur-pw" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Current password">
+        <input type="password" id="vs-new-pw" required minlength="6" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="New password (min 6 chars)">
+        <button type="submit" class="m3-btn-primary w-full py-2.5 text-xs">Update Password</button>
+      </form>
+    </div>
+  `;
+
+  const closeAcc = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
+  modal.querySelector('#vs-acc-close')?.addEventListener('click', closeAcc);
+  bindModalBackdropAndEsc(modal, closeAcc);
+  bindThemePicker(modal);
+
+  modal.querySelector('#vs-profile-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      const payload = { email: modal.querySelector('#vs-acc-email').value.trim() || null };
+      if (isTeacher) {
+        payload.teacherDesignation = modal.querySelector('#vs-acc-desig')?.value.trim() || '';
+        payload.teacherInfo = modal.querySelector('#vs-acc-info')?.value.trim() || '';
+      }
+      const res = await apiRequest('/auth/profile', { method: 'PUT', body: payload });
+      if (res.user) setCurrentUser(res.user);
+      showToast('Profile saved!', 'success');
+      closeAcc();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
+
+  modal.querySelector('#vs-pw-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentPassword = modal.querySelector('#vs-cur-pw').value;
+    const newPassword = modal.querySelector('#vs-new-pw').value;
+    try {
+      await apiRequest('/auth/change-password', { method: 'PUT', body: { currentPassword, newPassword } });
+      showToast('Password updated successfully!', 'success');
+      e.target.reset();
+      closeAcc();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  initIcons();
+}
+
 export function initDashboardShell({ active = 'notices', mobileTitle = 'VidyaSphere', mobileRightHtml = '' } = {}) {
   initM3Theme();
   const user = requireAuth();
   if (!user) return null;
 
-  const displayName = user.fullName || user.username || 'Student';
+  const displayName = user.fullName || user.username || 'User';
   const initial = displayName.charAt(0).toUpperCase();
-  const roleLabel = user.role === 'teacher'
-    ? (user.teacherType === 'class' ? 'Class Teacher' : 'Subject Teacher')
-    : user.role;
-  const roleSubtitle = `${roleLabel}${user.className ? ' • ' + user.className : ''}`;
+  const roleSubtitle = getRoleSubtitle(user);
   const isAdmin = user.role === 'admin';
   const isTeacher = user.role === 'teacher';
+  const canUseTeacherStudio = isTeacher || isAdmin;
   const isMoreActive = !PRIMARY_MOBILE_KEYS.includes(active);
 
   const sidebar = document.createElement('aside');
@@ -48,7 +186,7 @@ export function initDashboardShell({ active = 'notices', mobileTitle = 'VidyaSph
         </div>
       </a>
 
-      ${isTeacher ? `
+      ${canUseTeacherStudio ? `
         <a href="/teacher/index.html" class="flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] font-bold text-xs shadow-xs hover:brightness-95 transition">
           <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Teacher Studio</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
@@ -69,7 +207,7 @@ export function initDashboardShell({ active = 'notices', mobileTitle = 'VidyaSph
         <div class="pt-3 mt-3 border-t border-[var(--md-outline)] space-y-0.5">
           <a href="/guide.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
             <i data-lucide="book-marked" class="w-4 h-4"></i>
-            <span>Student Guide</span>
+            <span>Student &amp; Teacher Guide</span>
           </a>
           ${isAdmin ? `
             <a href="/admin/index.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-bold text-rose-700 hover:bg-rose-100/70">
@@ -88,15 +226,15 @@ export function initDashboardShell({ active = 'notices', mobileTitle = 'VidyaSph
       </div>
 
       <div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-[var(--md-surface-card)] border border-[var(--md-outline)]">
-        <div class="flex items-center gap-2.5 overflow-hidden">
+        <button type="button" id="shell-profile-btn" class="flex items-center gap-2.5 overflow-hidden text-left flex-1 hover:opacity-85 transition" title="Account & Password Settings">
           <div class="w-8 h-8 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs flex items-center justify-center shrink-0">
             ${escapeHtml(initial)}
           </div>
           <div class="overflow-hidden">
             <p class="font-bold text-xs text-[var(--md-on-surface)] truncate">${escapeHtml(displayName)}</p>
-            <p class="text-[10px] text-[var(--md-on-surface-variant)] capitalize truncate">${escapeHtml(roleSubtitle)}</p>
+            <p class="text-[10px] text-[var(--md-on-surface-variant)] truncate">${escapeHtml(roleSubtitle)}</p>
           </div>
-        </div>
+        </button>
         <button id="shell-logout-btn" title="Sign Out" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition shrink-0">
           <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
@@ -108,14 +246,14 @@ export function initDashboardShell({ active = 'notices', mobileTitle = 'VidyaSph
   topHeader.className = 'md:hidden sticky top-0 z-30 glass border-b border-[var(--md-outline)] px-4 h-14 flex items-center justify-between w-full shrink-0';
   topHeader.innerHTML = `
     <div class="flex items-center gap-2.5 overflow-hidden">
-      <a href="${isTeacher ? '/teacher/index.html' : '/dashboard/index.html'}" class="w-8 h-8 rounded-xl bg-[var(--md-primary)] flex items-center justify-center text-[var(--md-on-primary)] shrink-0 shadow-xs">
+      <a href="${isAdmin ? '/admin/index.html' : (isTeacher ? '/teacher/index.html' : '/dashboard/index.html')}" class="w-8 h-8 rounded-xl bg-[var(--md-primary)] flex items-center justify-center text-[var(--md-on-primary)] shrink-0 shadow-xs">
         <i data-lucide="graduation-cap" class="w-4 h-4"></i>
       </a>
       <span class="font-extrabold text-[15px] text-[var(--md-on-surface)] tracking-tight truncate">${escapeHtml(mobileTitle)}</span>
     </div>
     <div class="flex items-center gap-1.5 shrink-0">
       ${mobileRightHtml}
-      ${isTeacher ? `
+      ${canUseTeacherStudio ? `
         <a href="/teacher/index.html" class="px-2.5 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[10px] font-bold flex items-center gap-1">
           <i data-lucide="sparkles" class="w-3 h-3"></i> Studio
         </a>
@@ -158,18 +296,18 @@ export function initDashboardShell({ active = 'notices', mobileTitle = 'VidyaSph
   moreSheet.id = 'shell-more-sheet';
   moreSheet.className = 'md:hidden fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-xs hidden items-end justify-center';
   moreSheet.innerHTML = `
-    <div class="bg-[var(--md-surface-card)] w-full rounded-t-[28px] p-5 pb-7 space-y-4 shadow-2xl border-t border-[var(--md-outline)] modal-enter">
+    <div class="bg-[var(--md-surface-card)] w-full rounded-t-[28px] p-5 pb-7 space-y-4 shadow-2xl border-t border-[var(--md-outline)] modal-enter max-h-[85vh] overflow-y-auto">
       <div class="m3-sheet-handle"></div>
       <div class="flex items-center justify-between pb-3 border-b border-[var(--md-outline)]">
-        <div class="flex items-center gap-2.5">
+        <button type="button" id="shell-profile-mob" class="flex items-center gap-2.5 text-left">
           <div class="w-9 h-9 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs flex items-center justify-center">
             ${escapeHtml(initial)}
           </div>
           <div>
             <p class="font-bold text-sm text-[var(--md-on-surface)]">${escapeHtml(displayName)}</p>
-            <p class="text-[11px] text-[var(--md-on-surface-variant)] capitalize">${escapeHtml(roleSubtitle)}</p>
+            <p class="text-[11px] text-[var(--md-on-surface-variant)]">${escapeHtml(roleSubtitle)} • Tap for Account</p>
           </div>
-        </div>
+        </button>
         <button type="button" id="shell-more-close" class="p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
@@ -196,9 +334,9 @@ export function initDashboardShell({ active = 'notices', mobileTitle = 'VidyaSph
         }).join('')}
         <a href="/guide.html" class="flex items-center gap-2.5 p-3.5 rounded-2xl bg-[var(--md-surface-container)] text-[var(--md-on-surface)] font-semibold">
           <i data-lucide="book-marked" class="w-4 h-4"></i>
-          <span>Student Guide</span>
+          <span>Platform Guide</span>
         </a>
-        ${isTeacher ? `
+        ${canUseTeacherStudio ? `
           <a href="/teacher/index.html" class="flex items-center gap-2.5 p-3.5 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] font-bold">
             <i data-lucide="sparkles" class="w-4 h-4"></i>
             <span>Teacher Studio</span>
@@ -233,10 +371,28 @@ export function initDashboardShell({ active = 'notices', mobileTitle = 'VidyaSph
     moreSheet.classList.remove('flex');
   };
 
+  document.getElementById('shell-profile-btn')?.addEventListener('click', () => openAccountModal(user));
+  document.getElementById('shell-profile-mob')?.addEventListener('click', () => { closeMore(); openAccountModal(user); });
+
   document.getElementById('shell-more-btn')?.addEventListener('click', openMore);
   document.getElementById('shell-more-close')?.addEventListener('click', closeMore);
   moreSheet.addEventListener('click', (e) => {
     if (e.target === moreSheet) closeMore();
+  });
+
+  // Silent background session sync to reflect role promotions / assignments / account status
+  apiRequest('/auth/me').then(res => {
+    if (res?.user) {
+      setCurrentUser(res.user);
+      if (res.user.accountStatus === 'pending') {
+        window.location.replace('/auth/pending.html');
+      }
+    }
+  }).catch(err => {
+    if (err.message?.includes('suspended') || err.message?.includes('403')) {
+      clearSession();
+      window.location.replace('/auth/login.html');
+    }
   });
 
   initIcons();

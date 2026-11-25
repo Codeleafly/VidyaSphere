@@ -1,5 +1,5 @@
 /**
- * Teacher Studio: Scoped Notices, Class Teacher Unit Tests & Class Student Approvals
+ * Teacher Studio: Scoped Notices, Class Teacher/Admin Unit Tests & Class Student Approvals
  */
 
 import { apiRequest } from '/js/api.js';
@@ -13,11 +13,14 @@ export async function loadTeacherNotices(user) {
   const listEl = document.getElementById('teacher-notices-list');
   try {
     const res = await apiRequest('/announcements');
+    const isAdmin = user.role === 'admin';
     const allowed = new Set([...(user.assignedClasses || []), ...(user.teacherType === 'class' && user.className ? [user.className] : [])]);
-    const notices = (res.announcements || []).filter(a => allowed.has(a.target_class));
+    const notices = isAdmin
+      ? (res.announcements || [])
+      : (res.announcements || []).filter(a => allowed.has(a.target_class));
 
     if (notices.length === 0) {
-      listEl.innerHTML = `<div class="m3-card p-6 text-center text-xs text-slate-400">No active notices in your assigned classes.</div>`;
+      listEl.innerHTML = `<div class="m3-card p-6 text-center text-xs text-slate-400">No active notices in your scope.</div>`;
       return;
     }
 
@@ -25,14 +28,14 @@ export async function loadTeacherNotices(user) {
       <div class="m3-card p-4 flex items-start justify-between gap-3">
         <div class="space-y-1">
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${escapeHtml(a.target_class)}</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${a.target_class === 'all' ? 'All Classes' : escapeHtml(a.target_class)}</span>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700">${escapeHtml(a.priority)}</span>
             <span class="text-[10px] text-slate-400">${escapeHtml(formatDate(a.created_at))}</span>
           </div>
           <h4 class="font-bold text-sm">${escapeHtml(a.title)}</h4>
           <p class="text-xs text-[var(--md-on-surface-variant)]">${escapeHtml(a.content)}</p>
         </div>
-        ${a.author_role !== 'admin' || a.author_id === user.id ? `
+        ${isAdmin || a.author_role !== 'admin' || a.author_id === user.id ? `
           <button class="del-t-ann-btn px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-[11px] font-bold shrink-0" data-id="${escapeHtml(a.id)}">Delete</button>
         ` : ''}
       </div>
@@ -58,27 +61,35 @@ export async function loadTeacherNotices(user) {
 export async function loadTeacherUnitTests(user) {
   teacherUser = user;
   const listEl = document.getElementById('teacher-unit-tests-list');
-  if (!listEl || user.teacherType !== 'class') return;
+  const isAdmin = user.role === 'admin';
+  if (!listEl || (!isAdmin && user.teacherType !== 'class')) return;
 
   try {
-    const res = await apiRequest(`/exams?class=${encodeURIComponent(user.className)}`);
-    const tests = (res.exams || []).filter(e => e.exam_type === 'unit_test' && e.class_name === user.className);
+    const url = isAdmin ? '/exams' : `/exams?class=${encodeURIComponent(user.className)}`;
+    const res = await apiRequest(url);
+    const tests = (res.exams || []).filter(e =>
+      e.exam_type === 'unit_test' && (isAdmin || e.class_name === user.className)
+    );
     if (tests.length === 0) {
-      listEl.innerHTML = `<div class="m3-card p-6 text-center text-xs text-slate-400">No unit tests scheduled for ${escapeHtml(user.className)} yet.</div>`;
+      listEl.innerHTML = `<div class="m3-card p-6 text-center text-xs text-slate-400">No unit tests scheduled yet.</div>`;
       return;
     }
 
     listEl.innerHTML = tests.map(ex => `
       <div class="m3-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="space-y-1">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">Unit Test</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-surface-container)]">${escapeHtml(ex.class_name)}</span>
             <span class="font-bold text-sm">${escapeHtml(ex.title)} (${escapeHtml(ex.subject)})</span>
           </div>
           <p class="text-xs text-slate-500 tabular-nums">${escapeHtml(ex.exam_date)} ${ex.start_time ? '• ' + escapeHtml(ex.start_time) : ''} ${ex.syllabus ? '• ' + escapeHtml(ex.syllabus) : ''}</p>
         </div>
         <div class="flex gap-1.5">
-          <button class="edit-ut-btn px-3 py-1 rounded-full bg-slate-100 text-xs font-bold" data-id="${escapeHtml(ex.id)}" data-title="${escapeHtml(ex.title)}" data-subject="${escapeHtml(ex.subject)}" data-date="${escapeHtml(ex.exam_date)}" data-start="${escapeHtml(ex.start_time || '')}" data-syllabus="${escapeHtml(ex.syllabus || '')}">Edit</button>
+          <button class="edit-ut-btn px-3 py-1 rounded-full bg-slate-100 text-xs font-bold"
+            data-id="${escapeHtml(ex.id)}" data-title="${escapeHtml(ex.title)}" data-subject="${escapeHtml(ex.subject)}"
+            data-date="${escapeHtml(ex.exam_date)}" data-start="${escapeHtml(ex.start_time || '')}"
+            data-syllabus="${escapeHtml(ex.syllabus || '')}" data-class="${escapeHtml(ex.class_name || '')}">Edit</button>
           <button class="del-ut-btn px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold" data-id="${escapeHtml(ex.id)}">Delete</button>
         </div>
       </div>
@@ -92,6 +103,8 @@ export async function loadTeacherUnitTests(user) {
         document.getElementById('t-exam-date').value = btn.dataset.date;
         document.getElementById('t-exam-start').value = btn.dataset.start;
         document.getElementById('t-exam-syllabus').value = btn.dataset.syllabus;
+        const clsSel = document.getElementById('t-exam-class-select');
+        if (clsSel && btn.dataset.class) clsSel.value = btn.dataset.class;
         document.getElementById('t-exam-cancel-btn').classList.remove('hidden');
       });
     });
@@ -117,15 +130,22 @@ export async function loadClassRoster(user) {
   teacherUser = user;
   const listEl = document.getElementById('teacher-roster-list');
   const filter = document.getElementById('t-roster-filter')?.value || '';
-  if (!listEl || user.teacherType !== 'class') return;
+  const classFilter = document.getElementById('t-roster-class-filter')?.value || '';
+  const isAdmin = user.role === 'admin';
+  if (!listEl || (!isAdmin && user.teacherType !== 'class')) return;
 
-  document.getElementById('roster-scope-subtitle').textContent = `Scoped to ${user.className}${user.division ? ' • Division ' + user.division : ''}`;
+  document.getElementById('roster-scope-subtitle').textContent = isAdmin
+    ? 'School-wide student approvals & roster (Admin access)'
+    : `Scoped to ${user.className}${user.division ? ' • Division ' + user.division : ''}`;
 
   try {
-    const res = await apiRequest(`/teacher/students${filter ? '?status=' + encodeURIComponent(filter) : ''}`);
+    const params = new URLSearchParams();
+    if (filter) params.append('status', filter);
+    if (isAdmin && classFilter) params.append('className', classFilter);
+    const res = await apiRequest(`/teacher/students${params.toString() ? '?' + params.toString() : ''}`);
     const students = res.students || [];
     if (students.length === 0) {
-      listEl.innerHTML = `<div class="m3-card p-8 text-center text-xs text-slate-400">No students matching this filter in ${escapeHtml(user.className)}.</div>`;
+      listEl.innerHTML = `<div class="m3-card p-8 text-center text-xs text-slate-400">No students matching this filter.</div>`;
       return;
     }
 
@@ -220,13 +240,15 @@ export function initClassRoomModule(user, refreshFn) {
   document.getElementById('teacher-exam-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('t-exam-id').value.trim();
+    const isAdmin = teacherUser.role === 'admin';
+    const selectedAdminClass = document.getElementById('t-exam-class-select')?.value;
     const payload = {
       title: document.getElementById('t-exam-title').value.trim(),
       subject: document.getElementById('t-exam-subject').value.trim(),
       examDate: document.getElementById('t-exam-date').value,
       startTime: document.getElementById('t-exam-start').value.trim(),
       syllabus: document.getElementById('t-exam-syllabus').value.trim(),
-      className: teacherUser.className,
+      className: isAdmin ? (selectedAdminClass || 'All Classes') : teacherUser.className,
     };
     try {
       if (id) {
@@ -246,4 +268,5 @@ export function initClassRoomModule(user, refreshFn) {
   });
 
   document.getElementById('t-roster-filter')?.addEventListener('change', () => loadClassRoster(teacherUser));
+  document.getElementById('t-roster-class-filter')?.addEventListener('change', () => loadClassRoster(teacherUser));
 }

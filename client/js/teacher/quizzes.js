@@ -1,5 +1,5 @@
 /**
- * Teacher Studio: 5-Minute MCQ Quiz Builder, Results & Homework Module
+ * Teacher Studio: 5-Minute MCQ Quiz Builder (Create + Edit + Results) & Homework (Create + Edit) Module
  */
 
 import { apiRequest } from '/js/api.js';
@@ -7,6 +7,7 @@ import { escapeHtml, safeUrl, formatDate, initIcons, showToast, bindModalBackdro
 
 let teacherUser = null;
 let onRefreshOverview = () => {};
+let homeworkCache = [];
 
 function addQuestionBlock(defaults = null) {
   const container = document.getElementById('quiz-questions-builder');
@@ -43,11 +44,39 @@ function addQuestionBlock(defaults = null) {
   container.appendChild(block);
 }
 
-export function openQuizModal() {
+export function openQuizModal(quizDetail = null) {
   const modal = document.getElementById('quiz-modal');
   const builder = document.getElementById('quiz-questions-builder');
+  document.getElementById('qz-id').value = quizDetail?.id || '';
+  document.getElementById('qz-title').value = quizDetail?.title || '';
+  if (quizDetail?.className) document.getElementById('qz-class').value = quizDetail.className;
+  if (quizDetail?.subject) document.getElementById('qz-subject').value = quizDetail.subject;
+  document.getElementById('qz-chapter').value = quizDetail?.chapter || '';
+  document.getElementById('qz-published').checked = quizDetail ? quizDetail.isPublished !== false : true;
+  document.getElementById('qz-modal-heading').textContent = quizDetail ? 'Edit MCQ Quiz' : 'Build 5-Min Auto-Graded MCQ Quiz';
+  document.getElementById('qz-submit-btn').textContent = quizDetail ? 'Update MCQ Quiz' : 'Publish MCQ Quiz';
+
   builder.innerHTML = '';
-  addQuestionBlock();
+  if (quizDetail?.questions?.length) {
+    quizDetail.questions.forEach(q => addQuestionBlock(q));
+  } else {
+    addQuestionBlock();
+  }
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+export function openHomeworkModal(hw = null) {
+  const modal = document.getElementById('hw-modal');
+  document.getElementById('hw-id').value = hw?.id || '';
+  document.getElementById('hw-title').value = hw?.title || '';
+  if (hw?.class_name) document.getElementById('hw-class').value = hw.class_name;
+  if (hw?.subject) document.getElementById('hw-subject').value = hw.subject;
+  document.getElementById('hw-due').value = hw?.due_date || '';
+  document.getElementById('hw-desc').value = hw?.description || '';
+  document.getElementById('hw-resource').value = hw?.resource_url || '';
+  document.getElementById('hw-modal-heading').textContent = hw ? 'Edit Homework' : 'Assign Homework';
+  document.getElementById('hw-submit-btn').textContent = hw ? 'Update Homework' : 'Publish Homework';
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 }
@@ -84,19 +113,36 @@ export async function loadTeacherQuizzes(user) {
     listEl.innerHTML = quizzes.map(q => `
       <article class="m3-card p-4 space-y-2.5 flex flex-col justify-between">
         <div class="space-y-1.5">
-          <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">${escapeHtml(q.className)} • ${escapeHtml(q.subject)}</span>
-            <span class="text-[10px] font-bold text-slate-500 tabular-nums">${q.questionCount} Qs • ${q.attemptCount} attempts</span>
+            <div class="flex items-center gap-1.5">
+              ${!q.isPublished ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600">Draft</span>` : ''}
+              <span class="text-[10px] font-bold text-slate-500 tabular-nums">${q.questionCount} Qs • ${q.attemptCount} attempts</span>
+            </div>
           </div>
           <h4 class="font-extrabold text-sm">${escapeHtml(q.title)}</h4>
           ${q.chapter ? `<p class="text-[11px] text-[var(--md-on-surface-variant)]">${escapeHtml(q.chapter)}</p>` : ''}
         </div>
-        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-          <button class="view-qr-btn m3-btn-tonal px-3 py-1 text-[11px]" data-id="${escapeHtml(q.id)}">View Scores</button>
-          <button class="del-qz-btn px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold" data-id="${escapeHtml(q.id)}">Delete</button>
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-1.5">
+          <button class="view-qr-btn m3-btn-tonal px-3 py-1 text-[11px]" data-id="${escapeHtml(q.id)}">Scores</button>
+          <div class="flex items-center gap-1.5">
+            <button class="edit-qz-btn px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-[11px] font-bold" data-id="${escapeHtml(q.id)}">Edit</button>
+            <button class="del-qz-btn px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold" data-id="${escapeHtml(q.id)}">Delete</button>
+          </div>
         </div>
       </article>
     `).join('');
+
+    listEl.querySelectorAll('.edit-qz-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          const data = await apiRequest(`/quizzes/${encodeURIComponent(btn.dataset.id)}`);
+          if (data.quiz) openQuizModal(data.quiz);
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      });
+    });
 
     listEl.querySelectorAll('.view-qr-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -107,15 +153,20 @@ export async function loadTeacherQuizzes(user) {
           const rows = data.results || [];
           qrList.innerHTML = rows.length === 0
             ? `<p class="text-center text-slate-400 py-6">No student attempts yet.</p>`
-            : rows.map(r => `
-                <div class="p-3 rounded-2xl bg-[var(--md-surface-container)] flex items-center justify-between">
-                  <div>
-                    <p class="font-bold">${escapeHtml(r.full_name)} <span class="font-mono text-slate-500">@${escapeHtml(r.username)}</span></p>
-                    <p class="text-[10px] text-slate-500">${escapeHtml(r.class_name)} ${escapeHtml(r.division)} • Roll #${escapeHtml(r.roll_number)}</p>
+            : rows.map(r => {
+                const sub = r.is_root_admin === 1 || r.username === 'admin'
+                  ? 'Admin'
+                  : [r.class_name ? `${r.class_name} ${r.division || ''}`.trim() : '', r.roll_number ? `Roll #${r.roll_number}` : ''].filter(Boolean).join(' • ');
+                return `
+                  <div class="p-3 rounded-2xl bg-[var(--md-surface-container)] flex items-center justify-between">
+                    <div>
+                      <p class="font-bold">${escapeHtml(r.full_name)} <span class="font-mono text-slate-500">@${escapeHtml(r.username)}</span></p>
+                      ${sub ? `<p class="text-[10px] text-slate-500">${escapeHtml(sub)}</p>` : ''}
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-white font-extrabold text-[var(--md-primary)] tabular-nums border border-[var(--md-outline)]">${r.score}/${r.total}</span>
                   </div>
-                  <span class="px-3 py-1 rounded-full bg-white font-extrabold text-[var(--md-primary)] tabular-nums border border-[var(--md-outline)]">${r.score}/${r.total}</span>
-                </div>
-              `).join('');
+                `;
+              }).join('');
           document.getElementById('quiz-results-modal').classList.remove('hidden');
           document.getElementById('quiz-results-modal').classList.add('flex');
         } catch (err) {
@@ -147,13 +198,13 @@ export async function loadTeacherHomework(user) {
   const listEl = document.getElementById('teacher-homework-list');
   try {
     const res = await apiRequest(`/homework?teacherId=${encodeURIComponent(user.id)}`);
-    const items = res.homework || [];
-    if (items.length === 0) {
+    homeworkCache = res.homework || [];
+    if (homeworkCache.length === 0) {
       listEl.innerHTML = `<div class="col-span-full m3-card p-6 text-center text-xs text-slate-400">No homework posted yet.</div>`;
       return;
     }
 
-    listEl.innerHTML = items.map(hw => {
+    listEl.innerHTML = homeworkCache.map(hw => {
       const link = safeUrl(hw.resource_url);
       return `
         <article class="m3-card p-4 space-y-2 flex flex-col justify-between">
@@ -167,11 +218,21 @@ export async function loadTeacherHomework(user) {
           </div>
           <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
             ${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-[var(--md-primary)] hover:underline">Reference Link</a>` : `<span class="text-[10px] text-slate-400">${escapeHtml(formatDate(hw.created_at))}</span>`}
-            <button class="del-hw-btn px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold" data-id="${escapeHtml(hw.id)}">Delete</button>
+            <div class="flex items-center gap-1.5">
+              <button class="edit-hw-btn px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-[11px] font-bold" data-id="${escapeHtml(hw.id)}">Edit</button>
+              <button class="del-hw-btn px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold" data-id="${escapeHtml(hw.id)}">Delete</button>
+            </div>
           </div>
         </article>
       `;
     }).join('');
+
+    listEl.querySelectorAll('.edit-hw-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const hw = homeworkCache.find(item => item.id === btn.dataset.id);
+        if (hw) openHomeworkModal(hw);
+      });
+    });
 
     listEl.querySelectorAll('.del-hw-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -199,11 +260,11 @@ export function initQuizzesAndHomework(user, refreshFn) {
   const hwModal = document.getElementById('hw-modal');
   const qrModal = document.getElementById('quiz-results-modal');
 
-  document.getElementById('open-quiz-modal-btn')?.addEventListener('click', openQuizModal);
+  document.getElementById('open-quiz-modal-btn')?.addEventListener('click', () => openQuizModal());
   document.getElementById('close-quiz-modal')?.addEventListener('click', closeQuizModal);
   bindModalBackdropAndEsc(qzModal, closeQuizModal);
 
-  document.getElementById('open-hw-modal-btn')?.addEventListener('click', () => { hwModal.classList.remove('hidden'); hwModal.classList.add('flex'); });
+  document.getElementById('open-hw-modal-btn')?.addEventListener('click', () => openHomeworkModal());
   document.getElementById('close-hw-modal')?.addEventListener('click', closeHwModal);
   bindModalBackdropAndEsc(hwModal, closeHwModal);
 
@@ -214,6 +275,7 @@ export function initQuizzesAndHomework(user, refreshFn) {
 
   document.getElementById('quiz-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const quizId = document.getElementById('qz-id').value.trim();
     const cards = Array.from(document.querySelectorAll('.qz-q-card'));
     const questions = cards.map(card => {
       const qText = card.querySelector('.qz-q-text').value.trim();
@@ -236,19 +298,23 @@ export function initQuizzesAndHomework(user, refreshFn) {
       };
     });
 
+    const payload = {
+      title: document.getElementById('qz-title').value.trim(),
+      className: document.getElementById('qz-class').value,
+      subject: document.getElementById('qz-subject').value,
+      chapter: document.getElementById('qz-chapter').value.trim(),
+      questions,
+      isPublished: document.getElementById('qz-published').checked,
+    };
+
     try {
-      await apiRequest('/quizzes', {
-        method: 'POST',
-        body: {
-          title: document.getElementById('qz-title').value.trim(),
-          className: document.getElementById('qz-class').value,
-          subject: document.getElementById('qz-subject').value,
-          chapter: document.getElementById('qz-chapter').value.trim(),
-          questions,
-          isPublished: true,
-        }
-      });
-      showToast('MCQ Quiz published!', 'success');
+      if (quizId) {
+        await apiRequest(`/quizzes/${encodeURIComponent(quizId)}`, { method: 'PUT', body: payload });
+        showToast('MCQ Quiz updated!', 'success');
+      } else {
+        await apiRequest('/quizzes', { method: 'POST', body: payload });
+        showToast('MCQ Quiz published!', 'success');
+      }
       e.target.reset();
       closeQuizModal();
       loadTeacherQuizzes(teacherUser);
@@ -260,19 +326,23 @@ export function initQuizzesAndHomework(user, refreshFn) {
 
   document.getElementById('hw-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const hwId = document.getElementById('hw-id').value.trim();
+    const payload = {
+      title: document.getElementById('hw-title').value.trim(),
+      className: document.getElementById('hw-class').value,
+      subject: document.getElementById('hw-subject').value,
+      dueDate: document.getElementById('hw-due').value,
+      description: document.getElementById('hw-desc').value.trim(),
+      resourceUrl: document.getElementById('hw-resource').value.trim(),
+    };
     try {
-      await apiRequest('/homework', {
-        method: 'POST',
-        body: {
-          title: document.getElementById('hw-title').value.trim(),
-          className: document.getElementById('hw-class').value,
-          subject: document.getElementById('hw-subject').value,
-          dueDate: document.getElementById('hw-due').value,
-          description: document.getElementById('hw-desc').value.trim(),
-          resourceUrl: document.getElementById('hw-resource').value.trim(),
-        }
-      });
-      showToast('Homework posted!', 'success');
+      if (hwId) {
+        await apiRequest(`/homework/${encodeURIComponent(hwId)}`, { method: 'PUT', body: payload });
+        showToast('Homework updated!', 'success');
+      } else {
+        await apiRequest('/homework', { method: 'POST', body: payload });
+        showToast('Homework posted!', 'success');
+      }
       e.target.reset();
       closeHwModal();
       loadTeacherHomework(teacherUser);

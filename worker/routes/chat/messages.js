@@ -1,14 +1,56 @@
 /**
- * Chat Messages & Lossless Gzip Attachments Routes
+ * Chat Messages, Replies, Emoji Reactions, Pinning & Lossless Gzip Attachments Routes
  */
 
 import { errorResponse, successResponse, corsHeaders } from '../../utils/response.js';
 import { compressData, decompressData, toUint8Array, parseUtcTimestamp } from '../../utils/compression.js';
 import { generateId } from '../../auth/crypto.js';
 import { authenticate } from '../../auth/middleware.js';
-import { canTeacherModerateChannel } from '../../utils/teacherScope.js';
+import { canTeacherModerateChannel, isRootAdminAccount } from '../../utils/teacherScope.js';
 import { parseDmId } from './dms.js';
-import { broadcastChatMessage } from './ws.js';
+import { broadcastChatMessage, broadcastChatEvent } from './ws.js';
+
+const ALLOWED_REACTIONS = new Set(['👍', '❤️', '💡', '🔥', '✅', '🎉', '🙏', '😂']);
+
+function sanitizeMessageRow(m) {
+  const isRoot = m.is_root_admin === 1 || m.sender_is_root_admin === 1 || m.sender_username === 'admin';
+  let reactions = {};
+  try {
+    reactions = m.reactions_json ? JSON.parse(m.reactions_json) : {};
+  } catch { reactions = {}; }
+  let replyPreview = null;
+  try {
+    replyPreview = m.reply_preview ? JSON.parse(m.reply_preview) : null;
+  } catch { replyPreview = null; }
+
+  return {
+    ...m,
+    class_name: isRoot ? '' : (m.class_name || ''),
+    division: isRoot ? '' : (m.division || ''),
+    roll_number: isRoot ? '' : (m.roll_number || ''),
+    is_root_admin: isRoot ? 1 : 0,
+    reactions,
+    replyPreview,
+  };
+}
+
+async function getTargetUsersForChannel(env, channel) {
+  if (channel.startsWith('dm_')) {
+    const canonicalDmId = parseDmId(channel);
+    const dm = await env.DB.prepare(
+      `SELECT user1_id, user2_id FROM direct_chats WHERE id = ? OR id = ?`
+    ).bind(canonicalDmId, canonicalDmId.replace('dm_', '')).first();
+    return dm ? new Set([dm.user1_id, dm.user2_id]) : new Set();
+  }
+  if (channel.startsWith('grp_')) {
+    const grpId = channel.replace('grp_', '');
+    const { results } = await env.DB.prepare(
+      `SELECT user_id FROM group_members WHERE group_id = ? AND invite_status = 'accepted'`
+    ).bind(grpId).all();
+    return new Set((results || []).map(r => r.user_id));
+  }
+  return null;
+}
 
 async function verifyChannelReadAccess(env, channel, user) {
   if (channel.startsWith('dm_')) {
@@ -22,7 +64,7 @@ async function verifyChannelReadAccess(env, channel, user) {
       return { error: errorResponse('Access denied to private conversation', 403) };
     }
     if (dm.status === 'pending') {
-      return { error: errorResponse('Chat permission pending. Awaiting student acceptance.', 403) };
+      return { error: errorResponse('Chat permission pending. Awaiting acceptance.', 403) };
     }
     if (dm.status === 'rejected') {
       return { error: errorResponse('This chat invitation was declined.', 403) };
@@ -53,6 +95,7 @@ export async function handleMessageRoutes(request, env, path, method) {
 
     const url = new URL(request.url);
     const channel = url.searchParams.get('channel') || 'school';
+    const search = (url.searchParams.get('search') || '').trim();
 
     const access = await verifyChannelReadAccess(env, channel, auth.user);
     if (access.error) return access.error;
@@ -64,11 +107,13 @@ export async function handleMessageRoutes(request, env, path, method) {
     let messages = [];
     if (since) {
       const { results } = await env.DB.prepare(`
-        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.is_pinned, m.pinned_by, m.has_attachment,
-               m.attachment_name, m.attachment_type, m.attachment_size,
+        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.is_pinned, m.pinned_by,
+               m.reply_to_id, m.reply_preview, m.reactions_json,
+               m.has_attachment, m.attachment_name, m.attachment_type, m.attachment_size,
                strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
                strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
-               p.full_name as sender_name, p.role as sender_role, p.teacher_type as sender_teacher_type, p.class_name, p.division, p.roll_number, p.is_root_admin
+               p.username as sender_username, p.full_name as sender_name, p.role as sender_role,
+               p.teacher_type as sender_teacher_type, p.class_name, p.division, p.roll_number, p.is_root_admin
         FROM messages m
         JOIN profiles p ON m.sender_id = p.id
         WHERE m.channel IN (${placeholders})
@@ -76,31 +121,51 @@ export async function handleMessageRoutes(request, env, path, method) {
           AND datetime(m.created_at) > datetime(?)
         ORDER BY m.created_at ASC, m.rowid ASC LIMIT 100
       `).bind(...matchChannels, since).all();
-      messages = results || [];
-    } else {
+      messages = (results || []).map(sanitizeMessageRow);
+    } else if (search) {
       const { results } = await env.DB.prepare(`
-        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.is_pinned, m.pinned_by, m.has_attachment,
-               m.attachment_name, m.attachment_type, m.attachment_size,
+        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.is_pinned, m.pinned_by,
+               m.reply_to_id, m.reply_preview, m.reactions_json,
+               m.has_attachment, m.attachment_name, m.attachment_type, m.attachment_size,
                strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
                strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
-               p.full_name as sender_name, p.role as sender_role, p.teacher_type as sender_teacher_type, p.class_name, p.division, p.roll_number, p.is_root_admin
+               p.username as sender_username, p.full_name as sender_name, p.role as sender_role,
+               p.teacher_type as sender_teacher_type, p.class_name, p.division, p.roll_number, p.is_root_admin
+        FROM messages m
+        JOIN profiles p ON m.sender_id = p.id
+        WHERE m.channel IN (${placeholders})
+          AND datetime(m.created_at) >= datetime('now', '-7 days')
+          AND (m.content LIKE ? OR p.full_name LIKE ? OR m.attachment_name LIKE ?)
+        ORDER BY m.created_at DESC, m.rowid DESC LIMIT 80
+      `).bind(...matchChannels, `%${search}%`, `%${search}%`, `%${search}%`).all();
+      messages = (results || []).reverse().map(sanitizeMessageRow);
+    } else {
+      const { results } = await env.DB.prepare(`
+        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.is_pinned, m.pinned_by,
+               m.reply_to_id, m.reply_preview, m.reactions_json,
+               m.has_attachment, m.attachment_name, m.attachment_type, m.attachment_size,
+               strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
+               strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
+               p.username as sender_username, p.full_name as sender_name, p.role as sender_role,
+               p.teacher_type as sender_teacher_type, p.class_name, p.division, p.roll_number, p.is_root_admin
         FROM messages m
         JOIN profiles p ON m.sender_id = p.id
         WHERE m.channel IN (${placeholders}) AND datetime(m.created_at) >= datetime('now', '-7 days')
         ORDER BY m.created_at DESC, m.rowid DESC LIMIT 80
       `).bind(...matchChannels).all();
-      messages = (results || []).reverse();
+      messages = (results || []).reverse().map(sanitizeMessageRow);
     }
 
     const { results: pinnedMessages } = await env.DB.prepare(`
       SELECT m.id, m.content, m.sender_id, p.full_name as sender_name, p.role as sender_role,
+             p.teacher_type as sender_teacher_type, p.is_root_admin,
              strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at
       FROM messages m
       JOIN profiles p ON m.sender_id = p.id
       WHERE m.channel IN (${placeholders})
         AND m.is_pinned = 1
         AND datetime(m.created_at) >= datetime('now', '-7 days')
-      ORDER BY m.created_at DESC LIMIT 5
+      ORDER BY m.created_at DESC LIMIT 8
     `).bind(...matchChannels).all();
 
     return successResponse({ messages, pinnedMessages: pinnedMessages || [] });
@@ -113,13 +178,14 @@ export async function handleMessageRoutes(request, env, path, method) {
 
     try {
       const contentType = request.headers.get('content-type') || '';
-      let content = '', channel = 'school';
+      let content = '', channel = 'school', replyToId = null;
       let fileBuffer = null, fileName = null, fileType = null, fileSize = 0;
 
       if (contentType.includes('multipart/form-data')) {
         const formData = await request.formData();
         content = (formData.get('content') || '').toString().trim();
         channel = (formData.get('channel') || 'school').toString().trim();
+        replyToId = (formData.get('replyToId') || '').toString().trim() || null;
         const file = formData.get('file');
 
         if (file && typeof file === 'object' && file.name) {
@@ -132,6 +198,7 @@ export async function handleMessageRoutes(request, env, path, method) {
         const body = await request.json();
         content = (body.content || '').trim();
         channel = (body.channel || 'school').trim();
+        replyToId = (body.replyToId || '').toString().trim() || null;
 
         if (body.fileBase64 && body.fileName) {
           fileName = body.fileName;
@@ -164,7 +231,7 @@ export async function handleMessageRoutes(request, env, path, method) {
           return errorResponse('Access denied to private conversation', 403);
         }
         if (dm.status === 'pending') {
-          return errorResponse('Cannot send message. Chat permission is pending authorization by the student.', 403);
+          return errorResponse('Cannot send message. Chat permission is pending authorization.', 403);
         }
         if (dm.status === 'rejected') {
           return errorResponse('Cannot send message. Chat invitation was declined.', 403);
@@ -212,18 +279,40 @@ export async function handleMessageRoutes(request, env, path, method) {
         }
       }
 
+      let replyPreviewObj = null;
+      let replyPreviewJson = null;
+      if (replyToId) {
+        const parent = await env.DB.prepare(
+          `SELECT m.id, m.content, m.channel, p.full_name as sender_name
+           FROM messages m LEFT JOIN profiles p ON m.sender_id = p.id
+           WHERE m.id = ?`
+        ).bind(replyToId).first();
+        if (parent && parent.channel === channel) {
+          replyPreviewObj = {
+            id: parent.id,
+            senderName: parent.sender_name || 'User',
+            content: String(parent.content || '').slice(0, 120),
+          };
+          replyPreviewJson = JSON.stringify(replyPreviewObj);
+        } else {
+          replyToId = null;
+        }
+      }
+
       const msgId = generateId('msg', 8);
       const hasAttachment = fileBuffer ? 1 : 0;
       const finalContent = content || (fileName ? `Shared attachment: ${fileName}` : '');
 
       await env.DB.prepare(`
-        INSERT INTO messages (id, sender_id, channel, content, is_edited, has_attachment, attachment_name, attachment_type, attachment_size)
-        VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)
+        INSERT INTO messages (id, sender_id, channel, content, is_edited, reply_to_id, reply_preview, reactions_json, has_attachment, attachment_name, attachment_type, attachment_size)
+        VALUES (?, ?, ?, ?, 0, ?, ?, '{}', ?, ?, ?, ?)
       `).bind(
         msgId,
         auth.user.id,
         channel,
         finalContent,
+        replyToId,
+        replyPreviewJson,
         hasAttachment,
         fileName || null,
         fileType || null,
@@ -244,30 +333,35 @@ export async function handleMessageRoutes(request, env, path, method) {
         }
       }
 
+      const isRoot = isRootAdminAccount(auth.user);
       const nowIso = new Date().toISOString();
       const responsePayload = {
         id: msgId,
         sender_id: auth.user.id,
         senderId: auth.user.id,
+        sender_username: auth.user.username,
         sender_name: auth.user.fullName,
         senderName: auth.user.fullName,
         sender_role: auth.user.role,
         senderRole: auth.user.role,
         sender_teacher_type: auth.user.teacherType || null,
         senderTeacherType: auth.user.teacherType || null,
-        class_name: auth.user.className || null,
-        className: auth.user.className || null,
-        division: auth.user.division || null,
-        roll_number: auth.user.rollNumber || null,
-        rollNumber: auth.user.rollNumber || null,
-        is_root_admin: auth.user.isRootAdmin ? 1 : 0,
-        isRootAdmin: auth.user.isRootAdmin || false,
+        class_name: isRoot ? '' : (auth.user.className || ''),
+        className: isRoot ? '' : (auth.user.className || ''),
+        division: isRoot ? '' : (auth.user.division || ''),
+        roll_number: isRoot ? '' : (auth.user.rollNumber || ''),
+        rollNumber: isRoot ? '' : (auth.user.rollNumber || ''),
+        is_root_admin: isRoot ? 1 : 0,
+        isRootAdmin: isRoot,
         channel,
         content: finalContent,
         is_edited: 0,
         isEdited: 0,
         is_pinned: 0,
         isPinned: false,
+        reply_to_id: replyToId,
+        replyPreview: replyPreviewObj,
+        reactions: {},
         has_attachment: hasAttachment,
         hasAttachment,
         attachment_name: fileName || null,
@@ -287,8 +381,63 @@ export async function handleMessageRoutes(request, env, path, method) {
     }
   }
 
+  // POST /api/chat/messages/:id/react - Toggle emoji reaction
+  if (path.startsWith('/api/chat/messages/') && path.endsWith('/react') && method === 'POST') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const msgId = path.split('/')[4];
+    const existing = await env.DB.prepare(`SELECT * FROM messages WHERE id = ?`).bind(msgId).first();
+    if (!existing) return errorResponse('Message not found', 404);
+
+    const access = await verifyChannelReadAccess(env, existing.channel, auth.user);
+    if (access.error) return access.error;
+
+    try {
+      const body = await request.json();
+      const emoji = String(body.emoji || '').trim();
+      if (!ALLOWED_REACTIONS.has(emoji)) {
+        return errorResponse('Unsupported reaction emoji', 400);
+      }
+
+      let reactions = {};
+      try {
+        reactions = existing.reactions_json ? JSON.parse(existing.reactions_json) : {};
+      } catch { reactions = {}; }
+
+      const list = Array.isArray(reactions[emoji]) ? [...reactions[emoji]] : [];
+      const idx = list.indexOf(auth.user.id);
+      if (idx === -1) {
+        list.push(auth.user.id);
+      } else {
+        list.splice(idx, 1);
+      }
+      if (list.length > 0) {
+        reactions[emoji] = list;
+      } else {
+        delete reactions[emoji];
+      }
+
+      await env.DB.prepare(
+        `UPDATE messages SET reactions_json = ? WHERE id = ?`
+      ).bind(JSON.stringify(reactions), msgId).run();
+
+      const targetUsers = await getTargetUsersForChannel(env, existing.channel);
+      broadcastChatEvent({
+        type: 'message_reacted',
+        channel: existing.channel,
+        id: msgId,
+        reactions,
+      }, targetUsers);
+
+      return successResponse({ id: msgId, reactions }, 'Reaction updated');
+    } catch (err) {
+      return errorResponse(`Reaction error: ${err.message}`, 500);
+    }
+  }
+
   // PUT /api/chat/messages/:id
-  if (path.startsWith('/api/chat/messages/') && !path.includes('/attachments') && method === 'PUT') {
+  if (path.startsWith('/api/chat/messages/') && !path.includes('/attachments') && !path.endsWith('/pin') && !path.endsWith('/react') && method === 'PUT') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
 
@@ -315,11 +464,21 @@ export async function handleMessageRoutes(request, env, path, method) {
         return errorResponse('Expired messages older than 7 days cannot be edited', 400);
       }
 
+      const trimmed = content.trim();
       await env.DB.prepare(`
         UPDATE messages SET content = ?, is_edited = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-      `).bind(content.trim(), msgId).run();
+      `).bind(trimmed, msgId).run();
 
-      return successResponse({ id: msgId, content: content.trim(), isEdited: 1 }, 'Message updated successfully');
+      const targetUsers = await getTargetUsersForChannel(env, existing.channel);
+      broadcastChatEvent({
+        type: 'message_updated',
+        channel: existing.channel,
+        id: msgId,
+        content: trimmed,
+        isEdited: 1,
+      }, targetUsers);
+
+      return successResponse({ id: msgId, content: trimmed, isEdited: 1 }, 'Message updated successfully');
     } catch (err) {
       return errorResponse(`Message edit failed: ${err.message}`, 500);
     }
@@ -360,11 +519,19 @@ export async function handleMessageRoutes(request, env, path, method) {
       `UPDATE messages SET is_pinned = ?, pinned_by = ? WHERE id = ?`
     ).bind(nextPinned, nextPinned === 1 ? auth.user.id : null, msgId).run();
 
+    const targetUsers = await getTargetUsersForChannel(env, existing.channel);
+    broadcastChatEvent({
+      type: 'message_pinned',
+      channel: existing.channel,
+      id: msgId,
+      isPinned: nextPinned === 1,
+    }, targetUsers);
+
     return successResponse({ id: msgId, isPinned: nextPinned === 1 }, nextPinned === 1 ? 'Message pinned!' : 'Message unpinned');
   }
 
   // DELETE /api/chat/messages/:id
-  if (path.startsWith('/api/chat/messages/') && !path.includes('/attachments') && !path.endsWith('/pin') && method === 'DELETE') {
+  if (path.startsWith('/api/chat/messages/') && !path.includes('/attachments') && !path.endsWith('/pin') && !path.endsWith('/react') && method === 'DELETE') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
 
@@ -429,6 +596,13 @@ export async function handleMessageRoutes(request, env, path, method) {
         env.DB.prepare(`DELETE FROM message_attachments WHERE message_id = ?`).bind(msgId),
         env.DB.prepare(`DELETE FROM messages WHERE id = ?`).bind(msgId)
       ]);
+
+      const targetUsers = await getTargetUsersForChannel(env, existing.channel);
+      broadcastChatEvent({
+        type: 'message_deleted',
+        channel: existing.channel,
+        id: msgId,
+      }, targetUsers);
 
       return successResponse({ id: msgId }, 'Message deleted successfully');
     } catch (err) {

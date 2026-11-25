@@ -19,22 +19,32 @@
           Daily Assignments
         </span>
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Class Homework Feed</h1>
-        <p class="text-xs text-[var(--md-on-surface-variant)]">Clear instructions, due dates, and worksheets posted by your subject &amp; class teachers.</p>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Clear instructions, due dates, worksheets &amp; your personal completion checklist.</p>
       </div>
     </div>
 
-    <div class="m3-card p-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-      <div class="relative">
-        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-        <input type="text" id="hw-search" placeholder="Search homework topic..."
-          class="m3-input w-full pl-9 pr-3 py-2 rounded-full border border-[var(--md-outline)] bg-[var(--md-surface)] text-xs">
+    <div class="m3-card p-3.5 space-y-2.5">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="hw-search" placeholder="Search homework topic..."
+            class="m3-input w-full pl-9 pr-3 py-2 rounded-full border border-[var(--md-outline)] bg-[var(--md-surface)] text-xs">
+        </div>
+        <select id="hw-class" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-semibold bg-white">
+          <option value="">All Classes</option>
+        </select>
+        <select id="hw-subject" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-semibold bg-white">
+          <option value="">All Subjects</option>
+        </select>
       </div>
-      <select id="hw-class" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-semibold bg-white">
-        <option value="">All Classes</option>
-      </select>
-      <select id="hw-subject" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-semibold bg-white">
-        <option value="">All Subjects</option>
-      </select>
+      <div class="flex items-center justify-between pt-2 border-t border-[var(--md-outline)]">
+        <div class="flex items-center gap-1.5">
+          <button data-done="all" class="hw-done-chip m3-chip active px-3.5 py-1 text-[11px]">All</button>
+          <button data-done="pending" class="hw-done-chip m3-chip px-3.5 py-1 text-[11px] font-semibold">Pending</button>
+          <button data-done="done" class="hw-done-chip m3-chip px-3.5 py-1 text-[11px] font-semibold">Done</button>
+        </div>
+        <span id="hw-count-label" class="text-[11px] font-semibold text-[var(--md-on-surface-variant)] tabular-nums"></span>
+      </div>
     </div>
 
     <div id="homework-feed" class="space-y-3">
@@ -45,13 +55,27 @@
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { initDashboardShell } from '/js/layout.js';
-    import { CLASS_LIST, SUBJECT_LIST, escapeHtml, safeUrl, formatDate, renderRoleBadgeHtml, initIcons } from '/js/ui.js';
+    import { CLASS_LIST, SUBJECT_LIST, escapeHtml, safeUrl, formatDate, renderRoleBadgeHtml, initIcons, showToast } from '/js/ui.js';
 
     const user = initDashboardShell({ active: 'homework', mobileTitle: 'Homework' });
     const classSel = document.getElementById('hw-class');
     const subSel = document.getElementById('hw-subject');
     const searchInp = document.getElementById('hw-search');
     const feedEl = document.getElementById('homework-feed');
+    const countLabel = document.getElementById('hw-count-label');
+
+    const storageKey = `vs_hw_done_${user?.id || 'guest'}`;
+    function getDoneSet() {
+      try {
+        return new Set(JSON.parse(localStorage.getItem(storageKey) || '[]'));
+      } catch { return new Set(); }
+    }
+    function saveDoneSet(set) {
+      try { localStorage.setItem(storageKey, JSON.stringify([...set])); } catch { /* ignore */ }
+    }
+
+    let doneFilter = 'all';
+    let lastHomework = [];
 
     if (user?.className) {
       const opt = document.createElement('option');
@@ -88,6 +112,68 @@
       return `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Due in ${diff} days</span>`;
     }
 
+    function renderHomework() {
+      const doneSet = getDoneSet();
+      const filtered = lastHomework.filter(hw => {
+        const isDone = doneSet.has(hw.id);
+        if (doneFilter === 'done') return isDone;
+        if (doneFilter === 'pending') return !isDone;
+        return true;
+      });
+      if (countLabel) countLabel.textContent = `${filtered.length} task${filtered.length === 1 ? '' : 's'}`;
+
+      if (filtered.length === 0) {
+        feedEl.innerHTML = `<div class="m3-card p-10 text-center text-xs text-slate-400">No homework matching this filter yet.</div>`;
+        return;
+      }
+
+      feedEl.innerHTML = filtered.map(hw => {
+        const link = safeUrl(hw.resource_url);
+        const isDone = doneSet.has(hw.id);
+        return `
+          <article class="m3-card p-5 space-y-2.5 ${isDone ? 'opacity-80 bg-emerald-50/25' : ''}">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${escapeHtml(hw.class_name)}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${escapeHtml(hw.subject)}</span>
+                ${renderRoleBadgeHtml(hw.teacher_role || 'teacher', hw.teacher_type, hw.teacher_is_root_admin === 1)}
+              </div>
+              ${getDueBadge(hw.due_date)}
+            </div>
+            <h3 class="text-base font-extrabold ${isDone ? 'line-through text-slate-500' : ''}">${escapeHtml(hw.title)}</h3>
+            <p class="text-xs sm:text-sm text-[var(--md-on-surface-variant)] whitespace-pre-line leading-relaxed">${escapeHtml(hw.description)}</p>
+            <div class="pt-2.5 border-t border-[var(--md-outline)] flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-500">
+              <span>Assigned by <strong>${escapeHtml(hw.teacher_name || 'Faculty')}</strong> • ${escapeHtml(formatDate(hw.created_at))}</span>
+              <div class="flex items-center gap-2">
+                ${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="m3-btn-tonal px-3 py-1 text-[11px] inline-flex items-center gap-1"><i data-lucide="external-link" class="w-3 h-3"></i> Reference</a>` : ''}
+                <button type="button" class="hw-toggle-done px-3 py-1 rounded-full font-bold text-[11px] inline-flex items-center gap-1 transition ${
+                  isDone ? 'bg-emerald-600 text-white' : 'bg-[var(--md-surface-container)] text-[var(--md-on-surface)] hover:brightness-95'
+                }" data-id="${escapeHtml(hw.id)}">
+                  <i data-lucide="check" class="w-3 h-3"></i> ${isDone ? 'Done' : 'Mark Done'}
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+      initIcons();
+
+      feedEl.querySelectorAll('.hw-toggle-done').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = getDoneSet();
+          const id = btn.dataset.id;
+          if (s.has(id)) {
+            s.delete(id);
+          } else {
+            s.add(id);
+            showToast('Marked homework complete!', 'success');
+          }
+          saveDoneSet(s);
+          renderHomework();
+        });
+      });
+    }
+
     async function loadHomework() {
       const params = new URLSearchParams();
       if (classSel.value) params.append('className', classSel.value);
@@ -96,37 +182,21 @@
 
       try {
         const res = await apiRequest(`/homework?${params.toString()}`);
-        const list = res.homework || [];
-        if (list.length === 0) {
-          feedEl.innerHTML = `<div class="m3-card p-10 text-center text-xs text-slate-400">No homework posted for this selection yet.</div>`;
-          return;
-        }
-        feedEl.innerHTML = list.map(hw => {
-          const link = safeUrl(hw.resource_url);
-          return `
-            <article class="m3-card p-5 space-y-2.5">
-              <div class="flex items-center justify-between flex-wrap gap-2">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${escapeHtml(hw.class_name)}</span>
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${escapeHtml(hw.subject)}</span>
-                  ${renderRoleBadgeHtml('teacher', hw.teacher_type)}
-                </div>
-                ${getDueBadge(hw.due_date)}
-              </div>
-              <h3 class="text-base font-extrabold">${escapeHtml(hw.title)}</h3>
-              <p class="text-xs sm:text-sm text-[var(--md-on-surface-variant)] whitespace-pre-line leading-relaxed">${escapeHtml(hw.description)}</p>
-              <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                <span>Assigned by <strong>${escapeHtml(hw.teacher_name || 'Teacher')}</strong> • ${escapeHtml(formatDate(hw.created_at))}</span>
-                ${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="m3-btn-tonal px-3 py-1 text-[11px] inline-flex items-center gap-1"><i data-lucide="external-link" class="w-3 h-3"></i> Reference</a>` : ''}
-              </div>
-            </article>
-          `;
-        }).join('');
-        initIcons();
+        lastHomework = res.homework || [];
+        renderHomework();
       } catch (err) {
         feedEl.innerHTML = `<div class="m3-card p-6 text-rose-600 text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
+
+    document.querySelectorAll('.hw-done-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.hw-done-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        doneFilter = btn.dataset.done;
+        renderHomework();
+      });
+    });
 
     classSel.addEventListener('change', loadHomework);
     subSel.addEventListener('change', loadHomework);

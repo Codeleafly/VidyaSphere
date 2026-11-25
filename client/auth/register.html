@@ -83,11 +83,11 @@
           <div class="space-y-1.5">
             <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)]">Teacher Role Type</label>
             <div class="grid grid-cols-2 gap-2 text-xs">
-              <label class="cursor-pointer p-3 rounded-2xl bg-white border border-[var(--md-outline)] flex items-center gap-2">
+              <label id="t-type-card-subject" class="cursor-pointer p-3 rounded-2xl bg-white border-2 border-[var(--md-primary)] flex items-center gap-2 transition">
                 <input type="radio" name="teacherType" value="subject" checked>
                 <span><strong>Subject Teacher</strong><br><span class="text-[10px] text-slate-500">Teach multiple classes</span></span>
               </label>
-              <label class="cursor-pointer p-3 rounded-2xl bg-white border border-[var(--md-outline)] flex items-center gap-2">
+              <label id="t-type-card-class" class="cursor-pointer p-3 rounded-2xl bg-white border border-[var(--md-outline)] flex items-center gap-2 transition">
                 <input type="radio" name="teacherType" value="class">
                 <span><strong>Class Teacher</strong><br><span class="text-[10px] text-slate-500">Approve class students &amp; tests</span></span>
               </label>
@@ -114,6 +114,26 @@
             <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1.5">Assigned Subjects (Tap to select)</label>
             <div id="t-subjects-chips" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1"></div>
           </div>
+
+          <!-- Extra Teacher Verification Information -->
+          <div class="pt-2 border-t border-[var(--md-outline)] space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">
+                Qualification / Designation <span class="font-normal lowercase text-slate-400">(optional)</span>
+              </label>
+              <input type="text" id="teacherDesignation" maxlength="140"
+                class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] bg-white text-xs"
+                placeholder="e.g. M.Sc. Physics, B.Ed • Senior Science Faculty">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">
+                Role Purpose &amp; Additional Info <span class="font-normal lowercase text-slate-400">(helps Admin verify faster)</span>
+              </label>
+              <textarea id="teacherInfo" rows="2" maxlength="600"
+                class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] bg-white text-xs"
+                placeholder="Briefly explain what you teach or will manage (e.g. Class 9-10 Algebra lessons, weekly MCQ quizzes, lab supervision)..."></textarea>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -130,9 +150,14 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Create Password</label>
-            <input type="password" id="password" required minlength="6"
-              class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm"
-              placeholder="Min 6 characters">
+            <div class="relative">
+              <input type="password" id="password" required minlength="6"
+                class="m3-input w-full px-3.5 pr-9 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm"
+                placeholder="Min 6 characters">
+              <button type="button" id="toggle-reg-pw" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700" title="Show/Hide">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Confirm Password</label>
@@ -158,9 +183,12 @@
         </button>
       </form>
 
-      <div class="border-t border-[var(--md-outline)] pt-3 text-center">
-        <a href="/auth/login.html" class="text-xs font-bold text-[var(--md-primary)] hover:underline">
+      <div class="border-t border-[var(--md-outline)] pt-3 flex items-center justify-between text-xs">
+        <a href="/auth/login.html" class="font-bold text-[var(--md-primary)] hover:underline">
           Already have an account? Sign In &rarr;
+        </a>
+        <a href="/guide.html" class="font-semibold text-[var(--md-on-surface-variant)] hover:text-[var(--md-primary)]">
+          Guide
         </a>
       </div>
     </div>
@@ -172,6 +200,11 @@
     import { CLASS_LIST, SUBJECT_LIST, escapeHtml, showToast, initIcons } from '/js/ui.js';
 
     initIcons();
+
+    const pwInput = document.getElementById('password');
+    document.getElementById('toggle-reg-pw')?.addEventListener('click', () => {
+      pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
+    });
 
     let selectedRole = 'student';
     const selectedClasses = new Set();
@@ -227,9 +260,14 @@
     btnStu.addEventListener('click', () => setRoleMode('student'));
     btnTch.addEventListener('click', () => setRoleMode('teacher'));
 
+    const cardSub = document.getElementById('t-type-card-subject');
+    const cardCls = document.getElementById('t-type-card-class');
     document.querySelectorAll('input[name="teacherType"]').forEach(r => {
       r.addEventListener('change', (e) => {
-        document.getElementById('class-teacher-primary-row').classList.toggle('hidden', e.target.value !== 'class');
+        const isCls = e.target.value === 'class';
+        document.getElementById('class-teacher-primary-row').classList.toggle('hidden', !isCls);
+        cardSub.className = `cursor-pointer p-3 rounded-2xl bg-white ${!isCls ? 'border-2 border-[var(--md-primary)]' : 'border border-[var(--md-outline)]'} flex items-center gap-2 transition`;
+        cardCls.className = `cursor-pointer p-3 rounded-2xl bg-white ${isCls ? 'border-2 border-[var(--md-primary)]' : 'border border-[var(--md-outline)]'} flex items-center gap-2 transition`;
       });
     });
 
@@ -239,7 +277,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const password = document.getElementById('password').value;
+      const password = pwInput.value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       if (password !== confirmPassword) {
         showToast('Passwords do not match.', 'error');
@@ -275,6 +313,8 @@
         payload.teacherType = tType;
         payload.assignedClasses = classesArr;
         payload.assignedSubjects = Array.from(selectedSubjects);
+        payload.teacherDesignation = document.getElementById('teacherDesignation').value.trim();
+        payload.teacherInfo = document.getElementById('teacherInfo').value.trim();
 
         if (payload.assignedClasses.length === 0) {
           showToast('Select at least one assigned class', 'warning');

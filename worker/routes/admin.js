@@ -1,12 +1,12 @@
 /**
- * Admin Routes: Approvals (Students & Teachers), Roster, Role Hierarchy & Teacher Protection
+ * Admin Routes: Approvals (Students & Teachers), Roster, Role Hierarchy, Teacher Protection & Audit Logs
  */
 
 import { errorResponse, successResponse } from '../utils/response.js';
 import { generateId } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
 import { sendActivationEmail } from '../utils/email.js';
-import { parseStringList } from '../utils/teacherScope.js';
+import { parseStringList, sanitizeProfileRow } from '../utils/teacherScope.js';
 
 export async function handleAdminRoutes(request, env, path, method) {
   const auth = await authenticate(request, env, ['admin']);
@@ -23,8 +23,8 @@ export async function handleAdminRoutes(request, env, path, method) {
 
     let query = `
       SELECT id, username, full_name, class_name, division, roll_number, email, role,
-             teacher_type, assigned_classes, assigned_subjects, allow_student_dms,
-             account_status, account_status as review_status, rejection_reason, created_at
+             teacher_type, assigned_classes, assigned_subjects, teacher_designation, teacher_info,
+             allow_student_dms, account_status, account_status as review_status, rejection_reason, created_at
       FROM profiles
       WHERE is_root_admin = 0 AND username != 'admin'
     `;
@@ -54,7 +54,7 @@ export async function handleAdminRoutes(request, env, path, method) {
 
       const applicant = await env.DB.prepare(
         `SELECT id, username, full_name, email, role, account_status, class_name, division,
-                teacher_type, assigned_classes, assigned_subjects
+                teacher_type, assigned_classes, assigned_subjects, teacher_designation, teacher_info
          FROM profiles WHERE id = ? OR username = ?`
       ).bind(targetId, targetId).first();
 
@@ -191,15 +191,15 @@ export async function handleAdminRoutes(request, env, path, method) {
     }
   }
 
-  // POST /api/admin/teacher-profile - Lead & Secondary Admins can adjust Teacher assignments during/after approval
+  // POST /api/admin/teacher-profile - Lead & Secondary Admins can adjust Teacher assignments
   if (path === '/api/admin/teacher-profile' && method === 'POST') {
     try {
       const body = await request.json();
-      const { userId, teacherType, assignedClasses, assignedSubjects, className, division } = body;
+      const { userId, teacherType, assignedClasses, assignedSubjects, className, division, teacherDesignation, teacherInfo } = body;
       if (!userId) return errorResponse('userId is required', 400);
 
       const target = await env.DB.prepare(
-        `SELECT id, username, role, class_name, division, teacher_type, assigned_classes, assigned_subjects
+        `SELECT id, username, role, class_name, division, teacher_type, assigned_classes, assigned_subjects, teacher_designation, teacher_info
          FROM profiles WHERE id = ? OR username = ?`
       ).bind(userId, userId).first();
 
@@ -211,6 +211,8 @@ export async function handleAdminRoutes(request, env, path, method) {
       const nextSubjects = assignedSubjects !== undefined ? parseStringList(assignedSubjects) : parseStringList(target.assigned_subjects);
       const nextClassName = className !== undefined ? String(className).trim() : (nextClasses[0] || target.class_name);
       const nextDivision = division !== undefined ? String(division).trim().toUpperCase() : target.division;
+      const nextDesig = teacherDesignation !== undefined ? String(teacherDesignation || '').trim().slice(0, 140) : (target.teacher_designation || '');
+      const nextInfo = teacherInfo !== undefined ? String(teacherInfo || '').trim().slice(0, 600) : (target.teacher_info || '');
 
       if (nextType === 'class' && nextClassName && !nextClasses.includes(nextClassName)) {
         nextClasses.unshift(nextClassName);
@@ -219,9 +221,10 @@ export async function handleAdminRoutes(request, env, path, method) {
       await env.DB.batch([
         env.DB.prepare(
           `UPDATE profiles
-           SET teacher_type = ?, assigned_classes = ?, assigned_subjects = ?, class_name = ?, division = ?, updated_at = CURRENT_TIMESTAMP
+           SET teacher_type = ?, assigned_classes = ?, assigned_subjects = ?, class_name = ?, division = ?,
+               teacher_designation = ?, teacher_info = ?, updated_at = CURRENT_TIMESTAMP
            WHERE id = ?`
-        ).bind(nextType, JSON.stringify(nextClasses), JSON.stringify(nextSubjects), nextClassName, nextDivision, target.id),
+        ).bind(nextType, JSON.stringify(nextClasses), JSON.stringify(nextSubjects), nextClassName, nextDivision, nextDesig, nextInfo, target.id),
         env.DB.prepare(
           `INSERT INTO audit_logs (id, action, actor_id, details) VALUES (?, 'UPDATE_TEACHER_ASSIGNMENT', ?, ?)`
         ).bind(generateId('log', 8), auth.user.id, `Updated assignments for teacher @${target.username}`),
@@ -234,6 +237,8 @@ export async function handleAdminRoutes(request, env, path, method) {
         assignedSubjects: nextSubjects,
         className: nextClassName,
         division: nextDivision,
+        teacherDesignation: nextDesig,
+        teacherInfo: nextInfo,
       }, `Teacher @${target.username} assignments updated!`);
     } catch (err) {
       return errorResponse(`Update teacher profile error: ${err.message}`, 500);
@@ -250,8 +255,8 @@ export async function handleAdminRoutes(request, env, path, method) {
 
     let query = `
       SELECT id, username, full_name, class_name, division, roll_number, email, role,
-             teacher_type, assigned_classes, assigned_subjects, allow_student_dms,
-             account_status, is_root_admin, created_at
+             teacher_type, assigned_classes, assigned_subjects, teacher_designation, teacher_info,
+             allow_student_dms, account_status, is_root_admin, created_at
       FROM profiles
       WHERE 1=1
     `;
@@ -277,7 +282,7 @@ export async function handleAdminRoutes(request, env, path, method) {
     query += ` ORDER BY is_root_admin DESC, (CASE role WHEN 'admin' THEN 0 WHEN 'teacher' THEN 1 ELSE 2 END), class_name ASC, division ASC, CAST(roll_number AS INTEGER) ASC`;
 
     const { results } = await env.DB.prepare(query).bind(...params).all();
-    return successResponse({ students: results || [] });
+    return successResponse({ students: (results || []).map(sanitizeProfileRow) });
   }
 
   // POST /api/admin/student-status - Suspend or reactivate (Root Admin & Active Teachers protected!)
@@ -330,7 +335,7 @@ export async function handleAdminRoutes(request, env, path, method) {
   if (path === '/api/admin/change-role' && method === 'POST') {
     try {
       const body = await request.json();
-      const { userId, newRole, teacherType, assignedClasses, assignedSubjects } = body;
+      const { userId, newRole, teacherType, assignedClasses, assignedSubjects, className, division, teacherDesignation } = body;
 
       if (!userId || !['student', 'teacher', 'admin'].includes(newRole)) {
         return errorResponse('Valid userId and newRole (student|teacher|admin) are required', 400);
@@ -341,7 +346,7 @@ export async function handleAdminRoutes(request, env, path, method) {
       }
 
       const target = await env.DB.prepare(
-        `SELECT id, username, is_root_admin, teacher_type, assigned_classes, assigned_subjects FROM profiles WHERE id = ? OR username = ?`
+        `SELECT id, username, class_name, division, is_root_admin, teacher_type, assigned_classes, assigned_subjects, teacher_designation FROM profiles WHERE id = ? OR username = ?`
       ).bind(userId, userId).first();
 
       if (!target) return errorResponse('Target user not found', 404);
@@ -353,19 +358,25 @@ export async function handleAdminRoutes(request, env, path, method) {
       const nextTeacherType = newRole === 'teacher'
         ? (['subject', 'class'].includes(teacherType) ? teacherType : (target.teacher_type || 'subject'))
         : null;
-      const nextClasses = newRole === 'teacher'
-        ? JSON.stringify(assignedClasses !== undefined ? parseStringList(assignedClasses) : parseStringList(target.assigned_classes))
-        : '[]';
-      const nextSubjects = newRole === 'teacher'
-        ? JSON.stringify(assignedSubjects !== undefined ? parseStringList(assignedSubjects) : parseStringList(target.assigned_subjects))
-        : '[]';
+      const nextClassesList = newRole === 'teacher'
+        ? (assignedClasses !== undefined ? parseStringList(assignedClasses) : parseStringList(target.assigned_classes))
+        : [];
+      const nextSubjectsList = newRole === 'teacher'
+        ? (assignedSubjects !== undefined ? parseStringList(assignedSubjects) : parseStringList(target.assigned_subjects))
+        : [];
+      const nextClassName = className !== undefined ? String(className).trim() : target.class_name;
+      const nextDivision = division !== undefined ? String(division).trim().toUpperCase() : target.division;
+      const nextDesig = newRole === 'teacher' && teacherDesignation !== undefined
+        ? String(teacherDesignation).trim().slice(0, 140)
+        : (target.teacher_designation || '');
 
       await env.DB.batch([
         env.DB.prepare(
           `UPDATE profiles
-           SET role = ?, teacher_type = ?, assigned_classes = ?, assigned_subjects = ?, updated_at = CURRENT_TIMESTAMP
+           SET role = ?, teacher_type = ?, assigned_classes = ?, assigned_subjects = ?,
+               class_name = ?, division = ?, teacher_designation = ?, updated_at = CURRENT_TIMESTAMP
            WHERE id = ?`
-        ).bind(newRole, nextTeacherType, nextClasses, nextSubjects, target.id),
+        ).bind(newRole, nextTeacherType, JSON.stringify(nextClassesList), JSON.stringify(nextSubjectsList), nextClassName, nextDivision, nextDesig, target.id),
         env.DB.prepare(
           `INSERT INTO audit_logs (id, action, actor_id, details)
            VALUES (?, 'ROLE_CHANGED', ?, ?)`
@@ -434,6 +445,20 @@ export async function handleAdminRoutes(request, env, path, method) {
         totalQuizzes: totalQuizzes ? totalQuizzes.count : 0,
       }
     });
+  }
+
+  // GET /api/admin/audit-logs - Recent administrative & faculty actions
+  if (path === '/api/admin/audit-logs' && method === 'GET') {
+    const { results } = await env.DB.prepare(
+      `SELECT l.id, l.action, l.actor_id, l.details,
+              strftime('%Y-%m-%dT%H:%M:%SZ', l.created_at) as created_at,
+              p.full_name as actor_name, p.username as actor_username, p.role as actor_role, p.is_root_admin as actor_is_root_admin
+       FROM audit_logs l
+       LEFT JOIN profiles p ON l.actor_id = p.id
+       ORDER BY l.created_at DESC, l.rowid DESC
+       LIMIT 80`
+    ).all();
+    return successResponse({ logs: results || [] });
   }
 
   // GET /api/admin/settings

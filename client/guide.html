@@ -3,189 +3,249 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student User Guide &amp; Manual | VidyaSphere</title>
+  <title>Student &amp; Teacher Guide | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] antialiased min-h-screen flex flex-col justify-between">
 
-  <header class="sticky top-0 z-40 glass border-b border-slate-200/80">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-      <a href="/index.html" class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm">
+  <!-- Material You Top App Bar -->
+  <header class="sticky top-0 z-40 glass border-b border-[var(--md-outline)]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <a href="/index.html?landing=1" class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-2xl bg-[var(--md-primary)] flex items-center justify-center text-[var(--md-on-primary)] shadow-sm">
           <i data-lucide="graduation-cap" class="w-5 h-5"></i>
         </div>
         <div>
-          <span class="text-lg font-extrabold text-slate-900">VidyaSphere</span>
-          <span class="hidden sm:inline-block text-xs text-slate-400 ml-2 font-medium">Student Manual</span>
+          <span class="text-lg font-extrabold tracking-tight">VidyaSphere</span>
+          <span class="hidden sm:inline-block text-xs text-[var(--md-on-surface-variant)] ml-2 font-medium">Student &amp; Teacher Guide</span>
         </div>
       </a>
-      <div class="flex items-center gap-2">
-        <a href="/dashboard/index.html" class="px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition flex items-center gap-1.5">
-          <i data-lucide="layout-dashboard" class="w-4 h-4 text-indigo-600"></i> Dashboard
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div id="guide-theme-dots" class="hidden sm:flex items-center"></div>
+        <a href="/dashboard/index.html" class="m3-btn-tonal px-3.5 py-2 text-xs inline-flex items-center gap-1.5">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> Portal
         </a>
-        <a href="/auth/login.html" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-slate-900 hover:bg-indigo-600 rounded-xl transition">Sign In</a>
+        <a href="/auth/login.html" class="m3-btn-primary px-4 py-2 text-xs">Sign In</a>
       </div>
     </div>
   </header>
 
-  <section class="bg-slate-950 text-white py-12 px-4 sm:px-6 border-b border-slate-800">
-    <div class="max-w-3xl mx-auto text-center space-y-4">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-semibold">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        Official Student Handout &amp; Platform Guide
-      </div>
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Master VidyaSphere in 5 Minutes</h1>
-      <p class="text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
-        Everything you need to know about sharing notes, checking exam timetables, clearing homework doubts, and messaging safely without personal phone numbers.
-      </p>
-      <div class="pt-1 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-300 font-mono">
-        <span class="bg-white/5 px-3 py-1 rounded-lg border border-white/10">Class 1 to 12</span>
-        <span class="bg-white/5 px-3 py-1 rounded-lg border border-white/10">Consent-First DMs</span>
-        <span class="bg-white/5 px-3 py-1 rounded-lg border border-white/10">15MB Academic Notes</span>
-      </div>
-    </div>
-  </section>
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6 flex-1 w-full">
 
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-6 flex-1 w-full">
-    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 flex flex-wrap gap-2 text-xs font-bold">
-      <a href="#vision" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition">Vision</a>
-      <a href="#registration" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Account Setup</a>
-      <a href="#notes" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Notes (15MB Limit)</a>
-      <a href="#exams" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Exam Timetables</a>
-      <a href="#chat" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Chat &amp; 7-Day Purge</a>
-      <a href="#qa-polls" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">Q&amp;A &amp; Polls</a>
-      <a href="#faqs" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">FAQs</a>
-    </div>
-
-    <article id="vision" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-3">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i> What is VidyaSphere &amp; Why Was It Built?
-      </h2>
-      <p class="text-sm text-slate-600 leading-relaxed">
-        VidyaSphere is a distraction-free school ecosystem founded and engineered by <strong>Sriramik Sanjiv Sahu</strong> (Class 9th Shraddha). Instead of sharing personal phone numbers in chaotic messaging groups just to get homework notes or exam datesheets, students get one verified academic space for Class 1 to 12.
-      </p>
-    </article>
-
-    <article id="registration" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i data-lucide="user-check" class="w-5 h-5 text-purple-600"></i> 1. Direct Registration &amp; 1-Click Approval
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-          <span class="font-bold text-indigo-600 uppercase text-[10px]">Step 1</span>
-          <h4 class="font-bold text-slate-900">Create Account</h4>
-          <p class="text-slate-600">Select your Class (1–12), division, and roll number, and set your username and password immediately.</p>
+    <!-- Material You Hero Header + Dual Guide Switcher -->
+    <section class="m3-tonal-box p-6 sm:p-8 border border-[var(--md-outline)] space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-2">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[var(--md-outline)] text-[11px] font-bold">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Complete Ecosystem Manual
+          </span>
+          <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">Student &amp; Teacher Guide</h1>
+          <p class="text-xs sm:text-sm text-[var(--md-on-surface-variant)] max-w-2xl leading-relaxed">
+            Everything students, faculty, and school admins need to master lessons, 5-minute MCQ quizzes, compressed study notes, exams, Q&amp;A, and consent-first chat.
+          </p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-          <span class="font-bold text-indigo-600 uppercase text-[10px]">Step 2</span>
-          <h4 class="font-bold text-slate-900">Live Waiting Screen</h4>
-          <p class="text-slate-600">After signup, you are logged in to a real-time waiting screen while your profile awaits verification.</p>
-        </div>
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-          <span class="font-bold text-indigo-600 uppercase text-[10px]">Step 3</span>
-          <h4 class="font-bold text-slate-900">Automatic Unlock</h4>
-          <p class="text-slate-600">Once the Lead Admin approves with 1 click, your dashboard unlocks automatically—no activation codes needed!</p>
+
+        <!-- Dual Guide Mode Segmented Switch -->
+        <div class="inline-flex p-1 rounded-full bg-white border border-[var(--md-outline)] shrink-0 self-start">
+          <button type="button" data-guide-mode="all" class="guide-mode-btn px-3.5 py-2 rounded-full text-xs font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] transition">All</button>
+          <button type="button" data-guide-mode="student" class="guide-mode-btn px-3.5 py-2 rounded-full text-xs font-semibold text-[var(--md-on-surface-variant)] transition">Student Guide</button>
+          <button type="button" data-guide-mode="teacher" class="guide-mode-btn px-3.5 py-2 rounded-full text-xs font-semibold text-[var(--md-on-surface-variant)] transition">Teacher Guide</button>
         </div>
       </div>
-    </article>
 
-    <article id="notes" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i data-lucide="book-open" class="w-5 h-5 text-emerald-600"></i> 2. Academic Notes Hub &amp; Storage Quotas
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
-          <div class="font-bold text-emerald-900">Max 15 MB Per Direct File</div>
-          <p class="text-emerald-800">Direct PDF and image uploads up to <strong>15 MB</strong> are gzip-compressed automatically (saving 40–60% storage) and stay active for 30 days.</p>
-        </div>
-        <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
-          <div class="font-bold text-indigo-900">4/24h Students &amp; 20/24h Teachers</div>
-          <p class="text-indigo-800">Students can upload up to 4 direct files/day and Teachers up to 20 verified files/day. <strong>Google Drive links</strong> are unlimited and permanent for the academic year!</p>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <span class="px-3 py-1 rounded-full bg-white border border-[var(--md-outline)] font-bold">Class 1 to 12</span>
+        <span class="px-3 py-1 rounded-full bg-white border border-[var(--md-outline)] font-bold">15MB Gzip Notes</span>
+        <span class="px-3 py-1 rounded-full bg-white border border-[var(--md-outline)] font-bold">Teacher Studio &amp; Quizzes</span>
+        <span class="px-3 py-1 rounded-full bg-white border border-[var(--md-outline)] font-bold">Consent-First DMs</span>
+      </div>
+    </section>
+
+    <!-- STUDENT GUIDE SECTION -->
+    <section id="student-guide" class="guide-section space-y-4">
+      <div class="flex items-center gap-2.5 px-1">
+        <span class="w-9 h-9 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center">
+          <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+        </span>
+        <div>
+          <h2 class="text-xl font-extrabold">Student Guide</h2>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">How students join, learn, share notes, and message safely</p>
         </div>
       </div>
-    </article>
 
-    <article class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i> Teacher Studio, Lessons, 5-Min Quizzes &amp; Homework
-      </h2>
-      <p class="text-sm text-slate-600 leading-relaxed">
-        Subject Teachers &amp; Class Teachers have a dedicated <strong>Teacher Studio</strong> (<code>/teacher/index.html</code>) to publish chapter lessons (with click-to-load YouTube Unlisted embeds &amp; Drive PDFs), 5-minute auto-graded MCQ quizzes, daily homework, and scoped class notices — plus privacy controls for student DMs.
-      </p>
-    </article>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <article class="m3-card p-5 space-y-2.5">
+          <h3 class="font-extrabold text-sm flex items-center gap-2">
+            <i data-lucide="user-check" class="w-4 h-4 text-[var(--md-primary)]"></i> 1. Direct Registration &amp; 1-Click Approval
+          </h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+            Register with your Class (1–12), Division, Roll Number, Username, and Password. Your account stays on a real-time Waiting Screen until your <strong>Class Teacher</strong> or <strong>School Admin</strong> approves with 1 click — zero activation codes required!
+          </p>
+        </article>
 
-    <article id="exams" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i> 3. Official Examination Timetables
-      </h2>
-      <p class="text-sm text-slate-600 leading-relaxed">
-        Visit <a href="/dashboard/exams.html" class="text-indigo-600 font-bold underline">Exams &amp; Timetable</a> to filter schedules by your class, see live countdowns, hall/room numbers, syllabus topics, and Google Drive datesheet links.
-      </p>
-    </article>
+        <article class="m3-card p-5 space-y-2.5">
+          <h3 class="font-extrabold text-sm flex items-center gap-2">
+            <i data-lucide="play-circle" class="w-4 h-4 text-purple-700"></i> 2. Lessons, 5-Min Quizzes &amp; Homework
+          </h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+            Watch teacher video lessons on tap (data-saver mode never auto-loads video streams), attempt auto-graded 5-minute MCQ quizzes with instant answer-key explanations, and track daily homework with your local Done checklist.
+          </p>
+        </article>
 
-    <article id="chat" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i data-lucide="messages-square" class="w-5 h-5 text-blue-600"></i> 4. Realtime Chat, Study Groups &amp; 7-Day Auto-Purge
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
-          <h4 class="font-bold text-amber-950">7-Day Ephemeral Auto-Purge</h4>
-          <p class="text-amber-800">All chat messages and attachments automatically vanish after 7 days to keep storage light and privacy clean.</p>
+        <article class="m3-card p-5 space-y-2.5">
+          <h3 class="font-extrabold text-sm flex items-center gap-2">
+            <i data-lucide="book-open" class="w-4 h-4 text-emerald-700"></i> 3. Academic Notes (15MB Gzip &amp; Drive)
+          </h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+            Upload up to <strong>4 direct PDFs/images per day</strong> (up to 15MB, gzip-compressed for 30 days) or share <strong>unlimited permanent Google Drive links</strong> valid for the entire academic year. Look for the <strong>Teacher Verified</strong> badge!
+          </p>
+        </article>
+
+        <article class="m3-card p-5 space-y-2.5">
+          <h3 class="font-extrabold text-sm flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4 text-amber-700"></i> 4. Exams, Q&amp;A &amp; School Polls
+          </h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+            Check live countdowns for Board Exams and Class Unit Tests, ask homework doubts in Q&amp;A (with Accepted &amp; Faculty Endorsed answers), and vote once in duplicate-proof school polls.
+          </p>
+        </article>
+      </div>
+
+      <article class="m3-card p-5 space-y-3">
+        <h3 class="font-extrabold text-sm flex items-center gap-2">
+          <i data-lucide="messages-square" class="w-4 h-4 text-[var(--md-primary)]"></i> 5. Realtime Chat, Replies, Study Groups &amp; Privacy
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div class="p-3.5 rounded-2xl bg-[var(--md-surface-container)] space-y-1">
+            <p class="font-bold">7-Day Auto-Purge</p>
+            <p class="text-[11px] text-[var(--md-on-surface-variant)]">Messages and attachments vanish automatically after 7 days.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[var(--md-surface-container)] space-y-1">
+            <p class="font-bold">Consent-First DMs</p>
+            <p class="text-[11px] text-[var(--md-on-surface-variant)]">No phone numbers needed. Private DMs &amp; study groups unlock only after acceptance.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[var(--md-surface-container)] space-y-1">
+            <p class="font-bold">Replies &amp; Reactions</p>
+            <p class="text-[11px] text-[var(--md-on-surface-variant)]">Quote-reply messages, react with emojis, and search channel history fast.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[var(--md-surface-container)] space-y-1">
+            <p class="font-bold">Lazy Downloads</p>
+            <p class="text-[11px] text-[var(--md-on-surface-variant)]">Attachments &amp; images stay unloaded until you tap Get or Preview.</p>
+          </div>
         </div>
-        <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
-          <h4 class="font-bold text-indigo-950">Consent-First DMs &amp; Groups</h4>
-          <p class="text-indigo-800">1-on-1 DMs and Study Group invitations require recipient acceptance before messages unlock.</p>
-        </div>
-        <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
-          <h4 class="font-bold text-emerald-950">Lossless Compressed Attachments</h4>
-          <p class="text-emerald-800">Files up to 15MB are compressed losslessly with gzip and restore byte-for-byte on download.</p>
-        </div>
-        <div class="p-4 rounded-xl border border-blue-200 bg-blue-50/50 space-y-1">
-          <h4 class="font-bold text-blue-950">Zero-Waste Lazy Downloads</h4>
-          <p class="text-blue-800">Chat attachments never auto-download on mobile data; they download only when you tap <strong>Get</strong>.</p>
+      </article>
+    </section>
+
+    <!-- TEACHER GUIDE SECTION -->
+    <section id="teacher-guide" class="guide-section space-y-4">
+      <div class="flex items-center gap-2.5 px-1">
+        <span class="w-9 h-9 rounded-2xl bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] flex items-center justify-center">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </span>
+        <div>
+          <h2 class="text-xl font-extrabold">Teacher Guide (Faculty Studio &amp; Roles)</h2>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">Guide for Subject Teachers, Class Teachers, and Admins using Teacher Studio</p>
         </div>
       </div>
-    </article>
 
-    <article id="qa-polls" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-3">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i data-lucide="vote" class="w-5 h-5 text-amber-600"></i> 5. Academic Q&amp;A &amp; Duplicate-Proof Polls
-      </h2>
-      <p class="text-sm text-slate-600 leading-relaxed">
-        Ask homework questions in Q&amp;A and mark the best response as the <strong>Accepted Solution</strong>. Vote in school polls backed by unique per-user constraints so every student gets exactly one vote.
-      </p>
-    </article>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <article class="m3-card p-5 space-y-2.5">
+          <h3 class="font-extrabold text-sm flex items-center gap-2">
+            <i data-lucide="id-card" class="w-4 h-4 text-[var(--md-primary)]"></i> 1. Subject Teacher vs Class Teacher Onboarding
+          </h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+            Register directly under the <strong>Teacher</strong> tab — no staff code needed. Select your assigned Classes, Subjects, Designation/Qualification, and describe what you will teach or handle so the Admin can review and approve with 1 click.
+          </p>
+        </article>
 
-    <article id="faqs" class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-3 text-xs">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i data-lucide="help-circle" class="w-5 h-5 text-cyan-600"></i> 6. FAQs &amp; Mobile Install
+        <article class="m3-card p-5 space-y-2.5">
+          <h3 class="font-extrabold text-sm flex items-center gap-2">
+            <i data-lucide="video" class="w-4 h-4 text-rose-700"></i> 2. Chapter Lessons &amp; 20/Day Verified Notes
+          </h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+            In <strong>Teacher Studio</strong> (<code>/teacher/index.html</code>), share unlisted YouTube class videos, Drive PDFs, and summaries. Teachers receive a <strong>20 files/24h quota</strong> and an automatic <strong>Teacher Verified</strong> badge on uploaded notes.
+          </p>
+        </article>
+
+        <article class="m3-card p-5 space-y-2.5">
+          <h3 class="font-extrabold text-sm flex items-center gap-2">
+            <i data-lucide="check-square" class="w-4 h-4 text-purple-700"></i> 3. 5-Min MCQ Quizzes &amp; Homework Feed
+          </h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+            Build quick auto-graded MCQ quizzes with explanations (answer keys stay hidden from students until submission) and track student scores. Post daily homework with due dates and reference links without grading overhead.
+          </p>
+        </article>
+
+        <article class="m3-card p-5 space-y-2.5">
+          <h3 class="font-extrabold text-sm flex items-center gap-2">
+            <i data-lucide="shield" class="w-4 h-4 text-emerald-700"></i> 4. Class Teacher Approvals, Unit Tests &amp; Privacy
+          </h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+            <strong>Class Teachers</strong> can approve pending students and schedule Unit/Class Tests scoped strictly to their assigned class. All Teachers can post scoped class notices, endorse Q&amp;A answers, pin/moderate taught class &amp; <code>#academics</code> chats, and toggle <strong>Allow Student DMs</strong> anytime.
+          </p>
+        </article>
+      </div>
+
+      <article class="m3-card p-5 space-y-2 border-l-4 border-l-amber-500">
+        <h3 class="font-extrabold text-sm flex items-center gap-2">
+          <i data-lucide="crown" class="w-4 h-4 text-amber-600"></i> Admin &amp; Lead Admin Unified Access
+        </h3>
+        <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+          Both <strong>Lead Admin</strong> and <strong>Secondary Admins</strong> can seamlessly switch across <strong>Admin Core</strong>, <strong>Teacher Studio</strong>, and the <strong>Student Portal</strong> to publish lessons, quizzes, unit tests, and official school circulars. Lead Admin holds exclusive authority over role promotions, teacher protections, and full platform governance.
+        </p>
+      </article>
+    </section>
+
+    <!-- FAQs -->
+    <section class="m3-card p-6 space-y-3 text-xs">
+      <h2 class="text-base font-extrabold flex items-center gap-2">
+        <i data-lucide="help-circle" class="w-4 h-4 text-[var(--md-primary)]"></i> Quick FAQs &amp; Security
       </h2>
-      <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
-        <summary class="font-bold text-slate-900 cursor-pointer">How do I install VidyaSphere as an app?</summary>
-        <p class="mt-2 text-slate-600">Open VidyaSphere in Chrome (Android) or Safari (iOS), tap the menu/Share icon, and select <strong>Add to Home Screen</strong> or <strong>Install app</strong>.</p>
+      <details class="p-3.5 rounded-2xl bg-[var(--md-surface-container)]">
+        <summary class="font-bold cursor-pointer">How do I change my password or accent color?</summary>
+        <p class="mt-2 text-[var(--md-on-surface-variant)]">Tap your name/avatar card at the bottom of the navigation rail (or in the mobile More menu) to update your password, profile info, and Material You color theme anytime.</p>
       </details>
-      <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
-        <summary class="font-bold text-slate-900 cursor-pointer">What if the site loads slowly on mobile data?</summary>
-        <p class="mt-2 text-slate-600">Enable <strong>Secure DNS</strong> in Chrome (<em>Settings &gt; Privacy and Security &gt; Use secure DNS &gt; Cloudflare 1.1.1.1 or Google Public DNS</em>).</p>
+      <details class="p-3.5 rounded-2xl bg-[var(--md-surface-container)]">
+        <summary class="font-bold cursor-pointer">How are passwords and privacy protected?</summary>
+        <p class="mt-2 text-[var(--md-on-surface-variant)]">Passwords use PBKDF2-HMAC-SHA256 (20,000 iterations + unique salt). Sessions use 256-bit random tokens, and private 1-on-1 DMs &amp; unjoined study groups remain strictly private to participants.</p>
       </details>
-      <details class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
-        <summary class="font-bold text-slate-900 cursor-pointer">How is my password protected?</summary>
-        <p class="mt-2 text-slate-600">Passwords are hashed with PBKDF2-HMAC-SHA256 (20,000 iterations + random salts). Plaintext passwords are never stored.</p>
-      </details>
-    </article>
+    </section>
   </main>
 
-  <footer class="bg-white border-t border-slate-200/80 py-6 text-center text-xs text-slate-400">
-    Created by Sriramik Sanjiv Sahu (Class 9th Shraddha) • VidyaSphere
+  <footer class="bg-[var(--md-surface-container)] border-t border-[var(--md-outline)] py-6 text-center text-xs text-[var(--md-on-surface-variant)]">
+    Created by Sriramik Sanjiv Sahu • VidyaSphere Digital Edge Ecosystem
   </footer>
 
   <script type="module">
-    import { initIcons } from '/js/ui.js';
+    import { initIcons, renderThemePickerHtml, bindThemePicker } from '/js/ui.js';
+
+    const dots = document.getElementById('guide-theme-dots');
+    if (dots) { dots.innerHTML = renderThemePickerHtml(); bindThemePicker(dots); }
     initIcons();
+
+    const buttons = document.querySelectorAll('.guide-mode-btn');
+    const studentSec = document.getElementById('student-guide');
+    const teacherSec = document.getElementById('teacher-guide');
+
+    function setGuideMode(mode) {
+      buttons.forEach(btn => {
+        const active = btn.dataset.guideMode === mode;
+        btn.className = active
+          ? 'guide-mode-btn px-3.5 py-2 rounded-full text-xs font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] transition'
+          : 'guide-mode-btn px-3.5 py-2 rounded-full text-xs font-semibold text-[var(--md-on-surface-variant)] transition';
+      });
+      studentSec.classList.toggle('hidden', mode === 'teacher');
+      teacherSec.classList.toggle('hidden', mode === 'student');
+    }
+
+    buttons.forEach(btn => btn.addEventListener('click', () => setGuideMode(btn.dataset.guideMode)));
+    if (window.location.hash === '#teacher-guide') setGuideMode('teacher');
+    if (window.location.hash === '#student-guide') setGuideMode('student');
   </script>
 </body>
 </html>

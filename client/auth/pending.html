@@ -76,7 +76,8 @@
       document.getElementById('student-username').textContent = `@${u.username}`;
       if (u.role === 'teacher') {
         const typeTxt = u.teacherType === 'class' ? 'Class Teacher' : 'Subject Teacher';
-        document.getElementById('student-class').textContent = `${typeTxt} • ${(u.assignedClasses || []).join(', ') || u.className || ''}`;
+        const extra = u.teacherDesignation ? ` • ${u.teacherDesignation}` : '';
+        document.getElementById('student-class').textContent = `${typeTxt}${extra}`;
       } else {
         document.getElementById('student-class').textContent = `${u.className || ''} ${u.division ? '- Div ' + u.division : ''} (Roll: ${u.rollNumber || '-'})`;
       }

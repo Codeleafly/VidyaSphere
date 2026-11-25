@@ -8,15 +8,16 @@ import { generateId } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
 
 export async function handleQARoutes(request, env, path, method) {
-  // GET /api/qa/questions - List questions with answer count
+  // GET /api/qa/questions - List questions with answer count, search & class/subject filters
   if (path === '/api/qa/questions' && method === 'GET') {
     const url = new URL(request.url);
     const subject = url.searchParams.get('subject') || '';
     const className = url.searchParams.get('className') || '';
     const status = url.searchParams.get('status') || '';
+    const search = (url.searchParams.get('search') || '').trim();
 
     let query = `
-      SELECT q.*, p.full_name as author_name, p.role as author_role, p.teacher_type as author_teacher_type,
+      SELECT q.*, p.full_name as author_name, p.role as author_role, p.teacher_type as author_teacher_type, p.is_root_admin as author_is_root_admin,
              (SELECT COUNT(*) FROM answers a WHERE a.question_id = q.id) as answer_count
       FROM questions q
       LEFT JOIN profiles p ON q.author_id = p.id
@@ -32,13 +33,17 @@ export async function handleQARoutes(request, env, path, method) {
       query += ` AND q.class_name = ?`;
       params.push(className);
     }
+    if (search) {
+      query += ` AND (q.title LIKE ? OR q.description LIKE ? OR q.subject LIKE ?)`;
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
     if (status === 'resolved') {
       query += ` AND q.is_resolved = 1`;
     } else if (status === 'unanswered') {
       query += ` AND (SELECT COUNT(*) FROM answers a WHERE a.question_id = q.id) = 0`;
     }
 
-    query += ` ORDER BY q.created_at DESC LIMIT 50`;
+    query += ` ORDER BY q.created_at DESC LIMIT 60`;
 
     const { results } = await env.DB.prepare(query).bind(...params).all();
     return successResponse({ questions: results || [] });
@@ -46,10 +51,10 @@ export async function handleQARoutes(request, env, path, method) {
 
   // GET /api/qa/questions/:id - Detail view with all answers
   if (path.startsWith('/api/qa/questions/') && !path.includes('/answers') && method === 'GET') {
-    const id = path.replace('/api/qa/questions/', '');
+    const id = path.replace('/api/qa/questions/', '').trim();
 
     const question = await env.DB.prepare(
-      `SELECT q.*, p.full_name as author_name, p.role as author_role, p.teacher_type as author_teacher_type
+      `SELECT q.*, p.full_name as author_name, p.role as author_role, p.teacher_type as author_teacher_type, p.is_root_admin as author_is_root_admin
        FROM questions q
        LEFT JOIN profiles p ON q.author_id = p.id
        WHERE q.id = ?`
@@ -58,7 +63,7 @@ export async function handleQARoutes(request, env, path, method) {
     if (!question) return errorResponse('Question not found', 404);
 
     const { results: answers } = await env.DB.prepare(
-      `SELECT a.*, p.full_name as author_name, p.role as author_role, p.teacher_type as author_teacher_type,
+      `SELECT a.*, p.full_name as author_name, p.role as author_role, p.teacher_type as author_teacher_type, p.is_root_admin as author_is_root_admin,
               ep.full_name as endorsed_by_name
        FROM answers a
        LEFT JOIN profiles p ON a.author_id = p.id
@@ -99,6 +104,27 @@ export async function handleQARoutes(request, env, path, method) {
     }
   }
 
+  // DELETE /api/qa/questions/:id - Author or Admin deletes question and its answers
+  if (path.startsWith('/api/qa/questions/') && !path.includes('/answers') && method === 'DELETE') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const id = path.replace('/api/qa/questions/', '').trim();
+    const existing = await env.DB.prepare(`SELECT * FROM questions WHERE id = ?`).bind(id).first();
+    if (!existing) return errorResponse('Question not found', 404);
+
+    if (existing.author_id !== auth.user.id && auth.user.role !== 'admin') {
+      return errorResponse('Forbidden: You can only delete your own questions', 403);
+    }
+
+    await env.DB.batch([
+      env.DB.prepare(`DELETE FROM answers WHERE question_id = ?`).bind(id),
+      env.DB.prepare(`DELETE FROM questions WHERE id = ?`).bind(id),
+    ]);
+
+    return successResponse({ id }, 'Question deleted successfully');
+  }
+
   // POST /api/qa/questions/:id/answers - Submit an answer
   if (path.startsWith('/api/qa/questions/') && path.endsWith('/answers') && method === 'POST') {
     const auth = await authenticate(request, env);
@@ -133,6 +159,27 @@ export async function handleQARoutes(request, env, path, method) {
     }
   }
 
+  // DELETE /api/qa/answers/:id - Author or Admin deletes an answer
+  if (path.startsWith('/api/qa/answers/') && !path.endsWith('/accept') && !path.endsWith('/endorse') && method === 'DELETE') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const answerId = path.replace('/api/qa/answers/', '').trim();
+    const existing = await env.DB.prepare(`SELECT * FROM answers WHERE id = ?`).bind(answerId).first();
+    if (!existing) return errorResponse('Answer not found', 404);
+
+    if (existing.author_id !== auth.user.id && auth.user.role !== 'admin') {
+      return errorResponse('Forbidden: You can only delete your own answers', 403);
+    }
+
+    await env.DB.prepare(`DELETE FROM answers WHERE id = ?`).bind(answerId).run();
+    if (existing.is_accepted === 1) {
+      await env.DB.prepare(`UPDATE questions SET is_resolved = 0 WHERE id = ?`).bind(existing.question_id).run();
+    }
+
+    return successResponse({ id: answerId }, 'Answer deleted successfully');
+  }
+
   // POST /api/qa/answers/:id/accept - Author or Admin marks an answer as accepted
   if (path.startsWith('/api/qa/answers/') && path.endsWith('/accept') && method === 'POST') {
     const auth = await authenticate(request, env);
@@ -163,7 +210,7 @@ export async function handleQARoutes(request, env, path, method) {
     return successResponse({}, 'Answer accepted as the verified solution!');
   }
 
-  // POST /api/qa/answers/:id/endorse - Teachers & Admins mark an answer as Faculty Endorsed
+  // POST /api/qa/answers/:id/endorse - Teachers & Admins toggle Faculty Endorsed
   if (path.startsWith('/api/qa/answers/') && path.endsWith('/endorse') && method === 'POST') {
     const auth = await authenticate(request, env, ['teacher', 'admin']);
     if (auth.error) return auth.error;

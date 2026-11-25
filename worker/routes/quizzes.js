@@ -7,6 +7,7 @@
 import { errorResponse, successResponse } from '../utils/response.js';
 import { generateId } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
+import { sanitizeProfileRow } from '../utils/teacherScope.js';
 
 function sanitizeQuizQuestions(rawQuestions) {
   if (!Array.isArray(rawQuestions) || rawQuestions.length === 0) {
@@ -57,7 +58,7 @@ export async function handleQuizzesRoutes(request, env, path, method) {
 
     let query = `
       SELECT q.id, q.teacher_id, q.title, q.class_name, q.subject, q.chapter, q.questions_json, q.is_published, q.created_at,
-             p.full_name as teacher_name, p.teacher_type,
+             p.full_name as teacher_name, p.role as teacher_role, p.teacher_type, p.is_root_admin as teacher_is_root_admin,
              (SELECT COUNT(*) FROM quiz_attempts qa WHERE qa.quiz_id = q.id) as attempt_count,
              qa_me.score as my_score, qa_me.total as my_total, qa_me.created_at as my_attempted_at
       FROM quizzes q
@@ -96,7 +97,9 @@ export async function handleQuizzesRoutes(request, env, path, method) {
         id: row.id,
         teacherId: row.teacher_id,
         teacherName: row.teacher_name,
+        teacherRole: row.teacher_role || 'teacher',
         teacherType: row.teacher_type,
+        teacherIsRootAdmin: row.teacher_is_root_admin === 1,
         title: row.title,
         className: row.class_name,
         subject: row.subject,
@@ -168,14 +171,14 @@ export async function handleQuizzesRoutes(request, env, path, method) {
 
     const { results } = await env.DB.prepare(
       `SELECT qa.id, qa.student_id, qa.score, qa.total, qa.created_at,
-              p.full_name, p.username, p.class_name, p.division, p.roll_number
+              p.full_name, p.username, p.class_name, p.division, p.roll_number, p.is_root_admin
        FROM quiz_attempts qa
        JOIN profiles p ON qa.student_id = p.id
        WHERE qa.quiz_id = ?
        ORDER BY qa.score DESC, qa.created_at ASC`
     ).bind(quizId).all();
 
-    return successResponse({ quizTitle: quiz.title, results: results || [] });
+    return successResponse({ quizTitle: quiz.title, results: (results || []).map(sanitizeProfileRow) });
   }
 
   // POST /api/quizzes/:id/attempt - Student submits quiz and gets instant auto-graded key

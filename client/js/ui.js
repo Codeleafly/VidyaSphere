@@ -113,9 +113,54 @@ export function extractYouTubeId(url) {
   return null;
 }
 
+export function isRootUser(user) {
+  if (!user) return false;
+  return user.isRootAdmin === true || user.is_root_admin === 1 || user.is_root_admin === true || user.username === 'admin';
+}
+
+export function parseArrayField(val) {
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val || '[]');
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch { return []; }
+  }
+  return [];
+}
+
+/**
+ * Formats a clean, concise subline for any member:
+ * - Root Admin / Admins: "Admin" (NO class, NO division, NO roll number)
+ * - Teachers: Designation or concise subject/class summary
+ * - Students: Class • Div • Roll #
+ */
+export function formatMemberSubline(member) {
+  if (!member) return '';
+  if (isRootUser(member) || member.role === 'admin') {
+    return 'Admin';
+  }
+  if (member.role === 'teacher') {
+    const desig = (member.teacher_designation || member.teacherDesignation || '').trim();
+    const subs = parseArrayField(member.assigned_subjects || member.assignedSubjects);
+    const clss = parseArrayField(member.assigned_classes || member.assignedClasses);
+    if (desig) return desig;
+    const subHint = subs.length > 1 ? `${subs[0]} +${subs.length - 1}` : (subs[0] || 'Faculty');
+    const clsHint = clss.length > 1 ? `${clss[0]} +${clss.length - 1}` : (clss[0] || member.class_name || member.className || '');
+    return [subHint, clsHint].filter(Boolean).join(' • ') || 'Teacher';
+  }
+  const cls = member.class_name || member.className || '';
+  const div = member.division || '';
+  const roll = member.roll_number || member.rollNumber || '';
+  return [
+    cls ? `${cls}${div ? ' (' + div + ')' : ''}` : '',
+    roll ? `Roll #${roll}` : ''
+  ].filter(Boolean).join(' • ');
+}
+
 export function renderRoleBadgeHtml(role, teacherType = null, isRootAdmin = false) {
   if (isRootAdmin) {
-    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Lead Admin</span>`;
+    return `<span title="Lead Admin (Student, Teacher & Admin Access)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Admin</span>`;
   }
   if (role === 'admin') {
     return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">Admin</span>`;
@@ -132,7 +177,7 @@ export function showToast(message, type = 'info') {
   if (!toastContainer) {
     toastContainer = document.createElement('div');
     toastContainer.id = 'toast-container';
-    toastContainer.className = 'fixed bottom-20 md:bottom-5 right-4 left-4 md:left-auto z-[70] flex flex-col gap-2 md:max-w-sm pointer-events-none';
+    toastContainer.className = 'fixed bottom-20 md:bottom-5 right-4 left-4 md:left-auto z-[80] flex flex-col gap-2 md:max-w-sm pointer-events-none';
     document.body.appendChild(toastContainer);
   }
 

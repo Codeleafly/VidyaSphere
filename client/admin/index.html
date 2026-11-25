@@ -2,147 +2,151 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>School Admin Core | VidyaSphere</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 w-full">
 
-  <!-- Desktop Dark Sidebar -->
-  <aside class="hidden md:flex flex-col w-60 bg-slate-950 border-r border-slate-800 p-3.5 shrink-0 h-screen sticky top-0 justify-between text-white">
-    <div class="space-y-5">
-      <div class="flex items-center gap-2.5 px-2 py-1">
-        <div class="w-9 h-9 rounded-xl bg-rose-600 flex items-center justify-center text-white shadow-sm">
+  <!-- Desktop Material You Navigation Rail -->
+  <aside class="hidden md:flex flex-col w-64 bg-[var(--md-surface-container)] border-r border-[var(--md-outline)] p-3.5 shrink-0 h-screen sticky top-0 justify-between z-30">
+    <div class="space-y-4 overflow-y-auto no-scrollbar">
+      <div class="flex items-center gap-3 px-2.5 py-1.5">
+        <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center shadow-sm">
           <i data-lucide="shield-check" class="w-5 h-5"></i>
         </div>
         <div>
-          <h2 class="font-bold text-sm text-white leading-none">VidyaSphere</h2>
-          <span class="text-[11px] text-rose-400 font-medium">Admin Core</span>
+          <h2 class="font-extrabold text-[15px] leading-none">VidyaSphere</h2>
+          <span class="text-[11px] text-rose-700 font-bold">Admin Core</span>
         </div>
       </div>
 
       <nav class="space-y-0.5">
-        <button data-tab="applications" class="admin-tab-btn flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-800 text-white font-bold text-[13px] w-full text-left transition">
-          <i data-lucide="inbox" class="w-4 h-4 text-indigo-400"></i> Applications Queue
+        <button data-tab="applications" class="admin-tab-btn m3-nav-pill active flex items-center justify-between gap-2 px-3.5 py-2.5 text-[13px] w-full text-left">
+          <span class="flex items-center gap-3"><i data-lucide="inbox" class="w-4 h-4"></i> Applications</span>
+          <span id="admin-pending-pill" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 tabular-nums">0</span>
         </button>
-        <button data-tab="students" class="admin-tab-btn flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white font-medium text-[13px] transition w-full text-left">
-          <i data-lucide="users" class="w-4 h-4 text-rose-400"></i> Students & Roles
+        <button data-tab="students" class="admin-tab-btn m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <i data-lucide="users" class="w-4 h-4"></i> Roster &amp; Roles
         </button>
-        <button data-tab="exams" class="admin-tab-btn flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white font-medium text-[13px] transition w-full text-left">
-          <i data-lucide="calendar" class="w-4 h-4 text-purple-400"></i> Exams & Timetables
+        <button data-tab="exams" class="admin-tab-btn m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <i data-lucide="calendar" class="w-4 h-4"></i> Exams &amp; Timetables
         </button>
-        <button data-tab="announcements" class="admin-tab-btn flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white font-medium text-[13px] transition w-full text-left">
-          <i data-lucide="megaphone" class="w-4 h-4 text-amber-400"></i> Publish Notices
+        <button data-tab="announcements" class="admin-tab-btn m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <i data-lucide="megaphone" class="w-4 h-4"></i> Publish Notices
         </button>
-        <button data-tab="settings" class="admin-tab-btn flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white font-medium text-[13px] transition w-full text-left">
-          <i data-lucide="settings" class="w-4 h-4 text-cyan-400"></i> Academic Settings
+        <button data-tab="audit" class="admin-tab-btn m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <i data-lucide="history" class="w-4 h-4"></i> Audit Logs
+        </button>
+        <button data-tab="settings" class="admin-tab-btn m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <i data-lucide="settings" class="w-4 h-4"></i> Settings
         </button>
 
-        <div class="pt-3 mt-3 border-t border-slate-800">
-          <a href="/dashboard/index.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-indigo-600 text-slate-200 hover:text-white font-semibold text-[13px] transition border border-slate-800">
-            <i data-lucide="layout-grid" class="w-4 h-4 text-indigo-400"></i> Student Dashboard
+        <div class="pt-3 mt-3 border-t border-[var(--md-outline)] space-y-1">
+          <a href="/teacher/index.html" class="flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] font-bold text-xs hover:brightness-95 transition">
+            <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Teacher Studio</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </a>
+          <a href="/dashboard/index.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i> Student Portal
+          </a>
+          <a href="/guide.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
+            <i data-lucide="book-marked" class="w-4 h-4"></i> Student &amp; Teacher Guide
           </a>
         </div>
       </nav>
     </div>
 
-    <div class="border-t border-slate-800 pt-3 px-1">
-      <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800">
-        <div class="overflow-hidden">
-          <p id="admin-display-name" class="font-semibold text-xs text-white truncate">Administrator</p>
-          <p id="admin-display-role" class="text-[10px] text-rose-400 font-semibold truncate">Admin</p>
-        </div>
-        <button id="logout-btn" title="Sign Out" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition shrink-0">
+    <div class="pt-3 space-y-2.5 border-t border-[var(--md-outline)]">
+      <div class="flex items-center justify-between px-2" id="admin-theme-desktop"></div>
+      <div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-[var(--md-surface-card)] border border-[var(--md-outline)]">
+        <button type="button" id="admin-profile-btn" class="flex items-center gap-2.5 overflow-hidden text-left flex-1 hover:opacity-85 transition" title="Account & Password Settings">
+          <div class="w-8 h-8 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center shrink-0" id="admin-avatar-initial">A</div>
+          <div class="overflow-hidden">
+            <p id="admin-display-name" class="font-bold text-xs truncate">Admin</p>
+            <p id="admin-display-role" class="text-[10px] text-rose-700 font-bold truncate">Admin</p>
+          </div>
+        </button>
+        <button id="logout-btn" title="Sign Out" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition shrink-0">
           <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
   </aside>
 
-  <!-- Mobile Topbar -->
-  <header class="md:hidden bg-slate-950 text-white px-3.5 py-2.5 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-lg bg-rose-600 flex items-center justify-center text-white">
+  <!-- Mobile Material 3 Top App Bar -->
+  <header class="md:hidden sticky top-0 z-30 glass border-b border-[var(--md-outline)] px-4 h-14 flex items-center justify-between w-full shrink-0">
+    <div class="flex items-center gap-2.5 overflow-hidden">
+      <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0">
         <i data-lucide="shield-check" class="w-4 h-4"></i>
       </div>
-      <span class="font-bold text-sm">Admin Core</span>
+      <div class="overflow-hidden">
+        <span class="font-extrabold text-[15px] block leading-tight truncate">Admin Core</span>
+        <span id="admin-mob-badge" class="text-[10px] text-rose-700 font-bold block leading-none truncate">Admin</span>
+      </div>
     </div>
-    <div class="flex items-center gap-2">
-      <a href="/dashboard/index.html" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold text-[11px] flex items-center gap-1">
+    <div class="flex items-center gap-1.5">
+      <a href="/teacher/index.html" class="px-2.5 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] font-bold text-[10px] flex items-center gap-1">
+        <i data-lucide="sparkles" class="w-3 h-3"></i> Studio
+      </a>
+      <a href="/dashboard/index.html" class="px-2.5 py-1 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] font-bold text-[10px] flex items-center gap-1">
         <i data-lucide="layout-grid" class="w-3 h-3"></i> Portal
       </a>
-      <button id="logout-btn-mob" class="text-xs text-rose-400 font-bold px-1.5 py-1">Logout</button>
+      <button id="logout-btn-mob" class="p-2 text-slate-500 hover:text-rose-600 rounded-full" title="Sign Out">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+      </button>
     </div>
   </header>
 
-  <!-- Mobile Scrollable Tab Pills -->
-  <div class="md:hidden sticky top-0 z-30 bg-slate-950 border-b border-slate-800 px-2 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-    <button data-tab="applications" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shrink-0">
-      <i data-lucide="inbox" class="w-3.5 h-3.5"></i> Applications
-    </button>
-    <button data-tab="students" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0">
-      <i data-lucide="users" class="w-3.5 h-3.5 text-rose-400"></i> Roles
-    </button>
-    <button data-tab="exams" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0">
-      <i data-lucide="calendar" class="w-3.5 h-3.5 text-purple-400"></i> Exams
-    </button>
-    <button data-tab="announcements" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0">
-      <i data-lucide="megaphone" class="w-3.5 h-3.5 text-amber-400"></i> Notices
-    </button>
-    <button data-tab="settings" class="admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0">
-      <i data-lucide="settings" class="w-3.5 h-3.5 text-cyan-400"></i> Settings
-    </button>
-  </div>
-
   <!-- Main Workspace -->
-  <main class="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+  <main class="flex-1 w-full max-w-6xl mx-auto p-3.5 sm:p-6 lg:p-8 space-y-6">
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <p class="text-[11px] text-slate-500 font-semibold">Pending Review</p>
+    <!-- Material You Hero & Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div class="m3-card p-4">
+        <p class="text-[11px] text-[var(--md-on-surface-variant)] font-bold">Pending Review</p>
         <h3 id="stat-pending" class="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums">-</h3>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <p class="text-[11px] text-slate-500 font-semibold">Active Students</p>
+      <div class="m3-card p-4">
+        <p class="text-[11px] text-[var(--md-on-surface-variant)] font-bold">Active Students</p>
         <h3 id="stat-students" class="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">-</h3>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <p class="text-[11px] text-slate-500 font-semibold">Active Teachers</p>
-        <h3 id="stat-teachers" class="text-2xl font-extrabold text-sky-600 mt-1 tabular-nums">-</h3>
+      <div class="m3-card p-4">
+        <p class="text-[11px] text-[var(--md-on-surface-variant)] font-bold">Active Teachers</p>
+        <h3 id="stat-teachers" class="text-2xl font-extrabold text-[var(--md-primary)] mt-1 tabular-nums">-</h3>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <p class="text-[11px] text-slate-500 font-semibold">Notes Catalog</p>
+      <div class="m3-card p-4">
+        <p class="text-[11px] text-[var(--md-on-surface-variant)] font-bold">Notes Catalog</p>
         <h3 id="stat-notes" class="text-2xl font-extrabold text-indigo-600 mt-1 tabular-nums">-</h3>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <p class="text-[11px] text-slate-500 font-semibold">Active Polls</p>
+      <div class="m3-card p-4">
+        <p class="text-[11px] text-[var(--md-on-surface-variant)] font-bold">Active Polls</p>
         <h3 id="stat-polls" class="text-2xl font-extrabold text-purple-600 mt-1 tabular-nums">-</h3>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <p class="text-[11px] text-slate-500 font-semibold">Exams Scheduled</p>
+      <div class="m3-card p-4">
+        <p class="text-[11px] text-[var(--md-on-surface-variant)] font-bold">Exams Scheduled</p>
         <h3 id="stat-exams" class="text-2xl font-extrabold text-rose-600 mt-1 tabular-nums">-</h3>
       </div>
     </div>
 
     <!-- TAB 1: APPLICATIONS QUEUE -->
     <section id="tab-applications" class="admin-tab-content space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/80">
+      <div class="m3-tonal-box p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[var(--md-outline)]">
         <div>
-          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Student &amp; Teacher Verification Queue</h2>
-          <p class="text-xs text-slate-500">1-click approval automatically unlocks portals for Students &amp; Teachers with zero codes</p>
+          <h2 class="text-lg sm:text-xl font-extrabold">Verification Queue</h2>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">Compact summaries by default — tap <strong>More</strong> to inspect full teacher details before approving.</p>
         </div>
-        <div class="flex items-center gap-2">
-          <select id="reg-role-filter"
-            class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white focus:ring-2 focus:ring-indigo-500/30">
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="reg-role-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-bold bg-white">
             <option value="">All Roles</option>
             <option value="student">Students Only</option>
             <option value="teacher">Teachers Only</option>
           </select>
-          <select id="reg-status-filter"
-            class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white focus:ring-2 focus:ring-indigo-500/30">
+          <select id="reg-status-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-bold bg-white">
             <option value="pending" selected>Pending Review</option>
             <option value="active">Approved / Active</option>
             <option value="rejected">Rejected</option>
@@ -152,67 +156,80 @@
       </div>
 
       <div id="applications-container" class="space-y-3">
-        <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading applications...</div>
+        <div class="m3-card p-8 text-center text-slate-400 text-xs">Loading applications...</div>
       </div>
     </section>
 
-    <!-- TAB 2: STUDENT & TEACHER ACCOUNTS & ROLES -->
+    <!-- TAB 2: SCHOOL ROSTER & ROLES -->
     <section id="tab-students" class="admin-tab-content space-y-4 hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/80">
+      <div class="m3-tonal-box p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[var(--md-outline)]">
         <div>
-          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">School Roster, Teachers &amp; Admin Roles</h2>
-          <p class="text-xs text-slate-500">Manage student status, edit teacher assignments, or promote roles (Teachers protected for Lead Admin).</p>
+          <h2 class="text-lg sm:text-xl font-extrabold">School Roster, Teachers &amp; Admin Roles</h2>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">Search members, edit teacher assignments, manage status, or promote roles.</p>
         </div>
-        <select id="roster-role-filter" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
-          <option value="">All Accounts</option>
-          <option value="student">Students</option>
-          <option value="teacher">Teachers</option>
-          <option value="admin">Admins</option>
-        </select>
+        <div class="flex items-center gap-2 flex-wrap">
+          <input type="text" id="roster-search-input" placeholder="Search name, @username, roll..."
+            class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs bg-white w-48 sm:w-56">
+          <select id="roster-role-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-bold bg-white">
+            <option value="">All Accounts</option>
+            <option value="student">Students</option>
+            <option value="teacher">Teachers</option>
+            <option value="admin">Admins</option>
+          </select>
+        </div>
       </div>
 
-      <div id="quick-promoter-box" class="hidden bg-slate-950 p-4 sm:p-5 rounded-2xl text-white space-y-3 border border-slate-800">
+      <!-- Lead Admin Quick Promoter -->
+      <div id="quick-promoter-box" class="hidden m3-card p-5 space-y-3 border-2 border-amber-300/80 bg-amber-50/30">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold">
+          <div class="w-9 h-9 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold shrink-0">
             <i data-lucide="crown" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="font-bold text-sm text-white">Lead Admin Role Manager</h3>
-            <p class="text-[11px] text-slate-400">Promote any active user to Secondary Admin or Teacher</p>
+            <h3 class="font-extrabold text-sm">Lead Admin Role Manager</h3>
+            <p class="text-[11px] text-[var(--md-on-surface-variant)]">Promote any active user to Secondary Admin or Teacher with scoped classes</p>
           </div>
         </div>
-        <div class="flex flex-col sm:flex-row gap-2 pt-1">
-          <select id="quick-promote-select" class="flex-1 px-3.5 py-2.5 rounded-xl bg-white text-slate-900 text-xs font-semibold border border-slate-200">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <select id="quick-promote-select" class="m3-input flex-1 px-3.5 py-2.5 rounded-2xl bg-white text-xs font-semibold border border-[var(--md-outline)]">
             <option value="">Select an active user to promote...</option>
           </select>
-          <select id="quick-promote-role" class="px-3 py-2.5 rounded-xl bg-white text-slate-900 text-xs font-bold border border-slate-200">
+          <select id="quick-promote-role" class="m3-input px-3.5 py-2.5 rounded-2xl bg-white text-xs font-bold border border-[var(--md-outline)]">
             <option value="admin">Secondary Admin</option>
             <option value="teacher">Teacher</option>
           </select>
-          <button id="quick-promote-btn" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition shrink-0">
+          <button id="quick-promote-btn" class="m3-btn-primary px-5 py-2.5 text-xs flex items-center justify-center gap-1.5 shrink-0">
             <i data-lucide="shield-plus" class="w-4 h-4"></i> Apply Role
           </button>
+        </div>
+        <div id="quick-promote-teacher-opts" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
+          <select id="qp-teacher-type" class="m3-input px-3 py-2 rounded-2xl bg-white border border-[var(--md-outline)] font-semibold">
+            <option value="subject">Subject Teacher</option>
+            <option value="class">Class Teacher</option>
+          </select>
+          <input type="text" id="qp-teacher-classes" class="m3-input px-3 py-2 rounded-2xl bg-white border border-[var(--md-outline)]" placeholder="Classes (e.g. Class 9, Class 10)">
+          <input type="text" id="qp-teacher-subjects" class="m3-input px-3 py-2 rounded-2xl bg-white border border-[var(--md-outline)]" placeholder="Subjects (e.g. Mathematics)">
         </div>
       </div>
 
       <div id="admin-students-table" class="space-y-3">
-        <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading student directory...</div>
+        <div class="m3-card p-8 text-center text-slate-400 text-xs">Loading directory...</div>
       </div>
     </section>
 
     <!-- TAB 3: EXAMS & TIMETABLES -->
     <section id="tab-exams" class="admin-tab-content space-y-6 hidden">
-      <div class="pb-3 border-b border-slate-200/80">
-        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">School Examination Manager</h2>
-        <p class="text-xs text-slate-500">Schedule, update, or remove exam timetables, room assignments, and syllabus links.</p>
+      <div class="m3-tonal-box p-5 border border-[var(--md-outline)]">
+        <h2 class="text-lg sm:text-xl font-extrabold">School Examination Manager</h2>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Schedule, update, or remove exam timetables, room assignments, and syllabus links.</p>
       </div>
 
-      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] max-w-3xl space-y-4">
+      <div class="m3-card p-5 sm:p-6 max-w-3xl space-y-4">
         <div class="flex items-center justify-between">
-          <h3 id="exam-form-heading" class="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-purple-600"></span> Schedule New Exam
+          <h3 id="exam-form-heading" class="text-sm font-extrabold flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-[var(--md-primary)]"></span> Schedule New Exam
           </h3>
-          <button id="exam-cancel-edit-btn" type="button" class="hidden text-xs text-rose-600 hover:text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-lg">
+          <button id="exam-cancel-edit-btn" type="button" class="hidden text-xs text-rose-600 font-bold bg-rose-50 px-3 py-1 rounded-full">
             Cancel Edit
           </button>
         </div>
@@ -221,71 +238,57 @@
           <input type="hidden" id="exam-id" value="">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Exam Title</label>
-            <input type="text" id="exam-title" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-purple-500/30 focus:outline-none" placeholder="e.g. Unit Test 1 or Board Prelims 2026">
+            <input type="text" id="exam-title" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Unit Test 1 or Board Prelims 2026">
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Target Class</label>
-              <select id="exam-class" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
-                <option value="All Classes">All Classes</option>
-                <option value="Class 10">Class 10 (SSC / CBSE)</option>
-                <option value="Class 12">Class 12 (HSC / CBSE)</option>
-                <option value="Class 11">Class 11</option>
-                <option value="Class 9">Class 9</option>
-                <option value="Class 8">Class 8</option>
-                <option value="Class 7">Class 7</option>
-                <option value="Class 6">Class 6</option>
-                <option value="Class 5">Class 5</option>
-                <option value="Class 4">Class 4</option>
-                <option value="Class 3">Class 3</option>
-                <option value="Class 2">Class 2</option>
-                <option value="Class 1">Class 1</option>
-              </select>
+              <select id="exam-class" required class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] text-xs font-semibold bg-white"></select>
             </div>
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
-              <input type="text" id="exam-subject" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm" placeholder="e.g. Mathematics / Science">
+              <input type="text" id="exam-subject" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Mathematics / Science">
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Exam Date</label>
-              <input type="date" id="exam-date" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
+              <input type="date" id="exam-date" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs font-semibold bg-white">
             </div>
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Start Time</label>
-              <input type="text" id="exam-start-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs" placeholder="09:30 AM">
+              <input type="text" id="exam-start-time" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs" placeholder="09:30 AM">
             </div>
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">End Time</label>
-              <input type="text" id="exam-end-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs" placeholder="12:30 PM">
+              <input type="text" id="exam-end-time" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs" placeholder="12:30 PM">
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Hall / Room Number</label>
-              <input type="text" id="exam-room" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs" placeholder="Main Exam Block - Room 104">
+              <input type="text" id="exam-room" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs" placeholder="Main Exam Block - Room 104">
             </div>
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Google Drive PDF Link (Optional)</label>
-              <input type="url" id="exam-drive-link" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono" placeholder="https://drive.google.com/file/d/.../view">
+              <input type="url" id="exam-drive-link" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs font-mono" placeholder="https://drive.google.com/file/d/.../view">
             </div>
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Syllabus & Guidelines</label>
-            <textarea id="exam-syllabus" rows="3" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs leading-relaxed" placeholder="Chapters covered and reporting instructions..."></textarea>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Syllabus &amp; Guidelines</label>
+            <textarea id="exam-syllabus" rows="3" class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-xs leading-relaxed" placeholder="Chapters covered and reporting instructions..."></textarea>
           </div>
 
           <div id="exam-broadcast-wrapper" class="flex items-center gap-2">
-            <input type="checkbox" id="exam-broadcast" class="w-4 h-4 text-purple-600 rounded border-slate-300" checked>
-            <label for="exam-broadcast" class="text-xs text-slate-700 font-semibold cursor-pointer">Also broadcast an Exam Alert on the Notice Board</label>
+            <input type="checkbox" id="exam-broadcast" class="w-4 h-4 rounded" checked>
+            <label for="exam-broadcast" class="text-xs font-semibold cursor-pointer">Also broadcast an Exam Alert on the Notice Board</label>
           </div>
 
-          <button type="submit" id="exam-submit-btn" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider transition inline-flex items-center gap-2">
+          <button type="submit" id="exam-submit-btn" class="m3-btn-primary px-6 py-2.5 text-xs inline-flex items-center gap-2">
             <i data-lucide="calendar-plus" class="w-4 h-4"></i>
             <span id="exam-submit-text">Publish Exam Schedule</span>
           </button>
@@ -294,33 +297,33 @@
 
       <div class="space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-slate-900">Scheduled Exams Master List</h3>
-          <span id="exam-count-badge" class="text-xs text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200 font-bold tabular-nums">0 scheduled</span>
+          <h3 class="text-sm font-extrabold">Scheduled Exams Master List</h3>
+          <span id="exam-count-badge" class="text-xs text-[var(--md-primary)] bg-[var(--md-primary-container)] px-3 py-1 rounded-full font-bold tabular-nums">0 scheduled</span>
         </div>
         <div id="admin-exams-container" class="space-y-3">
-          <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading scheduled exams...</div>
+          <div class="m3-card p-8 text-center text-slate-400 text-xs">Loading scheduled exams...</div>
         </div>
       </div>
     </section>
 
     <!-- TAB 4: PUBLISH NOTICES -->
     <section id="tab-announcements" class="admin-tab-content space-y-6 hidden">
-      <div class="pb-3 border-b border-slate-200/80">
-        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Publish Official Announcement</h2>
-        <p class="text-xs text-slate-500">Post circulars (holiday, exam, urgent, general). Notices auto-delete after 30 days or anytime manually.</p>
+      <div class="m3-tonal-box p-5 border border-[var(--md-outline)]">
+        <h2 class="text-lg sm:text-xl font-extrabold">Publish Official Announcement</h2>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Post circulars (holiday, exam, urgent, general). Notices auto-delete after 30 days or anytime manually.</p>
       </div>
 
-      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] max-w-2xl">
+      <div class="m3-card p-6 max-w-2xl">
         <form id="create-ann-form" class="space-y-4">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Notice Title</label>
-            <input type="text" id="ann-title" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" placeholder="e.g. Science Practical Examinations Schedule">
+            <input type="text" id="ann-title" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Science Practical Examinations Schedule">
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Priority</label>
-              <select id="ann-priority" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
+              <select id="ann-priority" required class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] text-xs font-semibold bg-white">
                 <option value="general">General</option>
                 <option value="urgent">Urgent Circular</option>
                 <option value="exam">Examination</option>
@@ -329,35 +332,21 @@
             </div>
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Target Class</label>
-              <select id="ann-target-class" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
-                <option value="all">School-Wide (All Classes)</option>
-                <option value="Class 1">Class 1</option>
-                <option value="Class 2">Class 2</option>
-                <option value="Class 3">Class 3</option>
-                <option value="Class 4">Class 4</option>
-                <option value="Class 5">Class 5</option>
-                <option value="Class 6">Class 6</option>
-                <option value="Class 7">Class 7</option>
-                <option value="Class 8">Class 8</option>
-                <option value="Class 9">Class 9</option>
-                <option value="Class 10">Class 10</option>
-                <option value="Class 11">Class 11 (All Streams)</option>
-                <option value="Class 12">Class 12 (All Streams)</option>
-              </select>
+              <select id="ann-target-class" required class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] text-xs font-semibold bg-white"></select>
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <input type="checkbox" id="ann-pinned" class="rounded text-indigo-600 w-4 h-4">
-            <label for="ann-pinned" class="text-xs font-semibold text-slate-700">Pin notice to top of school feed</label>
+            <input type="checkbox" id="ann-pinned" class="rounded w-4 h-4">
+            <label for="ann-pinned" class="text-xs font-semibold">Pin notice to top of school feed</label>
           </div>
 
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Notice Content</label>
-            <textarea id="ann-content" rows="4" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Enter complete notice text..."></textarea>
+            <textarea id="ann-content" rows="4" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="Enter complete notice text..."></textarea>
           </div>
 
-          <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-sm transition">
+          <button type="submit" class="m3-btn-primary px-6 py-2.5 text-sm">
             Publish Official Circular
           </button>
         </form>
@@ -365,40 +354,56 @@
 
       <div class="space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-slate-900">Active Published Notices</h3>
-          <span id="notice-count-badge" class="text-xs text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 font-bold tabular-nums">0 active</span>
+          <h3 class="text-sm font-extrabold">Active Published Notices</h3>
+          <span id="notice-count-badge" class="text-xs text-[var(--md-primary)] bg-[var(--md-primary-container)] px-3 py-1 rounded-full font-bold tabular-nums">0 active</span>
         </div>
         <div id="admin-notices-container" class="space-y-3">
-          <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading active notices...</div>
+          <div class="m3-card p-8 text-center text-slate-400 text-xs">Loading active notices...</div>
         </div>
       </div>
     </section>
 
-    <!-- TAB 5: SETTINGS -->
-    <section id="tab-settings" class="admin-tab-content space-y-4 hidden">
-      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-5">
+    <!-- TAB 5: AUDIT LOGS -->
+    <section id="tab-audit" class="admin-tab-content space-y-4 hidden">
+      <div class="m3-tonal-box p-5 flex items-center justify-between gap-3 border border-[var(--md-outline)]">
         <div>
-          <h3 class="text-lg font-extrabold text-slate-900">Academic Year & Storage Policy</h3>
-          <p class="text-xs text-slate-500">Configure current academic session and resource retention</p>
+          <h2 class="text-lg sm:text-xl font-extrabold">Security &amp; Activity Audit Logs</h2>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">Recent approvals, role changes, exams, notices &amp; security events</p>
+        </div>
+        <button id="refresh-audit-btn" class="m3-btn-tonal px-4 py-2 text-xs flex items-center gap-1.5">
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Refresh
+        </button>
+      </div>
+      <div id="admin-audit-container" class="space-y-2.5">
+        <div class="m3-card p-8 text-center text-slate-400 text-xs">Loading audit logs...</div>
+      </div>
+    </section>
+
+    <!-- TAB 6: SETTINGS -->
+    <section id="tab-settings" class="admin-tab-content space-y-4 hidden">
+      <div class="m3-card p-6 space-y-5">
+        <div>
+          <h3 class="text-lg font-extrabold">Academic Year &amp; Storage Policy</h3>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">Configure current academic session and resource retention</p>
         </div>
 
         <form id="academic-year-form" class="space-y-4 max-w-md">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Active Academic Year</label>
-            <input type="text" id="set-academic-year" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold" placeholder="e.g. 2026-2027">
+            <input type="text" id="set-academic-year" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm font-semibold" placeholder="e.g. 2026-2027">
             <p class="text-[11px] text-slate-400 mt-1">Google Drive study notes remain active for this complete academic year.</p>
           </div>
-          <button type="submit" id="save-settings-btn" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs uppercase tracking-wider transition">
+          <button type="submit" id="save-settings-btn" class="m3-btn-primary px-6 py-2.5 text-xs">
             Save Academic Year
           </button>
         </form>
 
-        <div class="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+        <div class="pt-4 border-t border-[var(--md-outline)] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
             <p class="font-bold flex items-center gap-1.5"><i data-lucide="cloud" class="w-4 h-4 text-emerald-600"></i> Google Drive Notes (Permanent)</p>
             <p class="text-[11px] text-emerald-800 leading-relaxed">Uses 0 bytes of Cloudflare storage. Valid throughout the full active academic session.</p>
           </div>
-          <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+          <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
             <p class="font-bold flex items-center gap-1.5"><i data-lucide="file-clock" class="w-4 h-4 text-amber-600"></i> Direct Uploads (30-Day Purge)</p>
             <p class="text-[11px] text-amber-800 leading-relaxed">Direct PDFs/images up to 15MB auto-expire in 30 days via daily edge cron to preserve free tier limits.</p>
           </div>
@@ -407,30 +412,70 @@
     </section>
   </main>
 
-  <!-- Mobile Bottom Navigation -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur border-t border-slate-800 px-1 py-1 flex items-center justify-around">
-    <button data-tab="applications" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-400 font-bold text-[10px] truncate">
-      <i data-lucide="inbox" class="w-4 h-4 mb-0.5"></i><span>Requests</span>
+  <!-- Mobile Material 3 Bottom Navigation -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--md-surface-container)]/95 backdrop-blur-md border-t border-[var(--md-outline)] px-1 py-1.5 flex items-center justify-around">
+    <button data-tab="applications" class="admin-bottom-tab flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="a-pill px-3 py-1 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)]"><i data-lucide="inbox" class="w-4 h-4"></i></span>
+      <span class="font-bold">Requests</span>
     </button>
-    <button data-tab="students" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[10px] truncate">
-      <i data-lucide="users" class="w-4 h-4 mb-0.5 text-rose-400"></i><span>Roles</span>
+    <button data-tab="students" class="admin-bottom-tab flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="a-pill px-3 py-1 rounded-full text-[var(--md-on-surface-variant)]"><i data-lucide="users" class="w-4 h-4"></i></span>
+      <span class="font-medium">Roster</span>
     </button>
-    <button data-tab="exams" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[10px] truncate">
-      <i data-lucide="calendar" class="w-4 h-4 mb-0.5"></i><span>Exams</span>
+    <button data-tab="exams" class="admin-bottom-tab flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="a-pill px-3 py-1 rounded-full text-[var(--md-on-surface-variant)]"><i data-lucide="calendar" class="w-4 h-4"></i></span>
+      <span class="font-medium">Exams</span>
     </button>
-    <button data-tab="announcements" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[10px] truncate">
-      <i data-lucide="megaphone" class="w-4 h-4 mb-0.5"></i><span>Notices</span>
+    <button data-tab="announcements" class="admin-bottom-tab flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="a-pill px-3 py-1 rounded-full text-[var(--md-on-surface-variant)]"><i data-lucide="megaphone" class="w-4 h-4"></i></span>
+      <span class="font-medium">Notices</span>
     </button>
-    <button data-tab="settings" class="admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[10px] truncate">
-      <i data-lucide="settings" class="w-4 h-4 mb-0.5"></i><span>Settings</span>
+    <button type="button" id="admin-more-btn" class="flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="px-3 py-1 rounded-full text-[var(--md-on-surface-variant)]"><i data-lucide="grid-2x2" class="w-4 h-4"></i></span>
+      <span class="font-medium">More</span>
     </button>
   </nav>
+
+  <!-- Mobile More Sheet -->
+  <div id="admin-more-sheet" class="md:hidden fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-xs hidden items-end justify-center">
+    <div class="bg-[var(--md-surface-card)] w-full rounded-t-[28px] p-5 pb-7 space-y-4 shadow-2xl modal-enter">
+      <div class="m3-sheet-handle"></div>
+      <div class="flex items-center justify-between">
+        <button type="button" id="admin-profile-mob" class="text-left">
+          <h3 class="font-extrabold text-sm">Admin Core Tools</h3>
+          <p class="text-[11px] text-[var(--md-primary)] font-semibold">Tap to edit password &amp; profile</p>
+        </button>
+        <button id="admin-more-close" class="p-2 rounded-full bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="flex items-center justify-between p-3 rounded-2xl bg-[var(--md-surface-container)]">
+        <span class="text-xs font-bold">Material You Accent</span>
+        <div id="admin-theme-mob"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <button data-tab="audit" class="admin-sheet-tab flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
+          <i data-lucide="history" class="w-4 h-4"></i> Audit Logs
+        </button>
+        <button data-tab="settings" class="admin-sheet-tab flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
+          <i data-lucide="settings" class="w-4 h-4"></i> Settings
+        </button>
+        <a href="/teacher/index.html" class="flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] font-bold">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Teacher Studio
+        </a>
+        <a href="/dashboard/index.html" class="flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] font-bold">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i> Student Portal
+        </a>
+        <a href="/guide.html" class="col-span-2 flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
+          <i data-lucide="book-marked" class="w-4 h-4"></i> Student &amp; Teacher Guide
+        </a>
+      </div>
+    </div>
+  </div>
 
   <!-- Edit Teacher Assignment Modal (Lead & Secondary Admin) -->
   <div id="edit-teacher-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
       <div class="m3-sheet-handle sm:hidden"></div>
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+      <div class="flex items-center justify-between pb-2 border-b border-[var(--md-outline)]">
         <h3 id="et-heading" class="text-sm font-extrabold">Edit Teacher Assignments</h3>
         <button id="close-et-modal" class="p-1.5 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
@@ -438,7 +483,7 @@
         <input type="hidden" id="et-user-id">
         <div>
           <label class="block font-bold text-slate-600 mb-1">Teacher Type</label>
-          <select id="et-type" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-semibold">
+          <select id="et-type" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white font-semibold">
             <option value="subject">Subject Teacher</option>
             <option value="class">Class Teacher</option>
           </select>
@@ -446,22 +491,30 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-bold text-slate-600 mb-1">Primary Class</label>
-            <input type="text" id="et-class" class="w-full px-3 py-2 rounded-xl border border-slate-200" placeholder="Class 10">
+            <input type="text" id="et-class" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Class 10">
           </div>
           <div>
             <label class="block font-bold text-slate-600 mb-1">Division (Optional)</label>
-            <input type="text" id="et-div" class="w-full px-3 py-2 rounded-xl border border-slate-200 uppercase" placeholder="A">
+            <input type="text" id="et-div" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] uppercase" placeholder="A">
           </div>
         </div>
         <div>
           <label class="block font-bold text-slate-600 mb-1">Assigned Classes (comma-separated)</label>
-          <input type="text" id="et-classes" class="w-full px-3 py-2 rounded-xl border border-slate-200" placeholder="Class 9, Class 10">
+          <input type="text" id="et-classes" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Class 9, Class 10">
         </div>
         <div>
           <label class="block font-bold text-slate-600 mb-1">Assigned Subjects (comma-separated)</label>
-          <input type="text" id="et-subjects" class="w-full px-3 py-2 rounded-xl border border-slate-200" placeholder="Mathematics, Physics">
+          <input type="text" id="et-subjects" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Mathematics, Physics">
         </div>
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold">Save &amp; Apply</button>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Designation / Qualification</label>
+          <input type="text" id="et-designation" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="M.Sc., B.Ed • Senior Faculty">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Additional Info / Purpose</label>
+          <textarea id="et-info" rows="2" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)]"></textarea>
+        </div>
+        <button type="submit" class="m3-btn-primary w-full py-2.5 text-xs">Save &amp; Apply</button>
       </form>
     </div>
   </div>

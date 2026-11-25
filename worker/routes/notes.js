@@ -16,9 +16,11 @@ export async function handleNotesRoutes(request, env, path, method) {
     const className = url.searchParams.get('className') || '';
     const subject = url.searchParams.get('subject') || '';
     const sortBy = url.searchParams.get('sort') || 'newest';
+    const verifiedOnly = url.searchParams.get('verified') === '1' || url.searchParams.get('verified') === 'true';
+    const uploaderId = (url.searchParams.get('uploaderId') || '').trim();
 
     let query = `
-      SELECT n.*, p.full_name as uploader_name, p.role as uploader_role, p.teacher_type as uploader_teacher_type
+      SELECT n.*, p.full_name as uploader_name, p.role as uploader_role, p.teacher_type as uploader_teacher_type, p.is_root_admin as uploader_is_root_admin
       FROM notes n
       LEFT JOIN profiles p ON n.uploader_id = p.id
       WHERE n.moderation_status = 'approved'
@@ -37,6 +39,13 @@ export async function handleNotesRoutes(request, env, path, method) {
     if (subject) {
       query += ` AND n.subject = ?`;
       params.push(subject);
+    }
+    if (verifiedOnly) {
+      query += ` AND (n.is_teacher_verified = 1 OR p.role IN ('teacher', 'admin'))`;
+    }
+    if (uploaderId) {
+      query += ` AND n.uploader_id = ?`;
+      params.push(uploaderId);
     }
 
     query += sortBy === 'downloads'
@@ -148,7 +157,7 @@ export async function handleNotesRoutes(request, env, path, method) {
       const expiresAt = noteType === 'drive_link'
         ? null
         : new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
-      const isTeacherVerified = auth.user.role === 'teacher' ? 1 : 0;
+      const isTeacherVerified = (auth.user.role === 'teacher' || auth.user.role === 'admin') ? 1 : 0;
 
       await env.DB.prepare(
         `INSERT INTO notes (id, uploader_id, title, description, class_name, subject, chapter, note_type, drive_url, academic_year, expires_at, r2_key, file_type, file_size, moderation_status, is_teacher_verified)
@@ -291,11 +300,12 @@ export async function handleNotesRoutes(request, env, path, method) {
   }
 
   // DELETE /api/notes/:id - Delete note (uploader or admin)
-  if (path.startsWith('/api/notes/') && !path.endsWith('/report') && method === 'DELETE') {
+  if (path.startsWith('/api/notes/') && !path.endsWith('/report') && !path.endsWith('/file') && method === 'DELETE') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
 
-    const noteId = path.replace('/api/notes/', '');
+    const noteId = path.replace('/api/notes/', '').trim();
+    if (!noteId || noteId.includes('/')) return errorResponse('Invalid note ID', 400);
     const note = await env.DB.prepare(`SELECT * FROM notes WHERE id = ?`).bind(noteId).first();
 
     if (!note) return errorResponse('Note not found', 404);

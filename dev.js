@@ -26,12 +26,17 @@ function ensurePhase6Columns(db) {
     ['profiles', 'teacher_type', `TEXT DEFAULT NULL CHECK(teacher_type IN ('subject', 'class'))`],
     ['profiles', 'assigned_classes', `TEXT DEFAULT '[]'`],
     ['profiles', 'assigned_subjects', `TEXT DEFAULT '[]'`],
+    ['profiles', 'teacher_designation', `TEXT DEFAULT ''`],
+    ['profiles', 'teacher_info', `TEXT DEFAULT ''`],
     ['profiles', 'allow_student_dms', `INTEGER DEFAULT 1`],
     ['notes', 'is_teacher_verified', `INTEGER DEFAULT 0`],
     ['answers', 'is_faculty_endorsed', `INTEGER DEFAULT 0`],
     ['answers', 'endorsed_by', `TEXT`],
     ['messages', 'is_pinned', `INTEGER DEFAULT 0`],
     ['messages', 'pinned_by', `TEXT`],
+    ['messages', 'reply_to_id', `TEXT DEFAULT NULL`],
+    ['messages', 'reply_preview', `TEXT DEFAULT NULL`],
+    ['messages', 'reactions_json', `TEXT DEFAULT '{}'`],
     ['exams', 'exam_type', `TEXT NOT NULL DEFAULT 'board' CHECK(exam_type IN ('board', 'unit_test'))`],
   ];
 
@@ -41,6 +46,8 @@ function ensurePhase6Columns(db) {
       db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def};`);
     }
   }
+
+  db.exec(`UPDATE profiles SET class_name = '', division = '', roll_number = '' WHERE id = 'admin-root-001' OR is_root_admin = 1 OR username = 'admin';`);
 }
 
 if (isNewDb) {

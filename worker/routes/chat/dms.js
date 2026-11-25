@@ -5,6 +5,7 @@
 import { errorResponse, successResponse } from '../../utils/response.js';
 import { generateId } from '../../auth/crypto.js';
 import { authenticate } from '../../auth/middleware.js';
+import { isRootAdminAccount } from '../../utils/teacherScope.js';
 
 export function parseDmId(channel) {
   if (!channel) return null;
@@ -15,6 +16,22 @@ export function parseDmId(channel) {
   return clean ? `dm_${clean}` : null;
 }
 
+function formatPartner(row, prefix = '') {
+  const isRoot = (prefix ? row[`${prefix}root`] : row.is_root_admin) === 1 ||
+    (prefix ? row[`${prefix}username`] : row.username) === 'admin';
+  return {
+    id: prefix ? row[`${prefix}id`] : row.id,
+    username: prefix ? row[`${prefix}username`] : row.username,
+    fullName: prefix ? row[`${prefix}name`] : row.full_name,
+    className: isRoot ? '' : ((prefix ? row[`${prefix}class`] : row.class_name) || ''),
+    division: isRoot ? '' : ((prefix ? row[`${prefix}division`] : row.division) || ''),
+    rollNumber: isRoot ? '' : ((prefix ? row[`${prefix}roll`] : row.roll_number) || ''),
+    role: prefix ? row[`${prefix}role`] : row.role,
+    teacherType: (prefix ? row[`${prefix}teacher_type`] : row.teacher_type) || null,
+    isRootAdmin: isRoot,
+  };
+}
+
 export async function handleDmRoutes(request, env, path, method) {
   // GET /api/chat/dms - List all direct chats for current user
   if (path === '/api/chat/dms' && method === 'GET') {
@@ -23,8 +40,8 @@ export async function handleDmRoutes(request, env, path, method) {
 
     const { results } = await env.DB.prepare(`
       SELECT dc.id, dc.user1_id, dc.user2_id, dc.status, dc.requested_by, dc.created_at, dc.updated_at,
-             p1.username as u1_username, p1.full_name as u1_name, p1.class_name as u1_class, p1.division as u1_division, p1.roll_number as u1_roll, p1.role as u1_role, p1.teacher_type as u1_teacher_type, p1.is_root_admin as u1_root,
-             p2.username as u2_username, p2.full_name as u2_name, p2.class_name as u2_class, p2.division as u2_division, p2.roll_number as u2_roll, p2.role as u2_role, p2.teacher_type as u2_teacher_type, p2.is_root_admin as u2_root,
+             p1.id as u1_id, p1.username as u1_username, p1.full_name as u1_name, p1.class_name as u1_class, p1.division as u1_division, p1.roll_number as u1_roll, p1.role as u1_role, p1.teacher_type as u1_teacher_type, p1.is_root_admin as u1_root,
+             p2.id as u2_id, p2.username as u2_username, p2.full_name as u2_name, p2.class_name as u2_class, p2.division as u2_division, p2.roll_number as u2_roll, p2.role as u2_role, p2.teacher_type as u2_teacher_type, p2.is_root_admin as u2_root,
              (SELECT content FROM messages WHERE channel = ('dm_' || dc.id) AND datetime(created_at) >= datetime('now', '-7 days') ORDER BY created_at DESC, rowid DESC LIMIT 1) as last_message,
              (SELECT created_at FROM messages WHERE channel = ('dm_' || dc.id) AND datetime(created_at) >= datetime('now', '-7 days') ORDER BY created_at DESC, rowid DESC LIMIT 1) as last_message_time
       FROM direct_chats dc
@@ -36,17 +53,7 @@ export async function handleDmRoutes(request, env, path, method) {
 
     const dms = (results || []).map(r => {
       const isUser1 = r.user1_id === auth.user.id;
-      const partner = {
-        id: isUser1 ? r.user2_id : r.user1_id,
-        username: isUser1 ? r.u2_username : r.u1_username,
-        fullName: isUser1 ? r.u2_name : r.u1_name,
-        className: isUser1 ? r.u2_class : r.u1_class,
-        division: isUser1 ? r.u2_division : r.u1_division,
-        rollNumber: isUser1 ? r.u2_roll : r.u1_roll,
-        role: isUser1 ? r.u2_role : r.u1_role,
-        teacherType: isUser1 ? r.u2_teacher_type : r.u1_teacher_type,
-        isRootAdmin: (isUser1 ? r.u2_root : r.u1_root) === 1,
-      };
+      const partner = formatPartner(r, isUser1 ? 'u2_' : 'u1_');
       return {
         id: r.id,
         partner,
@@ -71,21 +78,22 @@ export async function handleDmRoutes(request, env, path, method) {
       const { targetUserId, targetUsername, query } = body;
 
       let target = null;
+      const selectCols = `id, username, full_name, class_name, division, roll_number, role, teacher_type, is_root_admin, allow_student_dms`;
       if (targetUserId) {
         target = await env.DB.prepare(
-          `SELECT id, username, full_name, class_name, role, allow_student_dms FROM profiles WHERE id = ? AND account_status = 'active'`
+          `SELECT ${selectCols} FROM profiles WHERE id = ? AND account_status = 'active'`
         ).bind(targetUserId).first();
       } else {
         const cleanQuery = (targetUsername || query || '').toString().trim();
         const cleanHandle = cleanQuery.replace(/^@/, '').toLowerCase();
         if (cleanHandle) {
           target = await env.DB.prepare(
-            `SELECT id, username, full_name, class_name, role, allow_student_dms FROM profiles WHERE LOWER(username) = ? AND account_status = 'active'`
+            `SELECT ${selectCols} FROM profiles WHERE LOWER(username) = ? AND account_status = 'active'`
           ).bind(cleanHandle).first();
         }
         if (!target && /^\d+$/.test(cleanQuery)) {
           target = await env.DB.prepare(
-            `SELECT id, username, full_name, class_name, role, allow_student_dms FROM profiles WHERE roll_number = ? AND account_status = 'active'`
+            `SELECT ${selectCols} FROM profiles WHERE roll_number = ? AND account_status = 'active'`
           ).bind(cleanQuery).first();
         }
       }
@@ -102,6 +110,7 @@ export async function handleDmRoutes(request, env, path, method) {
         return errorResponse('This teacher has disabled student direct messages in their privacy settings.', 403);
       }
 
+      const partnerObj = formatPartner(target);
       const [u1, u2] = [auth.user.id, target.id].sort();
       const existing = await env.DB.prepare(
         `SELECT * FROM direct_chats WHERE user1_id = ? AND user2_id = ?`
@@ -109,15 +118,15 @@ export async function handleDmRoutes(request, env, path, method) {
 
       if (existing) {
         if (existing.status === 'accepted') {
-          return successResponse({ id: existing.id, status: 'accepted', partner: target }, 'Chat conversation is already active');
+          return successResponse({ id: existing.id, status: 'accepted', partner: partnerObj, requestedByMe: existing.requested_by === auth.user.id }, 'Chat conversation is already active');
         }
         if (existing.status === 'pending') {
-          return successResponse({ id: existing.id, status: 'pending', partner: target }, 'Chat request is already pending authorization');
+          return successResponse({ id: existing.id, status: 'pending', partner: partnerObj, requestedByMe: existing.requested_by === auth.user.id }, 'Chat request is already pending authorization');
         }
         await env.DB.prepare(
           `UPDATE direct_chats SET status = 'pending', requested_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
         ).bind(auth.user.id, existing.id).run();
-        return successResponse({ id: existing.id, status: 'pending', partner: target }, 'Chat request re-sent successfully!');
+        return successResponse({ id: existing.id, status: 'pending', partner: partnerObj, requestedByMe: true }, 'Chat request re-sent successfully!');
       }
 
       const dmId = generateId('dm', 8);
@@ -129,7 +138,8 @@ export async function handleDmRoutes(request, env, path, method) {
       return successResponse({
         id: dmId,
         status: 'pending',
-        partner: target,
+        requestedByMe: true,
+        partner: partnerObj,
       }, `Chat request sent to ${target.full_name}! Messaging will activate once they accept.`, 201);
     } catch (err) {
       return errorResponse(`Direct chat error: ${err.message}`, 500);

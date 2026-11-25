@@ -1,9 +1,9 @@
 /**
- * Teacher Studio: Chapter-Wise Lessons & Teacher Verified Notes Module
+ * Teacher Studio: Chapter-Wise Lessons & Verified Notes Module
  */
 
 import { apiRequest } from '/js/api.js';
-import { escapeHtml, safeUrl, formatDate, initIcons, showToast, bindModalBackdropAndEsc } from '/js/ui.js';
+import { escapeHtml, safeUrl, formatDate, formatFileSize, initIcons, showToast, bindModalBackdropAndEsc } from '/js/ui.js';
 
 let lessonsCache = [];
 let onRefreshOverview = () => {};
@@ -43,7 +43,7 @@ export async function loadTeacherLessons(user) {
     const res = await apiRequest(`/lessons?teacherId=${encodeURIComponent(user.id)}`);
     lessonsCache = res.lessons || [];
     if (lessonsCache.length === 0) {
-      listEl.innerHTML = `<div class="col-span-full m3-card p-8 text-center text-xs text-slate-400">No lessons published yet. Tap "Add Lesson" to embed YouTube classes or Drive PDFs.</div>`;
+      listEl.innerHTML = `<div class="col-span-full m3-card p-8 text-center text-xs text-slate-400">No lessons published yet. Tap "Add Lesson" to share YouTube classes or Drive PDFs.</div>`;
       return;
     }
 
@@ -103,6 +103,60 @@ export async function loadTeacherLessons(user) {
   }
 }
 
+export async function loadTeacherNotes(user) {
+  teacherUser = user;
+  const listEl = document.getElementById('teacher-notes-list');
+  if (!listEl) return;
+  try {
+    const res = await apiRequest(`/notes?uploaderId=${encodeURIComponent(user.id)}`);
+    const notes = res.notes || [];
+    if (notes.length === 0) {
+      listEl.innerHTML = `<div class="col-span-full m3-card p-6 text-center text-xs text-slate-400">No verified notes uploaded yet.</div>`;
+      return;
+    }
+
+    listEl.innerHTML = notes.map(n => {
+      const isDrive = n.note_type === 'drive_link';
+      const driveHref = safeUrl(n.drive_url);
+      return `
+        <article class="m3-card p-4 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${escapeHtml(n.class_name)} • ${escapeHtml(n.subject)}</span>
+              <span class="text-[10px] font-bold text-slate-500 tabular-nums">${isDrive ? 'Drive' : formatFileSize(n.file_size)} • ${n.download_count} views</span>
+            </div>
+            <h4 class="font-extrabold text-sm">${escapeHtml(n.title)}</h4>
+            ${n.chapter ? `<p class="text-[11px] font-semibold text-[var(--md-primary)]">${escapeHtml(n.chapter)}</p>` : ''}
+            ${n.description ? `<p class="text-xs text-[var(--md-on-surface-variant)] line-clamp-2">${escapeHtml(n.description)}</p>` : ''}
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            ${isDrive && driveHref
+              ? `<a href="${escapeHtml(driveHref)}" target="_blank" rel="noopener noreferrer" class="font-bold text-emerald-700 hover:underline">Open Drive</a>`
+              : `<a href="/api/notes/${encodeURIComponent(n.id)}/file" target="_blank" class="font-bold text-[var(--md-primary)] hover:underline">Download PDF</a>`}
+            <button class="del-tnote-btn px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold" data-id="${escapeHtml(n.id)}">Delete</button>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.del-tnote-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this note permanently?')) return;
+        try {
+          await apiRequest(`/notes/${encodeURIComponent(btn.dataset.id)}`, { method: 'DELETE' });
+          showToast('Note deleted', 'info');
+          loadTeacherNotes(teacherUser);
+          onRefreshOverview();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      });
+    });
+  } catch (err) {
+    listEl.innerHTML = `<div class="col-span-full m3-card p-4 text-rose-600 text-xs">${escapeHtml(err.message)}</div>`;
+  }
+}
+
 export function initLessonsModule(user, refreshFn) {
   teacherUser = user;
   onRefreshOverview = refreshFn || (() => {});
@@ -120,11 +174,15 @@ export function initLessonsModule(user, refreshFn) {
   document.getElementById('close-t-note-modal')?.addEventListener('click', closeNoteModal);
   bindModalBackdropAndEsc(noteModal, closeNoteModal);
 
+  const driveCard = document.getElementById('tn-card-drive');
+  const fileCard = document.getElementById('tn-card-file');
   document.querySelectorAll('input[name="tn-mode"]').forEach(r => {
     r.addEventListener('change', (e) => {
       const isDrive = e.target.value === 'drive_link';
       document.getElementById('tn-drive-wrap').classList.toggle('hidden', !isDrive);
       document.getElementById('tn-file-wrap').classList.toggle('hidden', isDrive);
+      if (driveCard) driveCard.className = `cursor-pointer ${isDrive ? 'border-2 border-[var(--md-primary)] bg-[var(--md-surface-container)]' : 'border border-[var(--md-outline)] bg-white'} p-2.5 rounded-2xl flex items-center gap-2 transition`;
+      if (fileCard) fileCard.className = `cursor-pointer ${!isDrive ? 'border-2 border-[var(--md-primary)] bg-[var(--md-surface-container)]' : 'border border-[var(--md-outline)] bg-white'} p-2.5 rounded-2xl flex items-center gap-2 transition`;
     });
   });
 
@@ -159,6 +217,8 @@ export function initLessonsModule(user, refreshFn) {
   document.getElementById('t-note-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const mode = document.querySelector('input[name="tn-mode"]:checked')?.value || 'drive_link';
+    const chapter = document.getElementById('tn-chapter')?.value.trim() || '';
+    const description = document.getElementById('tn-desc')?.value.trim() || '';
     try {
       if (mode === 'file') {
         const file = document.getElementById('tn-file').files[0];
@@ -167,6 +227,8 @@ export function initLessonsModule(user, refreshFn) {
         fd.append('title', document.getElementById('tn-title').value.trim());
         fd.append('className', document.getElementById('tn-class').value);
         fd.append('subject', document.getElementById('tn-subject').value);
+        fd.append('chapter', chapter);
+        fd.append('description', description);
         fd.append('noteType', 'file');
         fd.append('file', file);
         await apiRequest('/notes/upload', { method: 'POST', body: fd });
@@ -177,14 +239,17 @@ export function initLessonsModule(user, refreshFn) {
             title: document.getElementById('tn-title').value.trim(),
             className: document.getElementById('tn-class').value,
             subject: document.getElementById('tn-subject').value,
+            chapter,
+            description,
             noteType: 'drive_link',
             driveUrl: document.getElementById('tn-drive').value.trim(),
           }
         });
       }
-      showToast('Teacher Verified Note published!', 'success');
+      showToast('Verified Note published!', 'success');
       e.target.reset();
       closeNoteModal();
+      loadTeacherNotes(teacherUser);
       onRefreshOverview();
     } catch (err) {
       showToast(err.message, 'error');

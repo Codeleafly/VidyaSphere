@@ -20,7 +20,7 @@ export async function handleHomeworkRoutes(request, env, path, method) {
     const teacherId = (url.searchParams.get('teacherId') || '').trim();
 
     let query = `
-      SELECT h.*, p.full_name as teacher_name, p.teacher_type
+      SELECT h.*, p.full_name as teacher_name, p.role as teacher_role, p.teacher_type, p.is_root_admin as teacher_is_root_admin
       FROM homework h
       LEFT JOIN profiles p ON h.teacher_id = p.id
       WHERE 1=1

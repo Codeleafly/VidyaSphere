@@ -5,6 +5,7 @@
 import { errorResponse, successResponse } from '../../utils/response.js';
 import { generateId } from '../../auth/crypto.js';
 import { authenticate } from '../../auth/middleware.js';
+import { isRootAdminAccount, sanitizeProfileRow } from '../../utils/teacherScope.js';
 
 async function findActiveStudent(env, cleanTarget, className) {
   const cleanUsername = cleanTarget.replace(/^@/, '').toLowerCase();
@@ -50,6 +51,7 @@ export async function handleGroupRoutes(request, env, path, method) {
     const { results } = await env.DB.prepare(`
       SELECT g.*, gm.role as my_role, gm.invite_status,
              p.full_name as creator_name, p.username as creator_username,
+             p.role as creator_role, p.teacher_type as creator_teacher_type, p.is_root_admin as creator_is_root_admin,
              p.class_name as creator_class, p.division as creator_division, p.roll_number as creator_roll,
              (SELECT COUNT(*) FROM group_members WHERE group_id = g.id AND invite_status = 'accepted') as member_count
       FROM chat_groups g
@@ -59,7 +61,18 @@ export async function handleGroupRoutes(request, env, path, method) {
       ORDER BY g.created_at DESC
     `).bind(auth.user.id).all();
 
-    return successResponse({ groups: results || [] });
+    const groups = (results || []).map(g => {
+      const isCreatorRoot = g.creator_is_root_admin === 1 || g.creator_username === 'admin';
+      return {
+        ...g,
+        creator_class: isCreatorRoot ? '' : g.creator_class,
+        creator_division: isCreatorRoot ? '' : g.creator_division,
+        creator_roll: isCreatorRoot ? '' : g.creator_roll,
+        creator_is_root_admin: isCreatorRoot ? 1 : 0,
+      };
+    });
+
+    return successResponse({ groups });
   }
 
   // POST /api/chat/groups - Create study group
@@ -110,17 +123,17 @@ export async function handleGroupRoutes(request, env, path, method) {
     const { results } = await env.DB.prepare(`
       SELECT gm.group_id, gm.user_id, gm.role as member_role, gm.invite_status,
              strftime('%Y-%m-%dT%H:%M:%SZ', gm.joined_at) as joined_at,
-             p.username, p.full_name, p.class_name, p.division, p.roll_number, p.is_root_admin
+             p.username, p.full_name, p.role as user_role, p.teacher_type, p.class_name, p.division, p.roll_number, p.is_root_admin
       FROM group_members gm
       JOIN profiles p ON gm.user_id = p.id
       WHERE gm.group_id = ?
       ORDER BY (CASE WHEN gm.role = 'admin' THEN 0 ELSE 1 END), (CASE WHEN gm.invite_status = 'accepted' THEN 0 ELSE 1 END), p.full_name ASC
     `).bind(groupId).all();
 
-    return successResponse({ members: results || [] });
+    return successResponse({ members: (results || []).map(sanitizeProfileRow) });
   }
 
-  // POST /api/chat/groups/:id/members - Invite classmate
+  // POST /api/chat/groups/:id/members - Invite member
   if (path.startsWith('/api/chat/groups/') && path.endsWith('/members') && method === 'POST') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
@@ -143,27 +156,29 @@ export async function handleGroupRoutes(request, env, path, method) {
       const cleanTarget = (targetUserId || targetUsername || targetRollNumber || query || '').toString().trim();
 
       if (!cleanTarget) {
-        return errorResponse('Please enter a roll number, username, or select a student', 400);
+        return errorResponse('Please enter a roll number, username, or select a user', 400);
       }
 
       const targetUser = await findActiveStudent(env, cleanTarget, group.class_name);
       if (!targetUser) {
-        return errorResponse(`Student "${cleanTarget}" not found. Verify the roll number or username.`, 404);
+        return errorResponse(`User "${cleanTarget}" not found. Verify the roll number or username.`, 404);
       }
 
       const existing = await env.DB.prepare(
         `SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`
       ).bind(groupId, targetUser.id).first();
 
+      const isRoot = isRootAdminAccount(targetUser);
       const memberPayload = {
         id: targetUser.id,
         username: targetUser.username,
         fullName: targetUser.full_name,
-        className: targetUser.class_name,
-        division: targetUser.division,
-        rollNumber: targetUser.roll_number,
+        className: isRoot ? '' : targetUser.class_name,
+        division: isRoot ? '' : targetUser.division,
+        rollNumber: isRoot ? '' : targetUser.roll_number,
         role: 'member',
-        inviteStatus: 'pending'
+        inviteStatus: 'pending',
+        isRootAdmin: isRoot,
       };
 
       if (existing) {

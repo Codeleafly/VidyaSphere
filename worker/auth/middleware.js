@@ -4,7 +4,7 @@
  */
 
 import { errorResponse } from '../utils/response.js';
-import { parseStringList } from '../utils/teacherScope.js';
+import { parseStringList, isRootAdminAccount } from '../utils/teacherScope.js';
 
 export async function authenticate(request, env, allowedRoles = [], allowPending = false) {
   const authHeader = request.headers.get('Authorization') || '';
@@ -21,7 +21,8 @@ export async function authenticate(request, env, allowedRoles = [], allowPending
   const sessionRow = await env.DB.prepare(
     `SELECT s.token, s.user_id, s.expires_at, p.username, p.full_name, p.role, p.account_status,
             p.class_name, p.division, p.roll_number, p.is_root_admin,
-            p.teacher_type, p.assigned_classes, p.assigned_subjects, p.allow_student_dms
+            p.teacher_type, p.assigned_classes, p.assigned_subjects,
+            p.teacher_designation, p.teacher_info, p.allow_student_dms
      FROM sessions s
      JOIN profiles p ON s.user_id = p.id
      WHERE s.token = ?`
@@ -47,7 +48,7 @@ export async function authenticate(request, env, allowedRoles = [], allowPending
     return { error: errorResponse('Forbidden: Insufficient privileges. Access restricted to authorized personnel only.', 403) };
   }
 
-  const isRootAdmin = sessionRow.is_root_admin === 1 || sessionRow.username === 'admin';
+  const isRootAdmin = isRootAdminAccount(sessionRow);
 
   return {
     user: {
@@ -55,12 +56,14 @@ export async function authenticate(request, env, allowedRoles = [], allowPending
       username: sessionRow.username,
       fullName: sessionRow.full_name,
       role: sessionRow.role,
-      className: sessionRow.class_name,
-      division: sessionRow.division || '',
-      rollNumber: sessionRow.roll_number || '',
+      className: isRootAdmin ? '' : (sessionRow.class_name || ''),
+      division: isRootAdmin ? '' : (sessionRow.division || ''),
+      rollNumber: isRootAdmin ? '' : (sessionRow.roll_number || ''),
       teacherType: sessionRow.teacher_type || null,
       assignedClasses: parseStringList(sessionRow.assigned_classes),
       assignedSubjects: parseStringList(sessionRow.assigned_subjects),
+      teacherDesignation: sessionRow.teacher_designation || '',
+      teacherInfo: sessionRow.teacher_info || '',
       allowStudentDms: sessionRow.allow_student_dms !== 0,
       token: sessionRow.token,
       accountStatus: sessionRow.account_status,

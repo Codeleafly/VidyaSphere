@@ -1,16 +1,35 @@
 /**
- * Admin Core Portal Entrypoint
+ * Admin Core Portal Entrypoint (Material You M3)
  */
 
 import { apiRequest } from '/js/api.js';
-import { logout } from '/js/auth.js';
-import { initIcons, showToast } from '/js/ui.js';
+import { logout, setCurrentUser } from '/js/auth.js';
+import { openAccountModal } from '/js/layout.js';
+import {
+  CLASS_LIST, escapeHtml, formatDateTime, initIcons, initM3Theme,
+  renderThemePickerHtml, bindThemePicker, showToast, renderRoleBadgeHtml
+} from '/js/ui.js';
 import { loadApplications } from '/js/admin/applications.js';
 import { loadStudentAccounts, initQuickPromoter } from '/js/admin/students.js';
 import { loadExamsAdmin, initExamsManager } from '/js/admin/exams.js';
 import { loadAdminNotices } from '/js/admin/notices.js';
 
+initM3Theme();
+
 let currentAdminUser = null;
+
+function populateClassDropdowns() {
+  const examClass = document.getElementById('exam-class');
+  const annClass = document.getElementById('ann-target-class');
+  if (examClass) {
+    examClass.innerHTML = `<option value="All Classes">All Classes</option>` +
+      CLASS_LIST.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  }
+  if (annClass) {
+    annClass.innerHTML = `<option value="all">School-Wide (All Classes)</option>` +
+      CLASS_LIST.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  }
+}
 
 async function verifyAdminSession() {
   try {
@@ -21,12 +40,19 @@ async function verifyAdminSession() {
       return false;
     }
     currentAdminUser = res.user;
-    document.getElementById('admin-display-name').textContent = res.user.fullName || res.user.username;
+    setCurrentUser(res.user);
+    const displayName = res.user.fullName || res.user.username;
+    document.getElementById('admin-display-name').textContent = displayName;
+    const avatar = document.getElementById('admin-avatar-initial');
+    if (avatar) avatar.textContent = displayName.charAt(0).toUpperCase();
+
     const isRoot = res.user.isRootAdmin || res.user.username === 'admin';
+    const roleText = isRoot ? 'Admin (Lead)' : 'Admin';
     const roleLabelEl = document.getElementById('admin-display-role');
-    if (roleLabelEl) {
-      roleLabelEl.textContent = isRoot ? 'Lead Root Admin' : 'Secondary Admin';
-    }
+    if (roleLabelEl) roleLabelEl.textContent = roleText;
+    const mobBadge = document.getElementById('admin-mob-badge');
+    if (mobBadge) mobBadge.textContent = roleText;
+
     return true;
   } catch {
     alert('Session expired or unauthorized. Please log in.');
@@ -46,6 +72,13 @@ async function loadStats() {
     document.getElementById('stat-notes').textContent = s.totalNotes ?? 0;
     document.getElementById('stat-polls').textContent = s.totalPolls ?? 0;
     document.getElementById('stat-exams').textContent = s.totalExams ?? 0;
+
+    const pill = document.getElementById('admin-pending-pill');
+    if (pill) {
+      const cnt = s.pendingRegistrations || 0;
+      pill.textContent = cnt;
+      pill.classList.toggle('hidden', cnt === 0);
+    }
   } catch (e) {
     console.error('Stats error', e);
   }
@@ -62,6 +95,34 @@ async function loadSettings() {
   }
 }
 
+async function loadAuditLogs() {
+  const container = document.getElementById('admin-audit-container');
+  if (!container) return;
+  try {
+    const res = await apiRequest('/admin/audit-logs');
+    const logs = res.logs || [];
+    if (logs.length === 0) {
+      container.innerHTML = `<div class="m3-card p-8 text-center text-slate-400 text-xs">No audit logs recorded yet.</div>`;
+      return;
+    }
+    container.innerHTML = logs.map(l => `
+      <div class="m3-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div class="space-y-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${escapeHtml(l.action)}</span>
+            <span class="font-bold">${escapeHtml(l.actor_name || 'System')}</span>
+            ${l.actor_role ? renderRoleBadgeHtml(l.actor_role, null, l.actor_is_root_admin === 1) : ''}
+          </div>
+          <p class="text-[var(--md-on-surface-variant)] break-words">${escapeHtml(l.details || '')}</p>
+        </div>
+        <span class="text-[11px] text-slate-400 tabular-nums shrink-0">${escapeHtml(formatDateTime(l.created_at))}</span>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<div class="m3-card p-6 text-rose-600 text-xs">${escapeHtml(err.message)}</div>`;
+  }
+}
+
 function refreshAllData() {
   loadStats();
   loadApplications(currentAdminUser, refreshAllData);
@@ -69,22 +130,20 @@ function refreshAllData() {
 }
 
 function switchTab(tabId) {
-  document.querySelectorAll('aside .admin-tab-btn').forEach(btn => {
-    btn.className = btn.dataset.tab === tabId
-      ? 'admin-tab-btn flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-800 text-white font-bold text-[13px] w-full text-left transition'
-      : 'admin-tab-btn flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white font-medium text-[13px] transition w-full text-left';
-  });
-
-  document.querySelectorAll('.md\\:hidden .admin-tab-btn').forEach(btn => {
-    btn.className = btn.dataset.tab === tabId
-      ? 'admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shrink-0'
-      : 'admin-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-xs shrink-0';
+  document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
   });
 
   document.querySelectorAll('.admin-bottom-tab').forEach(btn => {
-    btn.className = btn.dataset.tab === tabId
-      ? 'admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-indigo-400 font-bold text-[10px] truncate'
-      : 'admin-bottom-tab flex-1 py-1.5 px-0.5 flex flex-col items-center justify-center text-slate-400 font-medium text-[10px] truncate';
+    const pill = btn.querySelector('.a-pill');
+    const label = btn.querySelector('span:last-child');
+    const active = btn.dataset.tab === tabId;
+    if (pill) {
+      pill.className = active
+        ? 'a-pill px-3 py-1 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)]'
+        : 'a-pill px-3 py-1 rounded-full text-[var(--md-on-surface-variant)]';
+    }
+    if (label) label.className = active ? 'font-bold' : 'font-medium';
   });
 
   document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
@@ -94,17 +153,47 @@ function switchTab(tabId) {
   if (tabId === 'students') loadStudentAccounts(currentAdminUser, refreshAllData);
   if (tabId === 'exams') loadExamsAdmin();
   if (tabId === 'announcements') loadAdminNotices();
+  if (tabId === 'audit') loadAuditLogs();
   if (tabId === 'settings') loadSettings();
 }
+
+// Theme pickers
+const deskTheme = document.getElementById('admin-theme-desktop');
+const mobTheme = document.getElementById('admin-theme-mob');
+if (deskTheme) { deskTheme.innerHTML = `<span class="text-[10px] font-bold uppercase text-[var(--md-on-surface-variant)]">Theme</span>` + renderThemePickerHtml(); bindThemePicker(deskTheme); }
+if (mobTheme) { mobTheme.innerHTML = renderThemePickerHtml(); bindThemePicker(mobTheme); }
+
+populateClassDropdowns();
 
 document.getElementById('logout-btn')?.addEventListener('click', logout);
 document.getElementById('logout-btn-mob')?.addEventListener('click', logout);
 document.getElementById('reg-status-filter')?.addEventListener('change', () => loadApplications(currentAdminUser, refreshAllData));
 document.getElementById('reg-role-filter')?.addEventListener('change', () => loadApplications(currentAdminUser, refreshAllData));
 document.getElementById('roster-role-filter')?.addEventListener('change', () => loadStudentAccounts(currentAdminUser, refreshAllData));
+document.getElementById('roster-search-input')?.addEventListener('input', () => {
+  clearTimeout(window._adminRosterTimer);
+  window._adminRosterTimer = setTimeout(() => loadStudentAccounts(currentAdminUser, refreshAllData), 250);
+});
+document.getElementById('refresh-audit-btn')?.addEventListener('click', loadAuditLogs);
 
-document.querySelectorAll('.admin-tab-btn, .admin-bottom-tab').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+document.querySelectorAll('.admin-tab-btn, .admin-bottom-tab, .admin-sheet-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('admin-more-sheet')?.classList.add('hidden');
+    document.getElementById('admin-more-sheet')?.classList.remove('flex');
+    switchTab(btn.dataset.tab);
+  });
+});
+
+const moreSheet = document.getElementById('admin-more-sheet');
+document.getElementById('admin-more-btn')?.addEventListener('click', () => { moreSheet.classList.remove('hidden'); moreSheet.classList.add('flex'); });
+document.getElementById('admin-more-close')?.addEventListener('click', () => { moreSheet.classList.add('hidden'); moreSheet.classList.remove('flex'); });
+moreSheet?.addEventListener('click', (e) => { if (e.target === moreSheet) { moreSheet.classList.add('hidden'); moreSheet.classList.remove('flex'); } });
+
+document.getElementById('admin-profile-btn')?.addEventListener('click', () => currentAdminUser && openAccountModal(currentAdminUser));
+document.getElementById('admin-profile-mob')?.addEventListener('click', () => {
+  moreSheet?.classList.add('hidden');
+  moreSheet?.classList.remove('flex');
+  if (currentAdminUser) openAccountModal(currentAdminUser);
 });
 
 document.getElementById('create-ann-form')?.addEventListener('submit', async (e) => {

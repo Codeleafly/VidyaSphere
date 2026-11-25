@@ -3,270 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Realtime Student Chat & DMs | VidyaSphere</title>
+  <title>Realtime Chat &amp; Study Groups | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] h-[100dvh] flex flex-col md:flex-row pb-16 md:pb-0 overflow-hidden w-full selection:bg-indigo-500 selection:text-white">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] h-[100dvh] flex flex-col md:flex-row pb-16 md:pb-0 overflow-hidden w-full">
 
-  <!-- Mobile Channels Backdrop -->
+  <!-- Mobile Conversations Drawer Backdrop -->
   <div id="channels-backdrop" class="fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-40 hidden md:hidden transition-opacity"></div>
 
-  <!-- Split View Main Area -->
+  <!-- Material You Split View Chat Workspace -->
   <main class="flex-1 min-h-0 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-5 flex flex-col md:flex-row gap-3 overflow-hidden">
 
-    <!-- Conversations / Channels Sidebar -->
-    <div id="channels-panel" class="fixed inset-y-0 left-0 z-50 w-72 bg-[var(--md-surface-card)] border-r md:border border-[var(--md-outline)] p-3 flex-col shrink-0 h-full overflow-hidden shadow-2xl md:shadow-[0_1px_2px_rgba(15,23,42,0.04)] hidden md:flex md:relative md:inset-auto md:z-auto md:rounded-3xl">
-      <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
-        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-          <i data-lucide="message-circle" class="w-4 h-4 text-indigo-600"></i> Chats & DMs
+    <!-- Left Rail: Hubs / DMs / Study Groups -->
+    <aside id="channels-panel" class="fixed inset-y-0 left-0 z-50 w-76 max-w-[85vw] md:w-72 bg-[var(--md-surface-container)] md:bg-[var(--md-surface-card)] border-r md:border border-[var(--md-outline)] p-3 flex-col shrink-0 h-full overflow-hidden shadow-2xl md:shadow-none hidden md:flex md:relative md:inset-auto md:z-auto md:rounded-[28px]">
+      <div class="flex items-center justify-between pb-2.5 border-b border-[var(--md-outline)]">
+        <span class="text-xs font-extrabold tracking-tight text-[var(--md-on-surface)] flex items-center gap-2">
+          <span class="w-7 h-7 rounded-xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center">
+            <i data-lucide="messages-square" class="w-3.5 h-3.5"></i>
+          </span>
+          Conversations
         </span>
         <div class="flex items-center gap-1">
-          <button id="open-new-dm-btn" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[11px] font-bold transition">
-            <i data-lucide="plus" class="w-3 h-3"></i> Direct Chat
+          <button id="open-new-dm-btn" class="m3-btn-tonal inline-flex items-center gap-1 px-2.5 py-1 text-[11px]">
+            <i data-lucide="user-plus" class="w-3 h-3"></i> DM
           </button>
-          <button id="close-channels-mob-btn" class="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600" title="Close">
+          <button id="close-channels-mob-btn" class="md:hidden p-1.5 rounded-full text-slate-500 hover:bg-slate-200/70" title="Close">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <!-- Tabs: Hub / DMs / Groups -->
-      <div class="grid grid-cols-3 gap-1 p-1 bg-slate-100/90 rounded-xl my-2.5 text-[11px] font-bold">
-        <button class="chat-tab-btn active py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition" data-target="channels-list">Hub</button>
-        <button class="chat-tab-btn py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition" data-target="dms-list">DMs</button>
-        <button class="chat-tab-btn py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition" data-target="groups-list">Groups</button>
+      <!-- Material 3 Segmented Tabs: Hubs / DMs / Groups -->
+      <div class="grid grid-cols-3 gap-1 p-1 bg-[var(--md-surface-container)] rounded-full border border-[var(--md-outline)] my-2.5 text-[11px] font-bold">
+        <button type="button" class="chat-tab-btn active py-1.5 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] transition" data-target="channels-list">Hubs</button>
+        <button type="button" class="chat-tab-btn py-1.5 rounded-full text-[var(--md-on-surface-variant)] transition flex items-center justify-center gap-1" data-target="dms-list">
+          <span>DMs</span>
+          <span id="dms-badge-count" class="hidden px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[9px] font-extrabold tabular-nums">0</span>
+        </button>
+        <button type="button" class="chat-tab-btn py-1.5 rounded-full text-[var(--md-on-surface-variant)] transition flex items-center justify-center gap-1" data-target="groups-list">
+          <span>Groups</span>
+          <span id="groups-badge-count" class="hidden px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[9px] font-extrabold tabular-nums">0</span>
+        </button>
+      </div>
+
+      <!-- Quick Sidebar Search -->
+      <div class="relative mb-2">
+        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+        <input type="text" id="sidebar-filter-input" placeholder="Filter chats..."
+          class="m3-input w-full pl-8 pr-3 py-1.5 rounded-full border border-[var(--md-outline)] bg-white text-xs">
       </div>
 
       <!-- Scrollable List Area -->
-      <div class="flex-1 overflow-y-auto space-y-1 pr-1 text-xs" id="chat-tabs-content">
+      <div class="flex-1 overflow-y-auto space-y-1 pr-0.5 text-xs no-scrollbar" id="chat-tabs-content">
         <div id="channels-list" class="space-y-1">
-          <button class="channel-item active bg-indigo-50 text-indigo-700 w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80" data-channel="school" data-title="School Hub">
-            <span class="flex items-center gap-2 font-semibold truncate">
-              <i data-lucide="hash" class="w-3.5 h-3.5 text-indigo-600"></i>
-              <span class="channel-label">#school-hub</span>
-            </span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 font-bold">All</span>
-          </button>
-          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80" data-channel="class" id="class-channel-btn" data-title="My Class Hub">
-            <span class="flex items-center gap-2 font-semibold text-slate-700 truncate">
-              <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i>
-              <span class="channel-label">#my-class</span>
-            </span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-700 font-bold">Class</span>
-          </button>
-          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80" data-channel="academics" data-title="Academics & Study">
-            <span class="flex items-center gap-2 font-semibold text-slate-700 truncate">
-              <i data-lucide="book" class="w-3.5 h-3.5 text-emerald-600"></i>
-              <span class="channel-label">#academics</span>
-            </span>
-          </button>
-          <button class="channel-item w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition hover:bg-slate-100/80" data-channel="sports" data-title="Sports & Events">
-            <span class="flex items-center gap-2 font-semibold text-slate-700 truncate">
-              <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-600"></i>
-              <span class="channel-label">#sports</span>
-            </span>
-          </button>
+          <!-- Dynamically hydrated by chat/main.js based on Student / Teacher / Admin role -->
         </div>
 
         <div id="dms-list" class="hidden space-y-1">
           <div id="dms-items-container" class="space-y-1">
-            <p class="text-center text-slate-400 py-4 text-[11px]">Loading direct chats...</p>
+            <p class="text-center text-slate-400 py-5 text-[11px]">Loading direct chats...</p>
           </div>
         </div>
 
-        <div id="groups-list" class="hidden space-y-1">
-          <div class="flex items-center justify-between pb-1.5 px-1">
-            <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Study Groups</span>
-            <button id="create-group-btn" class="text-[11px] text-indigo-600 font-bold hover:underline">+ New Group</button>
+        <div id="groups-list" class="hidden space-y-1.5">
+          <div class="flex items-center justify-between px-1 pb-1">
+            <span class="text-[10px] text-[var(--md-on-surface-variant)] font-bold uppercase tracking-wider">Study Groups</span>
+            <button id="create-group-btn" class="m3-btn-tonal px-2.5 py-1 text-[10px] inline-flex items-center gap-1">
+              <i data-lucide="plus" class="w-3 h-3"></i> New Group
+            </button>
           </div>
           <div id="groups-items-container" class="space-y-1">
-            <p class="text-center text-slate-400 py-4 text-[11px]">No groups joined yet.</p>
+            <p class="text-center text-slate-400 py-5 text-[11px]">No groups joined yet.</p>
           </div>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- Active Chat Window -->
-    <div class="flex-1 min-h-0 bg-[var(--md-surface-card)] rounded-3xl border border-[var(--md-outline)] flex flex-col h-full overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+    <!-- Active Chat Surface -->
+    <section class="flex-1 min-h-0 bg-[var(--md-surface-card)] rounded-[28px] border border-[var(--md-outline)] flex flex-col h-full overflow-hidden relative shadow-xs">
 
-      <!-- Chat Header -->
-      <div class="px-3.5 py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+      <!-- Chat Top Bar -->
+      <div class="px-3.5 py-3 border-b border-[var(--md-outline)] flex items-center justify-between gap-2 shrink-0 bg-[var(--md-surface-card)]">
         <div class="flex items-center gap-2.5 overflow-hidden">
-          <button id="toggle-channels-mob-btn" class="md:hidden p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 shrink-0" title="Switch Channel or DMs">
-            <i data-lucide="panel-left" class="w-4 h-4"></i>
+          <button id="toggle-channels-mob-btn" class="md:hidden p-2 rounded-full bg-[var(--md-surface-container)] hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] shrink-0" title="Switch Channel or DMs">
+            <i data-lucide="menu" class="w-4 h-4"></i>
           </button>
-          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0" id="current-chat-icon">
+          <div class="w-9 h-9 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center font-bold shrink-0" id="current-chat-icon">
             <i data-lucide="hash" class="w-4 h-4"></i>
           </div>
           <div class="overflow-hidden">
             <div class="flex items-center gap-2">
-              <h2 class="font-bold text-slate-900 text-sm sm:text-base truncate" id="channel-name">School Hub</h2>
-              <button id="group-info-btn" class="hidden px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 text-[10px] font-bold items-center gap-1 shrink-0 transition" title="Manage Group Members">
+              <h2 class="font-extrabold text-sm sm:text-base truncate" id="channel-name">School Hub</h2>
+              <button id="group-info-btn" class="hidden px-2.5 py-0.5 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] text-[10px] font-bold items-center gap-1 shrink-0 transition" title="Manage Group Members">
                 <i data-lucide="users" class="w-3 h-3"></i>
                 <span id="group-members-count-badge">Members</span>
               </button>
             </div>
-            <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
+            <div class="flex items-center gap-1.5 text-[10px] text-[var(--md-on-surface-variant)]">
               <span id="connection-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-              <span id="connection-status">Live Connected</span>
+              <span id="connection-status" class="font-semibold">Live</span>
+              <span id="online-count-badge" class="hidden font-bold text-emerald-700 tabular-nums"></span>
               <span>•</span>
-              <span id="chat-subtitle" class="truncate">Public stream • Auto-purge after 7 days</span>
+              <span id="chat-subtitle" class="truncate">Public stream • 7-day auto-purge</span>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5">
-          <span class="hidden sm:inline-flex items-center gap-1 text-[10px] bg-slate-100 text-slate-500 font-medium px-2.5 py-1 rounded-lg">
-            <i data-lucide="clock" class="w-3 h-3 text-amber-500"></i> 7-Day Auto Purge
-          </span>
-          <button id="refresh-chat-btn" title="Refresh messages" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="toggle-chat-search-btn" title="Search messages" class="p-2 rounded-full text-[var(--md-on-surface-variant)] hover:bg-[var(--md-surface-container)] transition">
+            <i data-lucide="search" class="w-4 h-4"></i>
+          </button>
+          <button id="refresh-chat-btn" title="Refresh messages" class="p-2 rounded-full text-[var(--md-on-surface-variant)] hover:bg-[var(--md-surface-container)] transition">
             <i data-lucide="rotate-cw" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
+      <!-- Expandable In-Chat Search Bar -->
+      <div id="chat-search-bar" class="hidden px-3.5 py-2 bg-[var(--md-surface-container)] border-b border-[var(--md-outline)] flex items-center gap-2 shrink-0">
+        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+        <input type="text" id="chat-msg-search-input" placeholder="Search messages or filenames (last 7 days)..."
+          class="flex-1 bg-transparent text-xs outline-none text-[var(--md-on-surface)]">
+        <button type="button" id="clear-chat-search-btn" class="px-2.5 py-1 rounded-full bg-white text-[10px] font-bold border border-[var(--md-outline)]">Close</button>
+      </div>
+
       <!-- Consent Banner (Pending DM or Group Invite) -->
       <div id="dm-permission-banner" class="hidden p-3 bg-amber-50 border-b border-amber-200/80 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
-        <div class="flex items-center gap-2 text-amber-900">
-          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 shrink-0"></i>
-          <span id="dm-permission-text">Chat request is awaiting approval.</span>
+        <div class="flex items-center gap-2 text-amber-950">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-700 shrink-0"></i>
+          <span id="dm-permission-text" class="font-medium">Chat request is awaiting approval.</span>
         </div>
         <div id="dm-permission-actions" class="flex items-center gap-2 shrink-0">
-          <button id="accept-dm-btn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs transition">Accept</button>
-          <button id="decline-dm-btn" class="px-3 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg font-bold text-xs transition">Decline</button>
+          <button id="accept-dm-btn" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold text-xs transition">Accept</button>
+          <button id="decline-dm-btn" class="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-full font-bold text-xs transition">Decline</button>
         </div>
       </div>
 
-      <!-- Pinned Messages Bar (Admins & Scoped Teachers) -->
-      <div id="pinned-bar" class="hidden px-3.5 py-2 bg-[var(--md-primary-container)]/60 border-b border-[var(--md-outline)] text-xs flex items-center justify-between gap-2 shrink-0">
-        <div class="flex items-center gap-2 overflow-hidden">
-          <i data-lucide="pin" class="w-3.5 h-3.5 text-[var(--md-primary)] shrink-0"></i>
-          <span id="pinned-bar-text" class="truncate font-semibold text-[var(--md-on-primary-container)]"></span>
+      <!-- Expandable Pinned Messages Bar -->
+      <div id="pinned-bar" class="hidden bg-[var(--md-primary-container)]/55 border-b border-[var(--md-outline)] text-xs shrink-0">
+        <div class="px-3.5 py-2 flex items-center justify-between gap-2 cursor-pointer" id="pinned-bar-toggle">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <i data-lucide="pin" class="w-3.5 h-3.5 text-[var(--md-primary)] shrink-0"></i>
+            <span id="pinned-bar-text" class="truncate font-semibold text-[var(--md-on-primary-container)]"></span>
+          </div>
+          <span id="pinned-bar-count" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white text-[var(--md-primary)] shrink-0 tabular-nums"></span>
         </div>
-        <span id="pinned-bar-count" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/80 shrink-0"></span>
+        <div id="pinned-drawer" class="hidden px-3.5 pb-2.5 space-y-1.5 max-h-40 overflow-y-auto border-t border-[var(--md-outline)]/60 pt-2"></div>
       </div>
 
       <!-- Messages Stream -->
-      <div id="messages-container" class="flex-1 min-h-0 bg-slate-50/60 p-3 sm:p-4 overflow-y-auto space-y-3">
+      <div id="messages-container" class="flex-1 min-h-0 bg-[var(--md-surface)]/75 p-3 sm:p-4 overflow-y-auto space-y-2.5">
         <div class="p-8 text-center text-slate-400 text-xs">Loading messages...</div>
       </div>
 
+      <!-- Scroll to Bottom FAB -->
+      <button type="button" id="scroll-bottom-btn" class="hidden absolute right-4 bottom-24 z-20 w-9 h-9 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-lg flex items-center justify-center m3-press" title="Jump to latest">
+        <i data-lucide="arrow-down" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Live Typing Indicator -->
+      <div id="typing-indicator-bar" class="hidden px-4 py-1 text-[11px] font-semibold text-[var(--md-primary)] bg-[var(--md-surface)] border-t border-[var(--md-outline)]/60 shrink-0"></div>
+
       <!-- Composer Bar -->
-      <div class="p-2.5 sm:p-3 border-t border-slate-100 bg-white shrink-0 space-y-2">
-        <div id="attachment-preview-bar" class="hidden flex items-center justify-between text-xs bg-indigo-50 border border-indigo-200/80 rounded-xl px-3 py-1.5">
-          <div class="flex items-center gap-2 overflow-hidden">
-            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i>
-            <span id="attachment-name-text" class="font-bold text-indigo-900 truncate"></span>
-            <span id="attachment-size-text" class="text-[10px] text-indigo-500 shrink-0 tabular-nums"></span>
+      <div class="p-2.5 sm:p-3 border-t border-[var(--md-outline)] bg-[var(--md-surface-card)] shrink-0 space-y-2">
+        <!-- Reply Quote Preview -->
+        <div id="reply-preview-bar" class="hidden items-center justify-between text-xs bg-[var(--md-surface-container)] border-l-4 border-l-[var(--md-primary)] rounded-xl px-3 py-1.5 gap-2">
+          <div class="overflow-hidden">
+            <p class="text-[10px] font-extrabold text-[var(--md-primary)]" id="reply-preview-author">Replying to</p>
+            <p class="text-[11px] text-[var(--md-on-surface-variant)] truncate" id="reply-preview-text"></p>
           </div>
-          <button type="button" id="remove-attachment-btn" class="text-slate-400 hover:text-rose-600 font-bold text-base px-1 leading-none">&times;</button>
+          <button type="button" id="cancel-reply-btn" class="p-1 rounded-full hover:bg-slate-200/70 text-slate-500 shrink-0"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
         </div>
 
-        <form id="chat-form" class="flex items-center gap-2">
+        <!-- Attachment Preview -->
+        <div id="attachment-preview-bar" class="hidden items-center justify-between text-xs bg-[var(--md-primary-container)]/60 border border-[var(--md-outline)] rounded-2xl px-3 py-1.5">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-[var(--md-primary)] shrink-0"></i>
+            <span id="attachment-name-text" class="font-bold truncate"></span>
+            <span id="attachment-size-text" class="text-[10px] text-[var(--md-on-surface-variant)] shrink-0 tabular-nums"></span>
+          </div>
+          <button type="button" id="remove-attachment-btn" class="p-1 rounded-full hover:bg-white/70 text-slate-600"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+        </div>
+
+        <!-- Quick Emoji Popover -->
+        <div id="composer-emoji-bar" class="hidden flex items-center gap-1.5 flex-wrap px-2 py-1.5 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline)]">
+          <span class="text-[10px] font-bold text-[var(--md-on-surface-variant)] mr-1">Insert:</span>
+          <button type="button" class="emoji-insert-btn text-base px-1.5 py-0.5 rounded-lg hover:bg-white">👍</button>
+          <button type="button" class="emoji-insert-btn text-base px-1.5 py-0.5 rounded-lg hover:bg-white">❤️</button>
+          <button type="button" class="emoji-insert-btn text-base px-1.5 py-0.5 rounded-lg hover:bg-white">🎉</button>
+          <button type="button" class="emoji-insert-btn text-base px-1.5 py-0.5 rounded-lg hover:bg-white">💡</button>
+          <button type="button" class="emoji-insert-btn text-base px-1.5 py-0.5 rounded-lg hover:bg-white">📚</button>
+          <button type="button" class="emoji-insert-btn text-base px-1.5 py-0.5 rounded-lg hover:bg-white">✅</button>
+          <button type="button" class="emoji-insert-btn text-base px-1.5 py-0.5 rounded-lg hover:bg-white">🙏</button>
+          <button type="button" class="emoji-insert-btn text-base px-1.5 py-0.5 rounded-lg hover:bg-white">🔥</button>
+        </div>
+
+        <form id="chat-form" class="flex items-center gap-1.5 sm:gap-2">
           <input type="file" id="chat-file-input" class="hidden" accept="image/*,application/pdf,.doc,.docx,.txt">
           <button type="button" id="attach-btn" title="Attach image, PDF or study material (Max 15MB)"
-            class="p-2 text-slate-400 hover:text-indigo-600 rounded-xl hover:bg-slate-100 transition shrink-0">
+            class="p-2.5 text-[var(--md-on-surface-variant)] hover:text-[var(--md-primary)] rounded-full hover:bg-[var(--md-surface-container)] transition shrink-0">
             <i data-lucide="paperclip" class="w-4 h-4"></i>
+          </button>
+          <button type="button" id="toggle-emoji-btn" title="Emojis"
+            class="p-2.5 text-[var(--md-on-surface-variant)] hover:text-[var(--md-primary)] rounded-full hover:bg-[var(--md-surface-container)] transition shrink-0">
+            <i data-lucide="smile" class="w-4 h-4"></i>
           </button>
 
           <input type="text" id="chat-input" required autocomplete="off"
-            class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 min-w-0 transition"
+            class="m3-input flex-1 px-4 py-2.5 rounded-full border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-xs sm:text-sm min-w-0 transition"
             placeholder="Message School Hub...">
 
           <button type="submit" id="send-btn"
-            class="px-4 sm:px-5 py-2 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shrink-0">
-            <span>Send</span>
-            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            class="m3-btn-primary px-4 sm:px-5 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shrink-0">
+            <span class="hidden sm:inline">Send</span>
+            <i data-lucide="send" class="w-4 h-4"></i>
           </button>
         </form>
       </div>
-    </div>
+    </section>
   </main>
 
-  <!-- Edit Message Modal -->
-  <div id="edit-msg-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-4 space-y-3 shadow-2xl border border-slate-200/80 modal-enter">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-indigo-600"></i> Edit Message
+  <!-- Edit Message Modal (Material 3 Bottom Sheet on Mobile) -->
+  <div id="edit-msg-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-sm p-5 space-y-3 shadow-2xl modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-[var(--md-outline)]">
+        <h3 class="text-sm font-extrabold flex items-center gap-1.5">
+          <i data-lucide="edit-3" class="w-4 h-4 text-[var(--md-primary)]"></i> Edit Message
         </h3>
-        <button id="close-edit-modal" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
+        <button id="close-edit-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
-      <textarea id="edit-msg-input" rows="3" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 focus:outline-none resize-none"></textarea>
+      <textarea id="edit-msg-input" rows="3" class="m3-input w-full p-3 rounded-2xl border border-[var(--md-outline)] text-xs resize-none"></textarea>
       <div class="flex justify-end gap-2">
-        <button type="button" id="cancel-edit-btn" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Cancel</button>
-        <button type="button" id="save-edit-btn" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">Save Changes</button>
+        <button type="button" id="cancel-edit-btn" class="px-4 py-2 rounded-full bg-[var(--md-surface-container)] text-xs font-bold">Cancel</button>
+        <button type="button" id="save-edit-btn" class="m3-btn-primary px-4 py-2 text-xs">Save Changes</button>
       </div>
     </div>
   </div>
 
   <!-- New Direct Message Modal -->
-  <div id="new-dm-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-3.5 shadow-2xl border border-slate-200/80 modal-enter">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-          <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600"></i> Start Direct Chat
+  <div id="new-dm-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-3.5 shadow-2xl max-h-[88vh] flex flex-col modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-[var(--md-outline)] shrink-0">
+        <h3 class="text-sm font-extrabold flex items-center gap-1.5">
+          <i data-lucide="user-plus" class="w-4 h-4 text-[var(--md-primary)]"></i> Start Direct Chat
         </h3>
-        <button id="close-dm-modal" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
+        <button id="close-dm-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
-      <p class="text-xs text-slate-500 leading-relaxed">Select a classmate to send a chat request. Private messaging unlocks once they accept.</p>
-      <input type="text" id="student-search-input" placeholder="Search by name, @username, or roll #..."
-        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">
-      <div id="student-picker-list" class="max-h-52 overflow-y-auto space-y-1 text-xs divide-y divide-slate-100">
-        <p class="text-center text-slate-400 py-3 text-[11px]">Type to find classmates</p>
+      <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed shrink-0">Select any student, teacher, or admin to send a consent-first chat request.</p>
+      <input type="text" id="student-search-input" placeholder="Search by name, @username, class, or roll #..."
+        class="m3-input w-full px-3.5 py-2.5 rounded-full border border-[var(--md-outline)] text-xs shrink-0">
+      <div id="student-picker-list" class="flex-1 overflow-y-auto space-y-1 text-xs divide-y divide-slate-100 min-h-[140px]">
+        <p class="text-center text-slate-400 py-4 text-[11px]">Loading directory...</p>
       </div>
     </div>
   </div>
 
   <!-- Create Study Group Modal -->
-  <div id="create-group-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl border border-slate-200/80 modal-enter">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-          <i data-lucide="users" class="w-4 h-4 text-purple-600"></i> Create Study Group
+  <div id="create-group-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-sm p-5 space-y-4 shadow-2xl modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-[var(--md-outline)]">
+        <h3 class="text-sm font-extrabold flex items-center gap-1.5">
+          <i data-lucide="users" class="w-4 h-4 text-[var(--md-primary)]"></i> Create Study Group
         </h3>
-        <button id="close-group-modal" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
+        <button id="close-group-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form id="group-form" class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Group Name</label>
+          <label class="block font-bold text-slate-600 mb-1">Group Name</label>
           <input type="text" id="group-name-input" required placeholder="e.g. Science Board Prep 2026"
-            class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500">
+            class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)]">
         </div>
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Description</label>
+          <label class="block font-bold text-slate-600 mb-1">Description</label>
           <textarea id="group-desc-input" rows="2" placeholder="What is this study group for?"
-            class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500"></textarea>
+            class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)]"></textarea>
         </div>
-        <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-purple-600 text-white font-bold rounded-xl transition">Create Group</button>
+        <button type="submit" class="m3-btn-primary w-full py-3 text-xs">Create Group</button>
       </form>
     </div>
   </div>
 
   <!-- Group Members & Invite Modal -->
-  <div id="group-members-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md p-4 sm:p-5 space-y-3 shadow-2xl border border-slate-200/80 max-h-[90vh] flex flex-col modal-enter">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100 shrink-0">
-        <div class="flex items-center gap-2 overflow-hidden">
-          <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold shrink-0">
+  <div id="group-members-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-3 shadow-2xl max-h-[90vh] flex flex-col modal-enter">
+      <div class="m3-sheet-handle sm:hidden shrink-0"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-[var(--md-outline)] shrink-0">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="w-9 h-9 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center font-bold shrink-0">
             <i data-lucide="users" class="w-4 h-4"></i>
           </div>
           <div class="overflow-hidden">
-            <h3 class="text-sm font-bold text-slate-900 truncate" id="group-modal-title">Study Group</h3>
-            <span class="text-[10px] text-slate-400" id="group-modal-member-count">0 members</span>
+            <h3 class="text-sm font-extrabold truncate" id="group-modal-title">Study Group</h3>
+            <span class="text-[10px] text-[var(--md-on-surface-variant)]" id="group-modal-member-count">0 members</span>
           </div>
         </div>
-        <button id="close-group-members-modal" class="text-slate-400 hover:text-slate-700 text-xl font-bold leading-none p-1">&times;</button>
+        <button id="close-group-members-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
-      <div class="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-bold shrink-0">
-        <button id="tab-btn-group-members" class="py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition">Members List</button>
-        <button id="tab-btn-group-add" class="py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1">
-          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Classmates
+      <div class="grid grid-cols-2 gap-1 p-1 bg-[var(--md-surface-container)] rounded-full text-xs font-bold shrink-0">
+        <button id="tab-btn-group-members" class="py-1.5 rounded-full bg-white text-[var(--md-primary)] shadow-xs transition">Members List</button>
+        <button id="tab-btn-group-add" class="py-1.5 rounded-full text-[var(--md-on-surface-variant)] transition flex items-center justify-center gap-1">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Members
         </button>
       </div>
 
@@ -277,23 +321,23 @@
       </div>
 
       <div id="panel-group-add" class="hidden flex-1 flex-col space-y-2 min-h-0">
-        <input type="text" id="add-member-search-input" placeholder="Search classmate by name, roll # or @username..."
-          class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-purple-500/30 focus:outline-none shrink-0">
+        <input type="text" id="add-member-search-input" placeholder="Search member by name, roll # or @username..."
+          class="m3-input w-full px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs shrink-0">
         <div id="group-classmate-selector" class="flex-1 overflow-y-auto space-y-1 text-xs divide-y divide-slate-100 pr-1">
-          <p class="text-center text-slate-400 py-6 text-[11px]">Loading classmates list...</p>
+          <p class="text-center text-slate-400 py-6 text-[11px]">Loading directory...</p>
         </div>
-        <div class="pt-2 border-t border-slate-100 shrink-0 flex gap-1.5">
-          <input type="text" id="manual-group-invite-input" placeholder="Or type roll # or username directly..."
-            class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-purple-500/30 focus:outline-none">
-          <button id="manual-group-invite-btn" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition">Invite</button>
+        <div class="pt-2 border-t border-[var(--md-outline)] shrink-0 flex gap-1.5">
+          <input type="text" id="manual-group-invite-input" placeholder="Or type roll # or @username directly..."
+            class="m3-input flex-1 px-3.5 py-1.5 rounded-full border border-[var(--md-outline)] text-xs">
+          <button id="manual-group-invite-btn" class="m3-btn-primary px-4 py-1.5 text-xs">Invite</button>
         </div>
       </div>
 
-      <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs shrink-0">
-        <button id="leave-group-btn" class="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold transition flex items-center gap-1">
+      <div class="pt-2 border-t border-[var(--md-outline)] flex items-center justify-between text-xs shrink-0">
+        <button id="leave-group-btn" class="px-3.5 py-1.5 rounded-full bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold transition flex items-center gap-1">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Leave Group
         </button>
-        <button id="delete-group-btn" class="hidden px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold transition flex items-center gap-1">
+        <button id="delete-group-btn" class="hidden px-3.5 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold transition flex items-center gap-1">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Group
         </button>
       </div>

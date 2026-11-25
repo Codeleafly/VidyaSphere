@@ -44,6 +44,9 @@
         </button>
 
         <div class="pt-3 mt-3 border-t border-[var(--md-outline)] space-y-1">
+          <a href="/admin/index.html" id="nav-admin-desktop" class="hidden m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-bold text-rose-700 hover:bg-rose-100/70">
+            <i data-lucide="shield-check" class="w-4 h-4"></i> Admin Core
+          </a>
           <a href="/dashboard/chat.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
             <i data-lucide="messages-square" class="w-4 h-4"></i> Class Chat
           </a>
@@ -53,6 +56,9 @@
           <a href="/dashboard/index.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
             <i data-lucide="eye" class="w-4 h-4"></i> Student Portal View
           </a>
+          <a href="/guide.html#teacher-guide" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
+            <i data-lucide="book-marked" class="w-4 h-4"></i> Teacher &amp; Student Guide
+          </a>
         </div>
       </nav>
     </div>
@@ -60,10 +66,10 @@
     <div class="pt-3 space-y-2.5 border-t border-[var(--md-outline)]">
       <div class="flex items-center justify-between px-2" id="teacher-theme-desktop"></div>
       <div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-[var(--md-surface-card)] border border-[var(--md-outline)]">
-        <div class="overflow-hidden">
+        <button type="button" id="teacher-profile-btn" class="overflow-hidden text-left flex-1 hover:opacity-85 transition" title="Account & Password Settings">
           <p id="teacher-display-name" class="font-bold text-xs truncate">Teacher</p>
           <p id="teacher-display-type" class="text-[10px] text-[var(--md-primary)] font-bold truncate">Faculty</p>
-        </div>
+        </button>
         <button id="teacher-logout-btn" title="Sign Out" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition shrink-0">
           <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
@@ -79,12 +85,15 @@
       </div>
       <div class="overflow-hidden">
         <span class="font-extrabold text-[15px] block leading-tight truncate">Teacher Studio</span>
-        <span id="teacher-mob-badge" class="text-[10px] text-[var(--md-primary)] font-bold block leading-none truncate">Faculty</span>
+        <span id="teacher-mob-badge" class="text-[10px] text-[var(--md-primary)] font-bold block leading-none truncate">Teacher</span>
       </div>
     </div>
     <div class="flex items-center gap-1.5">
+      <a href="/admin/index.html" id="nav-admin-mob-top" class="hidden px-2.5 py-1.5 rounded-full bg-rose-600 text-white font-bold text-[10px] items-center gap-1">
+        <i data-lucide="shield-check" class="w-3 h-3"></i> Admin
+      </a>
       <a href="/dashboard/index.html" class="px-3 py-1.5 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] font-bold text-[11px] flex items-center gap-1">
-        <i data-lucide="eye" class="w-3 h-3"></i> Student View
+        <i data-lucide="eye" class="w-3 h-3"></i> Portal
       </a>
       <button id="teacher-logout-mob" class="p-2 text-slate-500 hover:text-rose-600 rounded-full" title="Sign Out">
         <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -98,12 +107,19 @@
     <!-- TAB 1: STUDIO HOME -->
     <section id="tab-home" class="t-tab-content space-y-5">
       <div class="m3-tonal-box p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[var(--md-outline)]">
-        <div class="space-y-1.5">
-          <span id="home-role-pill" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[11px] font-bold">
-            Faculty Workspace
-          </span>
-          <h1 id="home-greeting" class="text-xl sm:text-2xl font-extrabold tracking-tight">Welcome, Teacher</h1>
-          <div id="home-assignments-chips" class="flex flex-wrap gap-1.5 pt-1"></div>
+        <div class="space-y-1.5 max-w-xl">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="home-role-pill" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[11px] font-bold">
+              Teacher
+            </span>
+            <span id="home-scope-summary" class="text-[11px] font-semibold text-[var(--md-on-surface-variant)]"></span>
+            <button type="button" id="toggle-scope-details-btn" class="hidden text-[11px] font-bold text-[var(--md-primary)] hover:underline">
+              Details
+            </button>
+          </div>
+          <h1 id="home-greeting" class="text-xl sm:text-2xl font-extrabold tracking-tight">Teacher Studio</h1>
+          <p id="home-teacher-bio" class="hidden text-xs text-[var(--md-on-surface-variant)] leading-relaxed"></p>
+          <div id="home-assignments-chips" class="hidden flex-wrap gap-1.5 pt-1.5"></div>
         </div>
         <div class="flex flex-wrap gap-2 shrink-0">
           <button id="quick-new-lesson-btn" class="m3-btn-primary px-4 py-2.5 text-xs flex items-center gap-1.5">
@@ -137,7 +153,7 @@
 
       <!-- Privacy & Quick Actions Card (Android Settings Style) -->
       <div class="m3-card p-5 space-y-4">
-        <h2 class="text-sm font-extrabold">Teacher Preferences &amp; Quick Access</h2>
+        <h2 class="text-sm font-extrabold">Preferences &amp; Quick Access</h2>
         <div class="flex items-center justify-between gap-4 p-3.5 rounded-2xl bg-[var(--md-surface-container)]">
           <div>
             <p class="text-sm font-bold">Allow Student Direct Messages</p>
@@ -153,7 +169,7 @@
           </button>
           <button data-jump="quizzes" class="quick-jump-btn m3-card p-3.5 text-left m3-card-interactive flex items-center gap-3">
             <span class="w-9 h-9 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center shrink-0"><i data-lucide="clipboard-list" class="w-4 h-4"></i></span>
-            <div><p class="font-bold">Homework Feed</p><p class="text-[11px] text-[var(--md-on-surface-variant)]">Zero grading overhead</p></div>
+            <div><p class="font-bold">Quizzes &amp; Homework</p><p class="text-[11px] text-[var(--md-on-surface-variant)]">Auto-graded MCQs &amp; tasks</p></div>
           </button>
           <a href="/dashboard/qa.html" class="m3-card p-3.5 text-left m3-card-interactive flex items-center gap-3">
             <span class="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0"><i data-lucide="award" class="w-4 h-4"></i></span>
@@ -164,13 +180,13 @@
     </section>
 
     <!-- TAB 2: LESSONS & VERIFIED NOTES -->
-    <section id="tab-lessons" class="t-tab-content hidden space-y-5">
+    <section id="tab-lessons" class="t-tab-content hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-xl font-extrabold">Lessons &amp; Teacher Verified Notes</h2>
-          <p class="text-xs text-[var(--md-on-surface-variant)]">Share YouTube Unlisted classes, Drive PDFs, and verified notes (20/day direct file quota)</p>
+          <h2 class="text-xl font-extrabold">Lessons &amp; Verified Notes</h2>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">Share YouTube Unlisted classes, Drive PDFs, and verified study notes (20/day direct file quota)</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
           <button id="open-lesson-modal-btn" class="m3-btn-primary px-4 py-2.5 text-xs flex items-center gap-1.5">
             <i data-lucide="video" class="w-4 h-4"></i> Add Lesson
           </button>
@@ -180,8 +196,18 @@
         </div>
       </div>
 
-      <div id="teacher-lessons-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        <div class="col-span-full m3-card p-8 text-center text-xs text-slate-400">Loading your lessons...</div>
+      <div class="space-y-3">
+        <h3 class="text-sm font-extrabold">Your Published Lessons</h3>
+        <div id="teacher-lessons-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="col-span-full m3-card p-8 text-center text-xs text-slate-400">Loading your lessons...</div>
+        </div>
+      </div>
+
+      <div class="space-y-3 pt-2 border-t border-[var(--md-outline)]">
+        <h3 class="text-sm font-extrabold">Your Uploaded Verified Notes</h3>
+        <div id="teacher-notes-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="col-span-full m3-card p-6 text-center text-xs text-slate-400">Loading your verified notes...</div>
+        </div>
       </div>
     </section>
 
@@ -192,7 +218,7 @@
           <h2 class="text-xl font-extrabold">5-Min MCQ Quizzes &amp; Homework</h2>
           <p class="text-xs text-[var(--md-on-surface-variant)]">Auto-graded MCQ quizzes + lightweight daily homework assignments</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
           <button id="open-quiz-modal-btn" class="m3-btn-primary px-4 py-2.5 text-xs flex items-center gap-1.5">
             <i data-lucide="plus-circle" class="w-4 h-4"></i> Build MCQ Quiz
           </button>
@@ -203,14 +229,14 @@
       </div>
 
       <div class="space-y-3">
-        <h3 class="text-sm font-extrabold text-[var(--md-on-surface)]">Your Published Quizzes</h3>
+        <h3 class="text-sm font-extrabold">Your Published Quizzes</h3>
         <div id="teacher-quizzes-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           <div class="col-span-full m3-card p-6 text-center text-xs text-slate-400">Loading quizzes...</div>
         </div>
       </div>
 
       <div class="space-y-3">
-        <h3 class="text-sm font-extrabold text-[var(--md-on-surface)]">Your Homework Feed</h3>
+        <h3 class="text-sm font-extrabold">Your Homework Feed</h3>
         <div id="teacher-homework-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           <div class="col-span-full m3-card p-6 text-center text-xs text-slate-400">Loading homework...</div>
         </div>
@@ -220,8 +246,8 @@
     <!-- TAB 4: SCOPED NOTICES & CLASS TESTS -->
     <section id="tab-notices" class="t-tab-content hidden space-y-6">
       <div>
-        <h2 class="text-xl font-extrabold">Scoped Class Notices &amp; Unit Tests</h2>
-        <p class="text-xs text-[var(--md-on-surface-variant)]">Publish 30-day notices for classes you teach. Class Teachers can also schedule Unit Tests.</p>
+        <h2 class="text-xl font-extrabold">Class Notices &amp; Unit Tests</h2>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Publish 30-day notices for classes you teach. Class Teachers &amp; Admins can also schedule Unit Tests.</p>
       </div>
 
       <div class="m3-card p-5 max-w-2xl space-y-4">
@@ -249,21 +275,21 @@
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Message</label>
             <textarea id="t-ann-content" rows="3" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="Enter details for students..."></textarea>
           </div>
-          <button type="submit" class="m3-btn-primary px-5 py-2.5 text-xs">Publish Scoped Notice</button>
+          <button type="submit" class="m3-btn-primary px-5 py-2.5 text-xs">Publish Notice</button>
         </form>
       </div>
 
       <div class="space-y-3">
-        <h3 class="text-sm font-extrabold">Active Notices in Your Classes</h3>
+        <h3 class="text-sm font-extrabold">Active Notices in Your Scope</h3>
         <div id="teacher-notices-list" class="space-y-2.5"></div>
       </div>
 
-      <!-- Class Teacher Unit Test Scheduler -->
+      <!-- Class Teacher / Admin Unit Test Scheduler -->
       <div id="class-teacher-tests-panel" class="hidden space-y-4 pt-4 border-t border-[var(--md-outline)]">
         <div class="m3-card p-5 max-w-2xl space-y-4">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-extrabold flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px]">Class Teacher</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px]">Class Test</span>
               Schedule Class / Unit Test
             </h3>
             <button type="button" id="t-exam-cancel-btn" class="hidden text-xs font-bold text-rose-600">Cancel Edit</button>
@@ -279,6 +305,10 @@
                 <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
                 <input type="text" id="t-exam-subject" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Science">
               </div>
+            </div>
+            <div id="t-exam-admin-class-wrap" class="hidden">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Target Class (Admin)</label>
+              <select id="t-exam-class-select" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs font-semibold bg-white"></select>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
@@ -301,18 +331,23 @@
       </div>
     </section>
 
-    <!-- TAB 5: CLASS ROSTER & APPROVALS (CLASS TEACHER ONLY) -->
+    <!-- TAB 5: CLASS ROSTER & APPROVALS (CLASS TEACHER & ADMINS) -->
     <section id="tab-roster" class="t-tab-content hidden space-y-5">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h2 class="text-xl font-extrabold">Class Roster &amp; 1-Click Approvals</h2>
           <p id="roster-scope-subtitle" class="text-xs text-[var(--md-on-surface-variant)]">Approve pending students in your assigned class</p>
         </div>
-        <select id="t-roster-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-bold bg-white">
-          <option value="pending" selected>Pending Approvals</option>
-          <option value="active">Active Students</option>
-          <option value="">All Class Students</option>
-        </select>
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="t-roster-class-filter" class="hidden m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-bold bg-white">
+            <option value="">All Classes</option>
+          </select>
+          <select id="t-roster-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-bold bg-white">
+            <option value="pending" selected>Pending Approvals</option>
+            <option value="active">Active Students</option>
+            <option value="">All Class Students</option>
+          </select>
+        </div>
       </div>
       <div id="teacher-roster-list" class="space-y-2.5"></div>
     </section>
@@ -347,7 +382,10 @@
     <div class="bg-[var(--md-surface-card)] w-full rounded-t-[28px] p-5 pb-7 space-y-4 shadow-2xl modal-enter">
       <div class="m3-sheet-handle"></div>
       <div class="flex items-center justify-between">
-        <h3 class="font-extrabold text-sm">Teacher Tools &amp; Theme</h3>
+        <button type="button" id="teacher-profile-mob" class="text-left">
+          <h3 class="font-extrabold text-sm">Teacher Tools &amp; Account</h3>
+          <p class="text-[11px] text-[var(--md-primary)] font-semibold">Tap to edit password &amp; profile</p>
+        </button>
         <button id="t-more-close" class="p-1.5 rounded-full bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <div class="flex items-center justify-between p-3 rounded-2xl bg-[var(--md-surface-container)]">
@@ -358,6 +396,9 @@
         <button data-tab="roster" id="nav-roster-mob" class="hidden t-mob-sheet-tab flex items-center gap-2 p-3.5 rounded-2xl bg-amber-50 text-amber-900 font-bold">
           <i data-lucide="user-check" class="w-4 h-4"></i> Class Roster
         </button>
+        <a href="/admin/index.html" id="nav-admin-mob" class="hidden flex items-center gap-2 p-3.5 rounded-2xl bg-rose-50 text-rose-800 font-bold">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> Admin Core
+        </a>
         <a href="/dashboard/chat.html" class="flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
           <i data-lucide="messages-square" class="w-4 h-4"></i> Class Chat
         </a>
@@ -366,6 +407,9 @@
         </a>
         <a href="/dashboard/index.html" class="flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
           <i data-lucide="eye" class="w-4 h-4"></i> Student Portal
+        </a>
+        <a href="/guide.html#teacher-guide" class="flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
+          <i data-lucide="book-marked" class="w-4 h-4"></i> Guide
         </a>
       </div>
     </div>
@@ -421,7 +465,7 @@
     <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
       <div class="m3-sheet-handle sm:hidden"></div>
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-base font-extrabold">Upload Teacher Verified Note</h3>
+        <h3 class="text-base font-extrabold">Upload Verified Note</h3>
         <button id="close-t-note-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form id="t-note-form" class="space-y-3 text-xs">
@@ -439,11 +483,19 @@
             <select id="tn-subject" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
           </div>
         </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Chapter <span class="font-normal text-slate-400">(optional)</span></label>
+          <input type="text" id="tn-chapter" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="e.g. Chapter 4">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Description <span class="font-normal text-slate-400">(optional)</span></label>
+          <textarea id="tn-desc" rows="2" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Key revision points..."></textarea>
+        </div>
         <div class="grid grid-cols-2 gap-2">
-          <label class="cursor-pointer border border-[var(--md-outline)] bg-[var(--md-surface-container)] p-2.5 rounded-2xl flex items-center gap-2">
+          <label id="tn-card-drive" class="cursor-pointer border-2 border-[var(--md-primary)] bg-[var(--md-surface-container)] p-2.5 rounded-2xl flex items-center gap-2 transition">
             <input type="radio" name="tn-mode" value="drive_link" checked> <span class="font-bold">Drive Link (Permanent)</span>
           </label>
-          <label class="cursor-pointer border border-[var(--md-outline)] p-2.5 rounded-2xl flex items-center gap-2">
+          <label id="tn-card-file" class="cursor-pointer border border-[var(--md-outline)] p-2.5 rounded-2xl flex items-center gap-2 transition">
             <input type="radio" name="tn-mode" value="file"> <span class="font-bold">Direct File (20/day)</span>
           </label>
         </div>
@@ -458,15 +510,16 @@
     </div>
   </div>
 
-  <!-- MCQ Quiz Builder Modal -->
+  <!-- MCQ Quiz Builder Modal (Create & Edit) -->
   <div id="quiz-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-2xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
       <div class="m3-sheet-handle sm:hidden"></div>
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-base font-extrabold">Build 5-Min Auto-Graded MCQ Quiz</h3>
+        <h3 id="qz-modal-heading" class="text-base font-extrabold">Build 5-Min Auto-Graded MCQ Quiz</h3>
         <button id="close-quiz-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form id="quiz-form" class="space-y-3 text-xs">
+        <input type="hidden" id="qz-id" value="">
         <div>
           <label class="block font-bold text-slate-600 mb-1">Quiz Title</label>
           <input type="text" id="qz-title" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Quick Check: Quadratic Equations">
@@ -485,11 +538,15 @@
             <input type="text" id="qz-chapter" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Chapter 2">
           </div>
         </div>
+        <label class="flex items-center gap-2 font-bold text-slate-700">
+          <input type="checkbox" id="qz-published" checked class="w-4 h-4">
+          <span>Published (Visible to students immediately)</span>
+        </label>
         <div id="quiz-questions-builder" class="space-y-3"></div>
         <button type="button" id="add-quiz-question-btn" class="m3-btn-tonal px-4 py-2 text-xs inline-flex items-center gap-1.5">
           <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add MCQ Question
         </button>
-        <button type="submit" class="m3-btn-primary w-full py-3 text-xs">Publish MCQ Quiz</button>
+        <button type="submit" id="qz-submit-btn" class="m3-btn-primary w-full py-3 text-xs">Publish MCQ Quiz</button>
       </form>
     </div>
   </div>
@@ -506,15 +563,16 @@
     </div>
   </div>
 
-  <!-- Homework Modal -->
+  <!-- Homework Modal (Create & Edit) -->
   <div id="hw-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-3.5 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
       <div class="m3-sheet-handle sm:hidden"></div>
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-base font-extrabold">Assign Homework</h3>
+        <h3 id="hw-modal-heading" class="text-base font-extrabold">Assign Homework</h3>
         <button id="close-hw-modal" class="p-1.5 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form id="hw-form" class="space-y-3 text-xs">
+        <input type="hidden" id="hw-id" value="">
         <div>
           <label class="block font-bold text-slate-600 mb-1">Topic / Title</label>
           <input type="text" id="hw-title" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Exercise 4.2 Q1 to Q5">
@@ -541,7 +599,7 @@
           <label class="block font-bold text-slate-600 mb-1">Reference PDF / Drive Link (Optional)</label>
           <input type="url" id="hw-resource" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] font-mono" placeholder="https://drive.google.com/...">
         </div>
-        <button type="submit" class="m3-btn-primary w-full py-3 text-xs">Publish Homework</button>
+        <button type="submit" id="hw-submit-btn" class="m3-btn-primary w-full py-3 text-xs">Publish Homework</button>
       </form>
     </div>
   </div>

@@ -1,5 +1,6 @@
 /**
  * Admin Core: Student & Teacher Account Verification Queue
+ * Shows concise compact summary by default; "More" button reveals full additional teacher details.
  */
 
 import { apiRequest } from '/js/api.js';
@@ -10,6 +11,12 @@ function parseList(val) {
     const arr = JSON.parse(val || '[]');
     return Array.isArray(arr) ? arr : [];
   } catch { return []; }
+}
+
+function summarizeList(list, fallback = '-') {
+  if (!list || list.length === 0) return fallback;
+  if (list.length === 1) return list[0];
+  return `${list[0]} +${list.length - 1}`;
 }
 
 export async function loadApplications(currentAdminUser, onRefreshAll) {
@@ -27,7 +34,7 @@ export async function loadApplications(currentAdminUser, onRefreshAll) {
 
     if (list.length === 0) {
       appsContainer.innerHTML = `
-        <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
+        <div class="m3-card p-8 text-center text-slate-400">
           <i data-lucide="check-check" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
           <p class="text-sm font-semibold text-slate-700">No applications in this queue</p>
           <p class="text-xs text-slate-400 mt-1">Switch filter status above to view other records.</p>
@@ -46,64 +53,97 @@ export async function loadApplications(currentAdminUser, onRefreshAll) {
       const classes = parseList(reg.assigned_classes);
       const subjects = parseList(reg.assigned_subjects);
       const badgeClass = isPending
-        ? 'bg-amber-50 text-amber-700 border-amber-200'
-        : (isApproved ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200');
+        ? 'bg-amber-100 text-amber-900'
+        : (isApproved ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900');
+
+      const compactLine = isTeacher
+        ? [
+            reg.teacher_type === 'class' ? `Home: ${reg.class_name}${reg.division ? ' (' + reg.division + ')' : ''}` : `Classes: ${summarizeList(classes, reg.class_name || '-')}`,
+            `Subjects: ${summarizeList(subjects)}`
+          ].filter(Boolean).join(' • ')
+        : `${reg.class_name || ''}${reg.division ? ' • Div ' + reg.division : ''}${reg.roll_number ? ' • Roll #' + reg.roll_number : ''}`;
+
+      const hasExtraInfo = isTeacher || Boolean(reg.email) || Boolean(reg.teacher_designation) || Boolean(reg.teacher_info);
 
       return `
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full break-words">
-          <div class="space-y-1.5 w-full sm:w-auto">
-            <div class="flex items-center gap-2 flex-wrap">
-              <h4 class="font-bold text-slate-900 text-sm sm:text-base">${escapeHtml(reg.full_name)}</h4>
-              <span class="font-mono text-xs text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">@${escapeHtml(reg.username)}</span>
-              ${isTeacher ? `<span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-sky-100 text-sky-800">${reg.teacher_type === 'class' ? 'Class Teacher' : 'Subject Teacher'}</span>` : ''}
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase border ${badgeClass}">
-                ${escapeHtml(reg.account_status)}
-              </span>
+        <div class="m3-card p-4 sm:p-5 space-y-3 w-full break-words">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="space-y-1.5 w-full sm:w-auto">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="font-extrabold text-sm sm:text-base">${escapeHtml(reg.full_name)}</h4>
+                <span class="font-mono text-xs text-[var(--md-primary)] font-bold bg-[var(--md-primary-container)]/60 px-2.5 py-0.5 rounded-full">@${escapeHtml(reg.username)}</span>
+                ${isTeacher ? `<span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-sky-100 text-sky-900">${reg.teacher_type === 'class' ? 'Class Teacher' : 'Subject Teacher'}</span>` : ''}
+                <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${badgeClass}">
+                  ${escapeHtml(reg.account_status)}
+                </span>
+              </div>
+              <p class="text-xs text-[var(--md-on-surface-variant)] tabular-nums">${escapeHtml(compactLine)}</p>
             </div>
-            ${isTeacher ? `
-              <p class="text-xs text-slate-600">
-                <strong>Classes:</strong> ${escapeHtml(classes.join(', ') || reg.class_name)}
-                ${reg.division ? ` (Div ${escapeHtml(reg.division)})` : ''} •
-                <strong>Subjects:</strong> ${escapeHtml(subjects.join(', ') || '-')}
-              </p>
-            ` : `
-              <p class="text-xs text-slate-500 tabular-nums">
-                ${escapeHtml(reg.class_name)} • Div ${escapeHtml(reg.division)} • Roll: <strong>${escapeHtml(reg.roll_number)}</strong>
-              </p>
-            `}
-            ${reg.email ? `<p class="text-[11px] text-indigo-600 font-medium flex items-center gap-1"><i data-lucide="mail" class="w-3 h-3"></i> ${escapeHtml(reg.email)}</p>` : ''}
-            <p class="text-[11px] text-slate-400">Applied: ${escapeHtml(formatDate(reg.created_at))}</p>
-          </div>
 
-          <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 flex-wrap">
-            ${isPending ? `
-              <button class="approve-btn flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 transition"
-                data-id="${escapeHtml(reg.id)}" data-username="${escapeHtml(reg.username)}" data-role="${isTeacher ? 'teacher' : 'student'}">
-                <i data-lucide="check" class="w-3.5 h-3.5"></i> Approve ${isTeacher ? 'Teacher' : ''}
-              </button>
-              ${isViewerRootAdmin && !isTeacher ? `
-                <button class="approve-btn flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1 transition"
-                  data-id="${escapeHtml(reg.id)}" data-username="${escapeHtml(reg.username)}" data-role="admin">
-                  <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-300"></i> Approve as Admin
+            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 flex-wrap">
+              ${hasExtraInfo ? `
+                <button type="button" class="toggle-more-btn px-3 py-2 rounded-full bg-[var(--md-surface-container)] hover:brightness-95 text-xs font-bold inline-flex items-center gap-1 transition" data-id="${escapeHtml(reg.id)}">
+                  <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i> <span>More</span>
                 </button>
               ` : ''}
-              <button class="reject-btn px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition"
-                data-id="${escapeHtml(reg.id)}">
-                Reject
-              </button>
-            ` : (isApproved ? `
-              <span class="text-xs text-emerald-700 font-semibold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                Active • ${escapeHtml(reg.role)}
-              </span>
-            ` : `
-              <span class="text-xs text-rose-600 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200">Rejected</span>
-            `)}
+              ${isPending ? `
+                <button class="approve-btn m3-btn-primary px-4 py-2 text-xs flex items-center justify-center gap-1"
+                  data-id="${escapeHtml(reg.id)}" data-username="${escapeHtml(reg.username)}" data-role="${isTeacher ? 'teacher' : 'student'}">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i> Approve ${isTeacher ? 'Teacher' : ''}
+                </button>
+                ${isViewerRootAdmin && !isTeacher ? `
+                  <button class="approve-btn m3-btn-tonal px-3.5 py-2 text-xs flex items-center justify-center gap-1"
+                    data-id="${escapeHtml(reg.id)}" data-username="${escapeHtml(reg.username)}" data-role="admin">
+                    <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-600"></i> Admin
+                  </button>
+                ` : ''}
+                <button class="reject-btn px-3.5 py-2 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition"
+                  data-id="${escapeHtml(reg.id)}">
+                  Reject
+                </button>
+              ` : (isApproved ? `
+                <span class="text-xs text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                  Active • ${escapeHtml(reg.role)}
+                </span>
+              ` : `
+                <span class="text-xs text-rose-700 bg-rose-50 px-3 py-1.5 rounded-full border border-rose-200">Rejected</span>
+              `)}
+            </div>
+          </div>
+
+          <!-- Expandable More Details Drawer -->
+          <div id="app-more-${escapeHtml(reg.id)}" class="hidden pt-3 border-t border-[var(--md-outline)] bg-[var(--md-surface-container)]/60 rounded-2xl p-3.5 text-xs space-y-2">
+            ${isTeacher ? `
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div><span class="font-bold text-slate-600">Assigned Classes:</span> ${escapeHtml(classes.join(', ') || reg.class_name || '-')}</div>
+                <div><span class="font-bold text-slate-600">Assigned Subjects:</span> ${escapeHtml(subjects.join(', ') || '-')}</div>
+              </div>
+              ${reg.teacher_designation ? `<div><span class="font-bold text-slate-600">Qualification / Designation:</span> ${escapeHtml(reg.teacher_designation)}</div>` : ''}
+              <div>
+                <span class="font-bold text-slate-600">Purpose &amp; Additional Info:</span>
+                <p class="mt-0.5 text-[var(--md-on-surface-variant)] whitespace-pre-line">${escapeHtml(reg.teacher_info || 'No additional description provided.')}</p>
+              </div>
+            ` : ''}
+            <div class="flex items-center flex-wrap gap-4 text-[11px] text-slate-500 pt-1">
+              ${reg.email ? `<span class="flex items-center gap-1 text-[var(--md-primary)] font-semibold"><i data-lucide="mail" class="w-3 h-3"></i> ${escapeHtml(reg.email)}</span>` : ''}
+              <span>Applied: ${escapeHtml(formatDate(reg.created_at))}</span>
+              <span class="font-mono">ID: ${escapeHtml(reg.id)}</span>
+            </div>
           </div>
         </div>
       `;
     }).join('');
 
     initIcons();
+
+    appsContainer.querySelectorAll('.toggle-more-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const panel = document.getElementById(`app-more-${btn.dataset.id}`);
+        if (!panel) return;
+        const hidden = panel.classList.toggle('hidden');
+        btn.querySelector('span').textContent = hidden ? 'More' : 'Less';
+      });
+    });
 
     appsContainer.querySelectorAll('.approve-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -138,6 +178,6 @@ export async function loadApplications(currentAdminUser, onRefreshAll) {
       });
     });
   } catch (err) {
-    appsContainer.innerHTML = `<div class="p-6 text-center text-rose-600 bg-rose-50 rounded-2xl text-xs">${escapeHtml(err.message)}</div>`;
+    appsContainer.innerHTML = `<div class="m3-card p-6 text-center text-rose-600 text-xs">${escapeHtml(err.message)}</div>`;
   }
 }

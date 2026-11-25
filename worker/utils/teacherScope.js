@@ -74,16 +74,38 @@ export function canTeacherModerateChannel(user, channel) {
   return allowedChannels.includes(channel);
 }
 
+export function isRootAdminAccount(row) {
+  if (!row) return false;
+  return row.is_root_admin === 1 || row.isRootAdmin === true || row.username === 'admin';
+}
+
+/**
+ * Strip class, division, and roll number from Lead Root Admin rows so only Admin identity is exposed.
+ */
+export function sanitizeProfileRow(row) {
+  if (!row) return row;
+  if (isRootAdminAccount(row)) {
+    return {
+      ...row,
+      class_name: '',
+      division: '',
+      roll_number: '',
+      is_root_admin: 1,
+    };
+  }
+  return row;
+}
+
 export function formatUserProfile(row) {
   if (!row) return null;
-  const isRootAdmin = row.is_root_admin === 1 || row.username === 'admin';
+  const isRootAdmin = isRootAdminAccount(row);
   return {
     id: row.id,
     username: row.username,
     fullName: row.full_name,
-    className: row.class_name,
-    division: row.division || '',
-    rollNumber: row.roll_number || '',
+    className: isRootAdmin ? '' : (row.class_name || ''),
+    division: isRootAdmin ? '' : (row.division || ''),
+    rollNumber: isRootAdmin ? '' : (row.roll_number || ''),
     email: row.email || null,
     role: row.role,
     accountStatus: row.account_status,
@@ -91,6 +113,8 @@ export function formatUserProfile(row) {
     teacherType: row.teacher_type || null,
     assignedClasses: parseStringList(row.assigned_classes),
     assignedSubjects: parseStringList(row.assigned_subjects),
+    teacherDesignation: row.teacher_designation || '',
+    teacherInfo: row.teacher_info || '',
     allowStudentDms: row.allow_student_dms !== 0,
     isRootAdmin,
   };

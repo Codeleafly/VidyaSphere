@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS profiles (
     teacher_type TEXT DEFAULT NULL CHECK(teacher_type IN ('subject', 'class')),
     assigned_classes TEXT DEFAULT '[]',
     assigned_subjects TEXT DEFAULT '[]',
+    teacher_designation TEXT DEFAULT '',
+    teacher_info TEXT DEFAULT '',
     allow_student_dms INTEGER DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -173,6 +175,9 @@ CREATE TABLE IF NOT EXISTS messages (
     is_edited INTEGER DEFAULT 0,
     is_pinned INTEGER DEFAULT 0,
     pinned_by TEXT,
+    reply_to_id TEXT DEFAULT NULL,
+    reply_preview TEXT DEFAULT NULL,
+    reactions_json TEXT DEFAULT '{}',
     has_attachment INTEGER DEFAULT 0,
     attachment_name TEXT,
     attachment_type TEXT,

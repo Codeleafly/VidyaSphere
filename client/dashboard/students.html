@@ -16,7 +16,7 @@
     <div class="m3-tonal-box p-5 flex items-center justify-between gap-2 border border-[var(--md-outline)]">
       <div>
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">School Directory</h1>
-        <p class="text-xs text-[var(--md-on-surface-variant)]">Verified active students, subject teachers, class teachers &amp; admins</p>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Verified active students, teachers &amp; admins</p>
       </div>
       <span id="roster-count" class="text-xs font-bold bg-white border border-[var(--md-outline)] px-3 py-1 rounded-full tabular-nums"></span>
     </div>
@@ -34,6 +34,7 @@
         <option value="">All Members</option>
         <option value="student">Students</option>
         <option value="teacher">Teachers / Faculty</option>
+        <option value="admin">Admins</option>
       </select>
       <select id="class-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
         <option value="">All Classes (1st - 12th)</option>
@@ -48,7 +49,7 @@
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { initDashboardShell } from '/js/layout.js';
-    import { CLASS_LIST, escapeHtml, renderRoleBadgeHtml, initIcons } from '/js/ui.js';
+    import { CLASS_LIST, escapeHtml, renderRoleBadgeHtml, formatMemberSubline, isRootUser, showToast, initIcons } from '/js/ui.js';
 
     const user = initDashboardShell({ active: 'students', mobileTitle: 'Directory' });
 
@@ -77,37 +78,54 @@
         }
 
         container.innerHTML = list.map(member => {
-          const isRoot = member.is_root_admin === 1 || member.username === 'admin';
+          const isRoot = isRootUser(member);
+          const isAdmin = isRoot || member.role === 'admin';
           const isTeacher = member.role === 'teacher';
           const initial = (member.full_name || 'S').charAt(0).toUpperCase();
-
-          let subline = `${member.class_name || ''}${member.division ? ' - ' + member.division : ''}${member.roll_number ? ' • Roll ' + member.roll_number : ''}`;
-          if (isTeacher) {
-            try {
-              const subs = JSON.parse(member.assigned_subjects || '[]');
-              const clss = JSON.parse(member.assigned_classes || '[]');
-              subline = `${subs.slice(0, 2).join(', ') || 'Faculty'} • ${clss.slice(0, 2).join(', ') || member.class_name}`;
-            } catch { /* fallback */ }
-          }
+          const subline = formatMemberSubline(member);
+          const isMe = user && member.id === user.id;
+          const dmsBlocked = isTeacher && member.allow_student_dms === 0 && user?.role === 'student';
 
           return `
-            <div class="m3-card m3-card-interactive p-4 flex items-center gap-3 w-full break-words">
-              <div class="w-10 h-10 rounded-2xl ${isTeacher ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]' : 'bg-[var(--md-surface-container)] text-[var(--md-primary)]'} font-extrabold flex items-center justify-center shrink-0 text-sm">
-                ${escapeHtml(initial)}
-              </div>
-              <div class="overflow-hidden flex-1">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <h4 class="font-bold text-xs sm:text-sm truncate">${escapeHtml(member.full_name)}</h4>
-                  ${renderRoleBadgeHtml(member.role, member.teacher_type, isRoot)}
+            <div class="m3-card m3-card-interactive p-4 flex items-center justify-between gap-2.5 w-full break-words">
+              <div class="flex items-center gap-3 overflow-hidden flex-1">
+                <div class="w-10 h-10 rounded-2xl ${isAdmin ? 'bg-amber-100 text-amber-900' : (isTeacher ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]' : 'bg-[var(--md-surface-container)] text-[var(--md-primary)]')} font-extrabold flex items-center justify-center shrink-0 text-sm">
+                  ${escapeHtml(initial)}
                 </div>
-                <p class="text-[11px] text-[var(--md-primary)] font-mono font-medium truncate">@${escapeHtml(member.username)}</p>
-                <div class="text-[11px] text-slate-500 mt-0.5 tabular-nums truncate">${escapeHtml(subline)}</div>
+                <div class="overflow-hidden flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <h4 class="font-bold text-xs sm:text-sm truncate">${escapeHtml(member.full_name)}</h4>
+                    ${renderRoleBadgeHtml(member.role, member.teacher_type, isRoot)}
+                  </div>
+                  <p class="text-[11px] text-[var(--md-primary)] font-mono font-medium truncate">@${escapeHtml(member.username)}</p>
+                  <div class="text-[11px] text-slate-500 mt-0.5 tabular-nums truncate">${escapeHtml(subline)}</div>
+                </div>
               </div>
+              ${!isMe ? (dmsBlocked ? `
+                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] shrink-0">DMs Off</span>
+              ` : `
+                <button type="button" class="dir-dm-btn m3-btn-tonal p-2 shrink-0" title="Start Direct Chat" data-id="${escapeHtml(member.id)}">
+                  <i data-lucide="message-circle" class="w-4 h-4"></i>
+                </button>
+              `) : ''}
             </div>
           `;
         }).join('');
 
         initIcons();
+
+        container.querySelectorAll('.dir-dm-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            try {
+              btn.disabled = true;
+              const res = await apiRequest('/chat/dms/request', { method: 'POST', body: { targetUserId: btn.dataset.id } });
+              window.location.href = `/dashboard/chat.html?dm=${encodeURIComponent(res.id)}`;
+            } catch (err) {
+              showToast(err.message, 'error');
+              btn.disabled = false;
+            }
+          });
+        });
       } catch (err) {
         container.innerHTML = `<div class="col-span-full p-6 text-center text-rose-600 bg-rose-50 rounded-3xl text-xs">${escapeHtml(err.message)}</div>`;
       }

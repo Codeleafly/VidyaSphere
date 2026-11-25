@@ -23,11 +23,19 @@
       </button>
     </div>
 
-    <div class="m3-card p-3.5 flex flex-col sm:flex-row gap-2.5 w-full">
-      <select id="qa-subject-filter" class="m3-input w-full sm:flex-1 px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
+    <div class="m3-card p-3.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 w-full">
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+        <input type="text" id="qa-search-input" placeholder="Search doubts..."
+          class="m3-input w-full pl-9 pr-3 py-2 rounded-full border border-[var(--md-outline)] bg-[var(--md-surface)] text-xs sm:text-sm">
+      </div>
+      <select id="qa-class-filter" class="m3-input w-full px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
+        <option value="">All Classes</option>
+      </select>
+      <select id="qa-subject-filter" class="m3-input w-full px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
         <option value="">All Subjects</option>
       </select>
-      <select id="qa-status-filter" class="m3-input w-full sm:w-48 px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
+      <select id="qa-status-filter" class="m3-input w-full px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
         <option value="">All Questions</option>
         <option value="resolved">Solved</option>
         <option value="unanswered">Unanswered</option>
@@ -77,7 +85,10 @@
       <div class="m3-sheet-handle sm:hidden shrink-0"></div>
       <div class="flex items-center justify-between pb-2 border-b border-slate-100 shrink-0">
         <span id="detail-subject-badge" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]"></span>
-        <button id="close-detail-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <div class="flex items-center gap-1.5">
+          <button id="delete-question-btn" class="hidden px-3 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs">Delete</button>
+          <button id="close-detail-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
       </div>
 
       <div class="overflow-y-auto space-y-3.5 pr-1 flex-1 break-words">
@@ -110,10 +121,13 @@
     const user = initDashboardShell({ active: 'qa', mobileTitle: 'Academic Q&A' });
 
     const questionsList = document.getElementById('questions-list');
+    const searchInput = document.getElementById('qa-search-input');
+    const classFilter = document.getElementById('qa-class-filter');
     const subjectFilter = document.getElementById('qa-subject-filter');
     const statusFilter = document.getElementById('qa-status-filter');
     const askModal = document.getElementById('ask-modal');
     const detailModal = document.getElementById('detail-modal');
+    const delQuestionBtn = document.getElementById('delete-question-btn');
     let currentQuestionId = null;
     let currentQuestionAuthorId = null;
 
@@ -122,6 +136,7 @@
       document.getElementById('ask-subject').innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
     });
     CLASS_LIST.forEach(c => {
+      classFilter.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
       document.getElementById('ask-class').innerHTML += `<option value="${escapeHtml(c)}" ${c === (user?.className || 'Class 10') ? 'selected' : ''}>${escapeHtml(c)}</option>`;
     });
 
@@ -137,7 +152,9 @@
     async function loadQuestions() {
       const params = new URLSearchParams();
       if (subjectFilter.value) params.append('subject', subjectFilter.value);
+      if (classFilter.value) params.append('className', classFilter.value);
       if (statusFilter.value) params.append('status', statusFilter.value);
+      if (searchInput.value.trim()) params.append('search', searchInput.value.trim());
 
       try {
         const res = await apiRequest(`/qa/questions?${params.toString()}`);
@@ -161,7 +178,7 @@
             <h3 class="font-extrabold text-sm sm:text-base leading-snug">${escapeHtml(q.title)}</h3>
             <p class="text-xs text-[var(--md-on-surface-variant)] line-clamp-2">${escapeHtml(q.description)}</p>
             <div class="pt-2 border-t border-[var(--md-outline)] flex items-center justify-between text-[11px] text-slate-500">
-              <span class="flex items-center gap-1.5">Asked by <strong>${escapeHtml(q.author_name || 'Student')}</strong> ${renderRoleBadgeHtml(q.author_role, q.author_teacher_type)}</span>
+              <span class="flex items-center gap-1.5">Asked by <strong>${escapeHtml(q.author_name || 'Student')}</strong> ${renderRoleBadgeHtml(q.author_role, q.author_teacher_type, q.author_is_root_admin === 1)}</span>
               <span class="flex items-center gap-1 font-bold text-[var(--md-primary)] tabular-nums">
                 <i data-lucide="message-square" class="w-3 h-3"></i> ${q.answer_count} Answers
               </span>
@@ -178,6 +195,18 @@
       }
     }
 
+    delQuestionBtn?.addEventListener('click', async () => {
+      if (!currentQuestionId || !confirm('Delete this question and all answers?')) return;
+      try {
+        await apiRequest(`/qa/questions/${encodeURIComponent(currentQuestionId)}`, { method: 'DELETE' });
+        showToast('Question deleted', 'info');
+        closeDetail();
+        loadQuestions();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
     async function openQuestionDetail(id) {
       currentQuestionId = id;
       try {
@@ -186,9 +215,10 @@
         const answers = res.answers || [];
         currentQuestionAuthorId = q.author_id;
 
+        delQuestionBtn.classList.toggle('hidden', !(user && (user.id === q.author_id || user.role === 'admin')));
         document.getElementById('detail-subject-badge').textContent = `${q.subject} • ${q.class_name}`;
         document.getElementById('detail-title').textContent = q.title;
-        document.getElementById('detail-meta').textContent = `Asked by ${q.author_name || 'Student'} on ${formatDate(q.created_at)}`;
+        document.getElementById('detail-meta').textContent = `Asked by ${q.author_name || 'Member'} on ${formatDate(q.created_at)}`;
         document.getElementById('detail-desc').textContent = q.description;
 
         const isFaculty = user && (user.role === 'teacher' || user.role === 'admin');
@@ -200,19 +230,21 @@
             const isAccepted = ans.is_accepted === 1;
             const isEndorsed = ans.is_faculty_endorsed === 1;
             const canAccept = user && (user.id === currentQuestionAuthorId || user.role === 'admin') && !isAccepted;
+            const canDeleteAns = user && (user.id === ans.author_id || user.role === 'admin');
             return `
               <div class="p-3.5 rounded-2xl border ${isAccepted ? 'bg-emerald-50/70 border-emerald-300' : (isEndorsed ? 'bg-sky-50/70 border-sky-200' : 'bg-white border-[var(--md-outline)]')} space-y-1.5 break-words">
                 <div class="flex items-center justify-between flex-wrap gap-1.5">
                   <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="font-bold text-xs">${escapeHtml(ans.author_name || 'Peer')}</span>
-                    ${ans.author_role === 'teacher' ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">Teacher Verified</span>' : renderRoleBadgeHtml(ans.author_role, ans.author_teacher_type)}
+                    ${ans.author_role === 'teacher' ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">Teacher Verified</span>' : renderRoleBadgeHtml(ans.author_role, ans.author_teacher_type, ans.author_is_root_admin === 1)}
                     <span class="text-[10px] text-slate-400 tabular-nums">${escapeHtml(formatDate(ans.created_at))}</span>
                   </div>
                   <div class="flex items-center gap-2 flex-wrap">
                     ${isEndorsed ? '<span class="text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full inline-flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i> Faculty Endorsed</span>' : ''}
                     ${isAccepted ? '<span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full inline-flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Accepted</span>' : ''}
                     ${canAccept ? `<button class="accept-btn text-xs text-[var(--md-primary)] hover:underline font-bold" data-ans-id="${escapeHtml(ans.id)}">Mark Accepted</button>` : ''}
-                    ${isFaculty && !isEndorsed ? `<button class="endorse-btn text-xs text-sky-700 hover:underline font-bold" data-ans-id="${escapeHtml(ans.id)}">Endorse</button>` : ''}
+                    ${isFaculty ? `<button class="endorse-btn text-xs text-sky-700 hover:underline font-bold" data-ans-id="${escapeHtml(ans.id)}" data-endorsed="${isEndorsed}">${isEndorsed ? 'Un-endorse' : 'Endorse'}</button>` : ''}
+                    ${canDeleteAns ? `<button class="del-ans-btn text-xs text-rose-600 hover:underline font-bold" data-ans-id="${escapeHtml(ans.id)}">Delete</button>` : ''}
                   </div>
                 </div>
                 <p class="text-xs sm:text-sm text-[var(--md-on-surface-variant)] whitespace-pre-line leading-relaxed">${escapeHtml(ans.answer_text)}</p>
@@ -237,10 +269,29 @@
           answersContainer.querySelectorAll('.endorse-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
               e.stopPropagation();
+              const currentlyEndorsed = btn.dataset.endorsed === 'true';
               try {
-                await apiRequest(`/qa/answers/${encodeURIComponent(btn.dataset.ansId)}/endorse`, { method: 'POST' });
-                showToast('Answer marked as Faculty Endorsed!', 'success');
+                await apiRequest(`/qa/answers/${encodeURIComponent(btn.dataset.ansId)}/endorse`, {
+                  method: 'POST',
+                  body: { endorsed: !currentlyEndorsed }
+                });
+                showToast(currentlyEndorsed ? 'Endorsement removed' : 'Answer marked as Faculty Endorsed!', 'success');
                 openQuestionDetail(currentQuestionId);
+              } catch (err) {
+                showToast(err.message, 'error');
+              }
+            });
+          });
+
+          answersContainer.querySelectorAll('.del-ans-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              if (!confirm('Delete this answer?')) return;
+              try {
+                await apiRequest(`/qa/answers/${encodeURIComponent(btn.dataset.ansId)}`, { method: 'DELETE' });
+                showToast('Answer deleted', 'info');
+                openQuestionDetail(currentQuestionId);
+                loadQuestions();
               } catch (err) {
                 showToast(err.message, 'error');
               }
@@ -296,6 +347,8 @@
       }
     });
 
+    searchInput.addEventListener('input', () => { clearTimeout(window._qaTimer); window._qaTimer = setTimeout(loadQuestions, 250); });
+    classFilter.addEventListener('change', loadQuestions);
     subjectFilter.addEventListener('change', loadQuestions);
     statusFilter.addEventListener('change', loadQuestions);
 

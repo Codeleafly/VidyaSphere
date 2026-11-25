@@ -2,7 +2,7 @@
  * VidyaSphere Examination Schedules & Class Unit Tests Route Handler
  * - GET /api/exams: Readable by all students, teachers, and visitors
  * - /api/admin/exams*: Strictly Admin ONLY (Board & School-wide Exams)
- * - /api/teacher/exams*: Strictly Class Teachers ONLY (Unit / Class Tests for their assigned Class)
+ * - /api/teacher/exams*: Class Teachers (scoped to assigned Class) & Admins (any Class)
  */
 
 import { errorResponse, successResponse } from '../utils/response.js';
@@ -18,7 +18,7 @@ export async function handleExamsRoutes(request, env, path, method) {
     const academicYear = url.searchParams.get('academic_year') || '2026-2027';
 
     let query = `
-      SELECT e.*, p.full_name as author_name, p.role as author_role, p.teacher_type as author_teacher_type
+      SELECT e.*, p.full_name as author_name, p.role as author_role, p.teacher_type as author_teacher_type, p.is_root_admin as author_is_root_admin
       FROM exams e
       LEFT JOIN profiles p ON e.created_by = p.id
       WHERE e.academic_year = ?
@@ -39,10 +39,11 @@ export async function handleExamsRoutes(request, env, path, method) {
   // POST /api/admin/exams OR POST /api/teacher/exams
   if ((path === '/api/admin/exams' || path === '/api/teacher/exams') && method === 'POST') {
     const isTeacherEndpoint = path.startsWith('/api/teacher/');
-    const auth = await authenticate(request, env, isTeacherEndpoint ? ['teacher'] : ['admin']);
+    const auth = await authenticate(request, env, isTeacherEndpoint ? ['teacher', 'admin'] : ['admin']);
     if (auth.error) return auth.error;
 
-    if (isTeacherEndpoint && auth.user.teacherType !== 'class') {
+    const isAdminActor = auth.user.role === 'admin';
+    if (isTeacherEndpoint && !isAdminActor && auth.user.teacherType !== 'class') {
       return errorResponse('Forbidden: Only Class Teachers can schedule unit/class tests.', 403);
     }
 
@@ -66,19 +67,21 @@ export async function handleExamsRoutes(request, env, path, method) {
         return errorResponse('Exam title, subject, and date (YYYY-MM-DD) are required', 400);
       }
 
-      let finalClassName = String(className || '').trim();
+      let finalClassName = String(className || '').trim() || 'All Classes';
       let finalExamType = examType === 'unit_test' ? 'unit_test' : 'board';
 
       if (isTeacherEndpoint) {
         finalExamType = 'unit_test';
-        const teacherClass = (auth.user.className || '').trim();
-        if (!teacherClass) {
-          return errorResponse('Your Class Teacher profile does not have an assigned class.', 400);
+        if (!isAdminActor) {
+          const teacherClass = (auth.user.className || '').trim();
+          if (!teacherClass) {
+            return errorResponse('Your Class Teacher profile does not have an assigned class.', 400);
+          }
+          if (finalClassName && finalClassName !== 'All Classes' && finalClassName !== teacherClass) {
+            return errorResponse(`Forbidden: Class Teachers can only schedule unit tests for ${teacherClass}.`, 403);
+          }
+          finalClassName = teacherClass;
         }
-        if (finalClassName && finalClassName !== 'All Classes' && finalClassName !== teacherClass) {
-          return errorResponse(`Forbidden: Class Teachers can only schedule unit tests for ${teacherClass}.`, 403);
-        }
-        finalClassName = teacherClass;
       }
 
       const urlCheck = validateHttpUrl(driveLink);
@@ -125,10 +128,11 @@ export async function handleExamsRoutes(request, env, path, method) {
         const expiresAt = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
         const label = finalExamType === 'unit_test' ? 'Class Test Alert' : 'Exam Alert';
         const annContent = `Scheduled ${finalExamType === 'unit_test' ? 'Unit/Class Test' : 'Exam'}: ${title} (${subject}) on ${examDate}${startTime ? ' at ' + startTime : ''}.${roomOrHall ? ' Room/Hall: ' + roomOrHall : ''}\nCheck the Exam Timetable for complete syllabus and details.`;
+        const targetNoticeClass = (finalClassName === 'All Classes' || finalClassName === 'all') ? 'all' : finalClassName;
         await env.DB.prepare(`
           INSERT INTO announcements (id, title, content, priority, target_class, author_id, is_pinned, expires_at)
           VALUES (?, ?, ?, 'exam', ?, ?, 1, ?)
-        `).bind(annId, `${label}: ${title}`, annContent, finalClassName, auth.user.id, expiresAt).run();
+        `).bind(annId, `${label}: ${title}`, annContent, targetNoticeClass, auth.user.id, expiresAt).run();
       }
 
       return successResponse({ id: examId, examType: finalExamType, className: finalClassName }, 'Exam schedule created successfully', 201);
@@ -140,10 +144,11 @@ export async function handleExamsRoutes(request, env, path, method) {
   // PUT /api/admin/exams/:id OR PUT /api/teacher/exams/:id
   if ((path.startsWith('/api/admin/exams/') || path.startsWith('/api/teacher/exams/')) && method === 'PUT') {
     const isTeacherEndpoint = path.startsWith('/api/teacher/');
-    const auth = await authenticate(request, env, isTeacherEndpoint ? ['teacher'] : ['admin']);
+    const auth = await authenticate(request, env, isTeacherEndpoint ? ['teacher', 'admin'] : ['admin']);
     if (auth.error) return auth.error;
 
-    if (isTeacherEndpoint && auth.user.teacherType !== 'class') {
+    const isAdminActor = auth.user.role === 'admin';
+    if (isTeacherEndpoint && !isAdminActor && auth.user.teacherType !== 'class') {
       return errorResponse('Forbidden: Only Class Teachers can edit class unit tests.', 403);
     }
 
@@ -152,7 +157,7 @@ export async function handleExamsRoutes(request, env, path, method) {
       const existing = await env.DB.prepare(`SELECT * FROM exams WHERE id = ?`).bind(examId).first();
       if (!existing) return errorResponse('Exam not found', 404);
 
-      if (isTeacherEndpoint) {
+      if (isTeacherEndpoint && !isAdminActor) {
         if (existing.exam_type !== 'unit_test' || existing.class_name !== auth.user.className) {
           return errorResponse('Forbidden: Class Teachers can only edit unit tests in their own assigned class.', 403);
         }
@@ -175,8 +180,8 @@ export async function handleExamsRoutes(request, env, path, method) {
         return errorResponse('Exam title, subject, and date are required', 400);
       }
 
-      const finalClassName = isTeacherEndpoint ? auth.user.className : className.trim();
-      if (isTeacherEndpoint && body.className && body.className.trim() !== auth.user.className) {
+      const finalClassName = (isTeacherEndpoint && !isAdminActor) ? auth.user.className : className.trim();
+      if (isTeacherEndpoint && !isAdminActor && body.className && body.className.trim() !== auth.user.className) {
         return errorResponse(`Forbidden: Cannot move test outside ${auth.user.className}.`, 403);
       }
 
@@ -226,10 +231,11 @@ export async function handleExamsRoutes(request, env, path, method) {
   // DELETE /api/admin/exams/:id OR DELETE /api/teacher/exams/:id
   if ((path.startsWith('/api/admin/exams/') || path.startsWith('/api/teacher/exams/')) && method === 'DELETE') {
     const isTeacherEndpoint = path.startsWith('/api/teacher/');
-    const auth = await authenticate(request, env, isTeacherEndpoint ? ['teacher'] : ['admin']);
+    const auth = await authenticate(request, env, isTeacherEndpoint ? ['teacher', 'admin'] : ['admin']);
     if (auth.error) return auth.error;
 
-    if (isTeacherEndpoint && auth.user.teacherType !== 'class') {
+    const isAdminActor = auth.user.role === 'admin';
+    if (isTeacherEndpoint && !isAdminActor && auth.user.teacherType !== 'class') {
       return errorResponse('Forbidden: Only Class Teachers can delete class unit tests.', 403);
     }
 
@@ -238,7 +244,7 @@ export async function handleExamsRoutes(request, env, path, method) {
       const existing = await env.DB.prepare(`SELECT * FROM exams WHERE id = ?`).bind(examId).first();
       if (!existing) return errorResponse('Exam not found', 404);
 
-      if (isTeacherEndpoint && (existing.exam_type !== 'unit_test' || existing.class_name !== auth.user.className)) {
+      if (isTeacherEndpoint && !isAdminActor && (existing.exam_type !== 'unit_test' || existing.class_name !== auth.user.className)) {
         return errorResponse('Forbidden: Class Teachers can only delete unit tests for their assigned class (Board exams are Admin-only).', 403);
       }
 
