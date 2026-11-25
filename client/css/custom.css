@@ -1,12 +1,97 @@
-/* Minimal Modern Design System supplementing Tailwind CSS CDN */
+/* VidyaSphere Material You (M3) + Google/Apple Minimal Design System */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root,
+:root[data-m3-theme="blue"] {
+  --md-primary: #0b57d0;
+  --md-primary-hover: #0842a0;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #d3e3fd;
+  --md-on-primary-container: #041e49;
+  --md-secondary-container: #c2e7ff;
+  --md-on-secondary-container: #001d35;
+  --md-tertiary-container: #e8def8;
+  --md-on-tertiary-container: #1d192b;
+  --md-surface: #f7f9fc;
+  --md-surface-container: #eef3fa;
+  --md-surface-container-high: #e4ebf5;
+  --md-surface-card: #ffffff;
+  --md-on-surface: #1b1c1d;
+  --md-on-surface-variant: #444746;
+  --md-outline: #dfe4ec;
+  --md-outline-subtle: rgba(15, 23, 42, 0.08);
+  --md-ring: rgba(11, 87, 208, 0.24);
+}
+
+:root[data-m3-theme="violet"] {
+  --md-primary: #6750a4;
+  --md-primary-hover: #4f378b;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #eaddff;
+  --md-on-primary-container: #21005d;
+  --md-secondary-container: #e8def8;
+  --md-on-secondary-container: #1d192b;
+  --md-tertiary-container: #ffd8e4;
+  --md-on-tertiary-container: #31111d;
+  --md-surface: #faf8ff;
+  --md-surface-container: #f2edf9;
+  --md-surface-container-high: #e9e1f5;
+  --md-surface-card: #ffffff;
+  --md-on-surface: #1d1b20;
+  --md-on-surface-variant: #49454f;
+  --md-outline: #e4dff0;
+  --md-outline-subtle: rgba(33, 0, 93, 0.08);
+  --md-ring: rgba(103, 80, 164, 0.24);
+}
+
+:root[data-m3-theme="emerald"] {
+  --md-primary: #146c2e;
+  --md-primary-hover: #0f5223;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #c4eed0;
+  --md-on-primary-container: #072711;
+  --md-secondary-container: #d2e8d4;
+  --md-on-secondary-container: #0e2012;
+  --md-tertiary-container: #c2e7ff;
+  --md-on-tertiary-container: #001d35;
+  --md-surface: #f6fbf7;
+  --md-surface-container: #ecf4ee;
+  --md-surface-container-high: #e0ece3;
+  --md-surface-card: #ffffff;
+  --md-on-surface: #191c1a;
+  --md-on-surface-variant: #414942;
+  --md-outline: #dbe6dd;
+  --md-outline-subtle: rgba(7, 39, 17, 0.08);
+  --md-ring: rgba(20, 108, 46, 0.24);
+}
+
+:root[data-m3-theme="rose"] {
+  --md-primary: #b3261e;
+  --md-primary-hover: #8c1d18;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #ffd8e4;
+  --md-on-primary-container: #3f0915;
+  --md-secondary-container: #ffdad6;
+  --md-on-secondary-container: #410002;
+  --md-tertiary-container: #ffdea6;
+  --md-on-tertiary-container: #281900;
+  --md-surface: #fff9f9;
+  --md-surface-container: #faf0f1;
+  --md-surface-container-high: #f4e4e6;
+  --md-surface-card: #ffffff;
+  --md-on-surface: #201a1b;
+  --md-on-surface-variant: #524346;
+  --md-outline: #eedee0;
+  --md-outline-subtle: rgba(65, 0, 2, 0.08);
+  --md-ring: rgba(179, 38, 30, 0.22);
+}
 
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
 html, body {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
@@ -15,8 +100,8 @@ html, body {
   max-width: 100vw;
   margin: 0;
   padding: 0;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--md-surface);
+  color: var(--md-on-surface);
 }
 
 /* Tabular figures for dates, counters & roll numbers */
@@ -24,80 +109,197 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Break long codes and tokens cleanly on mobile screens */
 code, pre, .break-all {
   word-break: break-all;
   overflow-wrap: anywhere;
 }
 
-/* Hide scrollbars cleanly where desired */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Ultra-subtle minimal scrollbars */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.45);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.65);
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.35); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.55); }
 
-/* Refined glass surface */
+/* Material You Glass App Bar */
 .glass {
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--md-surface) 88%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
-/* Hairline card hover elevation */
+/* Material You Cards & Tonal Containers */
+.m3-card {
+  background-color: var(--md-surface-card);
+  border: 1px solid var(--md-outline);
+  border-radius: 24px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), border-color 0.18s ease;
+}
+
+.m3-card-interactive:hover {
+  border-color: color-mix(in srgb, var(--md-primary) 35%, var(--md-outline));
+  box-shadow: 0 6px 20px -10px rgba(15, 23, 42, 0.14);
+}
+
+.m3-tonal-box {
+  background-color: var(--md-surface-container);
+  border-radius: 24px;
+}
+
 .card-hover {
-  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), border-color 0.18s ease;
 }
 .card-hover:hover {
-  border-color: rgba(99, 102, 241, 0.35);
+  border-color: color-mix(in srgb, var(--md-primary) 35%, #e2e8f0);
   box-shadow: 0 8px 24px -12px rgba(15, 23, 42, 0.12);
 }
 
-/* Modal & Toast subtle animations */
+/* Material You Buttons, Pills & Segmented Controls */
+.m3-btn-primary {
+  background-color: var(--md-primary);
+  color: var(--md-on-primary);
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: background-color 0.16s ease, transform 0.14s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.18s ease;
+}
+.m3-btn-primary:hover {
+  background-color: var(--md-primary-hover);
+  box-shadow: 0 3px 10px -2px var(--md-ring);
+}
+.m3-btn-primary:active,
+.m3-press:active {
+  transform: scale(0.975);
+}
+
+.m3-btn-tonal {
+  background-color: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: filter 0.15s ease, transform 0.14s cubic-bezier(0.2, 0, 0, 1);
+}
+.m3-btn-tonal:hover { filter: brightness(0.96); }
+.m3-btn-tonal:active { transform: scale(0.975); }
+
+.m3-nav-pill {
+  border-radius: 9999px;
+  color: var(--md-on-surface-variant);
+  transition: background-color 0.18s cubic-bezier(0.2, 0, 0, 1), color 0.18s ease;
+}
+.m3-nav-pill:hover {
+  background-color: var(--md-surface-container-high);
+  color: var(--md-on-surface);
+}
+.m3-nav-pill.active {
+  background-color: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  font-weight: 700;
+}
+
+.m3-chip {
+  border-radius: 9999px;
+  border: 1px solid var(--md-outline);
+  background-color: var(--md-surface-card);
+  color: var(--md-on-surface-variant);
+  transition: all 0.16s cubic-bezier(0.2, 0, 0, 1);
+}
+.m3-chip:hover {
+  background-color: var(--md-surface-container);
+}
+.m3-chip.active {
+  background-color: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  border-color: transparent;
+  font-weight: 700;
+}
+
+/* Material 3 Input Focus */
+.m3-input:focus {
+  outline: none;
+  border-color: var(--md-primary);
+  box-shadow: 0 0 0 3px var(--md-ring);
+}
+
+/* Android Material 3 Switch */
+.m3-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 48px;
+  height: 28px;
+  border-radius: 9999px;
+  background-color: #cbd5e1;
+  border: 2px solid #64748b;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1), border-color 0.2s ease;
+}
+.m3-switch::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background-color: #475569;
+  top: 5px;
+  left: 5px;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), width 0.2s ease, height 0.2s ease, top 0.2s ease, background-color 0.2s ease;
+}
+.m3-switch:checked {
+  background-color: var(--md-primary);
+  border-color: var(--md-primary);
+}
+.m3-switch:checked::after {
+  width: 18px;
+  height: 18px;
+  top: 3px;
+  background-color: #ffffff;
+  transform: translateX(20px);
+}
+
+/* Material 3 Responsive Bottom Sheet (Mobile) / Dialog (Desktop) */
+@media (max-width: 639px) {
+  .m3-modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .m3-modal-panel {
+    border-radius: 28px 28px 0 0 !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    animation: sheetSlideUp 0.24s cubic-bezier(0.2, 0, 0, 1) forwards !important;
+  }
+}
+
+.m3-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 9999px;
+  background-color: #cbd5e1;
+  margin: 0 auto 10px;
+}
+
+/* Animations */
 @keyframes slideInUp {
-  from {
-    transform: translateY(14px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(14px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes sheetSlideUp {
+  from { transform: translateY(36px); opacity: 0.5; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes modalPop {
-  from {
-    transform: scale(0.97) translateY(6px);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
+  from { transform: scale(0.97) translateY(6px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .toast-enter {
-  animation: slideInUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInUp 0.22s cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 
 .modal-enter {
-  animation: modalPop 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: modalPop 0.2s cubic-bezier(0.2, 0, 0, 1) forwards;
 }

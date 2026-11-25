@@ -95,6 +95,9 @@ export function renderMessageHtml(msg) {
   const isMe = !!(senderId && user?.id && String(senderId) === String(user.id));
   const isRoot = (msg.is_root_admin === 1 || msg.isRootAdmin === true || msg.isRootAdmin === 1);
   const isAdmin = isRoot || (msg.sender_role === 'admin' || msg.senderRole === 'admin');
+  const isTeacher = (msg.sender_role === 'teacher' || msg.senderRole === 'teacher');
+  const senderTeacherType = msg.sender_teacher_type || msg.senderTeacherType || null;
+  const isPinned = (msg.is_pinned === 1 || msg.isPinned === true);
   const isEdited = (msg.is_edited === 1 || msg.isEdited === 1 || msg.isEdited === true);
   const hasAttachment = (msg.has_attachment === 1 || msg.hasAttachment === 1 || msg.hasAttachment === true);
   const senderName = msg.sender_name || msg.senderName || 'Student';
@@ -136,14 +139,28 @@ export function renderMessageHtml(msg) {
 
   const isViewerRoot = user?.isRootAdmin || user?.username === 'admin';
   const isViewerAdmin = user?.role === 'admin';
+  const isViewerTeacher = user?.role === 'teacher';
+  const teacherAllowedChannels = new Set([
+    'academics',
+    ...([...(user?.assignedClasses || []), ...(user?.teacherType === 'class' && user?.className ? [user.className] : [])]
+      .map(c => `class_${String(c).trim().toLowerCase().replace(/\s+/g, '_')}`))
+  ]);
+  const canTeacherModHere = isViewerTeacher && chatState.currentChatType === 'channel' && teacherAllowedChannels.has(chatState.currentChannel);
   const isPublicOrGroup = chatState.currentChatType !== 'dm';
   const canEdit = isMe;
-  const canDelete = isMe || (isPublicOrGroup && isViewerAdmin && (isViewerRoot || !isRoot));
+  const canDelete = isMe || (isPublicOrGroup && ((isViewerAdmin && (isViewerRoot || !isRoot)) || (canTeacherModHere && !isAdmin)));
+  const canPin = isViewerAdmin || canTeacherModHere || (chatState.currentChatType === 'group' && chatState.currentGroupRole === 'admin');
 
   let actionsHtml = '';
-  if (canEdit || canDelete) {
+  if (canEdit || canDelete || canPin) {
     actionsHtml = `
       <div class="flex items-center gap-2.5 mt-1 opacity-80 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 text-[10px] transition">
+        ${canPin ? `
+          <button type="button" class="pin-msg-btn text-slate-400 hover:text-[var(--md-primary)] flex items-center gap-0.5 font-medium"
+            data-msg-id="${escapeHtml(msg.id)}" title="${isPinned ? 'Unpin' : 'Pin message'}">
+            <i data-lucide="pin" class="w-3 h-3"></i> ${isPinned ? 'Unpin' : 'Pin'}
+          </button>
+        ` : ''}
         ${canEdit ? `
           <button type="button" class="edit-msg-btn text-slate-400 hover:text-indigo-600 flex items-center gap-0.5 font-medium"
             data-msg-id="${escapeHtml(msg.id)}" data-content="${escapeHtml(msg.content)}" title="Edit message">
@@ -168,10 +185,12 @@ export function renderMessageHtml(msg) {
   return `
     <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} group" id="msg-${escapeHtml(msg.id)}">
       <div class="flex items-center gap-1.5 mb-1 px-1 flex-wrap ${isMe ? 'justify-end' : ''}">
-        <span class="text-[11px] font-bold ${isAdmin ? 'text-rose-600' : (isMe ? 'text-indigo-700' : 'text-slate-700')}">
+        <span class="text-[11px] font-bold ${isAdmin ? 'text-rose-600' : (isTeacher ? 'text-[var(--md-primary)]' : (isMe ? 'text-indigo-700' : 'text-slate-700'))}">
           ${escapeHtml(senderName)}${isMe ? ' <span class="text-[10px] font-medium text-indigo-400">(You)</span>' : ''}
         </span>
-        ${isAdmin ? `<span class="text-[9px] px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-bold uppercase">${isRoot ? 'Lead Admin' : 'Admin'}</span>` : ''}
+        ${isAdmin ? `<span class="text-[9px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-bold uppercase">${isRoot ? 'Lead Admin' : 'Admin'}</span>` : ''}
+        ${isTeacher ? `<span class="text-[9px] px-2 py-0.5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] font-bold">${senderTeacherType === 'class' ? 'Class Teacher' : 'Teacher'}</span>` : ''}
+        ${isPinned ? `<span class="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">Pinned</span>` : ''}
         ${academicBadge ? `
           <span class="text-[9px] px-1.5 py-0.5 rounded-md ${isMe ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'} font-medium tabular-nums">
             ${escapeHtml(academicBadge)}

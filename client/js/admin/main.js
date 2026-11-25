@@ -41,6 +41,8 @@ async function loadStats() {
     const s = res.stats || {};
     document.getElementById('stat-pending').textContent = s.pendingRegistrations ?? 0;
     document.getElementById('stat-students').textContent = s.totalStudents ?? 0;
+    const teachersEl = document.getElementById('stat-teachers');
+    if (teachersEl) teachersEl.textContent = s.totalTeachers ?? 0;
     document.getElementById('stat-notes').textContent = s.totalNotes ?? 0;
     document.getElementById('stat-polls').textContent = s.totalPolls ?? 0;
     document.getElementById('stat-exams').textContent = s.totalExams ?? 0;
@@ -98,6 +100,8 @@ function switchTab(tabId) {
 document.getElementById('logout-btn')?.addEventListener('click', logout);
 document.getElementById('logout-btn-mob')?.addEventListener('click', logout);
 document.getElementById('reg-status-filter')?.addEventListener('change', () => loadApplications(currentAdminUser, refreshAllData));
+document.getElementById('reg-role-filter')?.addEventListener('change', () => loadApplications(currentAdminUser, refreshAllData));
+document.getElementById('roster-role-filter')?.addEventListener('change', () => loadStudentAccounts(currentAdminUser, refreshAllData));
 
 document.querySelectorAll('.admin-tab-btn, .admin-bottom-tab').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));

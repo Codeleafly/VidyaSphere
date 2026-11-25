@@ -5,54 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>School Hub | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 w-full">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 w-full">
 
   <main class="flex-1 w-full max-w-5xl mx-auto p-3.5 sm:p-6 lg:p-8 space-y-5">
-    <!-- Minimal Hero Welcome Banner -->
-    <div class="bg-slate-950 rounded-2xl p-5 sm:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-slate-800">
-      <div class="space-y-1">
-        <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-semibold uppercase tracking-wider text-indigo-300 inline-block">
+    <!-- Material You Hero Welcome Card -->
+    <div class="m3-tonal-box p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[var(--md-outline)]">
+      <div class="space-y-1.5">
+        <span class="px-3 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[10px] font-bold uppercase tracking-wider inline-block">
           Official School Hub
         </span>
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight truncate" id="welcome-title">Welcome</h1>
-        <p class="text-slate-400 text-xs sm:text-sm">Stay updated with official school announcements, exams, and circulars.</p>
+        <p class="text-[var(--md-on-surface-variant)] text-xs sm:text-sm">Notice board, upcoming lessons, quizzes, and school circulars.</p>
       </div>
-      <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-        <a href="/dashboard/exams.html" class="flex-1 sm:flex-none px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl transition inline-flex items-center justify-center gap-1.5 border border-white/10">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 text-purple-300"></i> Exams
+      <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto flex-wrap">
+        <a href="/dashboard/lessons.html" class="m3-btn-tonal flex-1 sm:flex-none px-4 py-2.5 text-xs inline-flex items-center justify-center gap-1.5">
+          <i data-lucide="play-circle" class="w-4 h-4"></i> Lessons &amp; Quizzes
         </a>
-        <a href="/dashboard/notes.html" class="flex-1 sm:flex-none px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition inline-flex items-center justify-center gap-1.5">
-          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Browse Notes
+        <a href="/dashboard/notes.html" class="m3-btn-primary flex-1 sm:flex-none px-4 py-2.5 text-xs inline-flex items-center justify-center gap-1.5">
+          <i data-lucide="book-open" class="w-4 h-4"></i> Browse Notes
         </a>
       </div>
     </div>
 
-    <!-- Filter Pills -->
+    <!-- Material 3 Filter Chips -->
     <div class="w-full flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5">
-      <div class="flex items-center gap-1.5 shrink-0">
-        <button data-filter="all" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition whitespace-nowrap">All Circulars</button>
-        <button data-filter="urgent" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100 transition whitespace-nowrap">Urgent</button>
-        <button data-filter="exam" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100 transition whitespace-nowrap">Exams</button>
-        <button data-filter="holiday" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100 transition whitespace-nowrap">Holidays</button>
+      <div class="flex items-center gap-2 shrink-0">
+        <button data-filter="all" class="filter-pill m3-chip active px-4 py-1.5 text-xs">All Circulars</button>
+        <button data-filter="urgent" class="filter-pill m3-chip px-4 py-1.5 text-xs font-semibold">Urgent</button>
+        <button data-filter="exam" class="filter-pill m3-chip px-4 py-1.5 text-xs font-semibold">Exams</button>
+        <button data-filter="holiday" class="filter-pill m3-chip px-4 py-1.5 text-xs font-semibold">Holidays</button>
       </div>
-      <span id="ann-count" class="text-xs text-slate-400 font-medium shrink-0 tabular-nums"></span>
+      <span id="ann-count" class="text-xs text-[var(--md-on-surface-variant)] font-semibold shrink-0 tabular-nums"></span>
     </div>
 
-    <!-- Feed -->
     <div id="announcements-container" class="space-y-3 w-full">
-      <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading announcements...</div>
+      <div class="m3-card p-8 text-center text-slate-400 text-xs">Loading announcements...</div>
     </div>
   </main>
 
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { initDashboardShell } from '/js/layout.js';
-    import { escapeHtml, formatDate, initIcons, showToast } from '/js/ui.js';
+    import { escapeHtml, formatDate, renderRoleBadgeHtml, initIcons, showToast } from '/js/ui.js';
 
     const user = initDashboardShell({ active: 'notices', mobileTitle: 'Notice Board' });
     if (user) {
@@ -69,7 +68,7 @@
         allAnnouncements = res.announcements || [];
         renderAnnouncements();
       } catch (err) {
-        container.innerHTML = `<div class="p-6 text-center text-rose-600 bg-rose-50 rounded-2xl border border-rose-200 text-xs">${escapeHtml(err.message)}</div>`;
+        container.innerHTML = `<div class="p-6 text-center text-rose-600 bg-rose-50 rounded-3xl border border-rose-200 text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
 
@@ -85,9 +84,9 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
+          <div class="m3-card p-10 text-center text-slate-400">
             <i data-lucide="bell-off" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-            <p class="text-sm font-semibold text-slate-700">No official notices published yet</p>
+            <p class="text-sm font-bold text-slate-700">No official notices published yet</p>
             <p class="text-xs text-slate-400 mt-1">School administration and teachers will post circulars here.</p>
           </div>
         `;
@@ -96,30 +95,33 @@
       }
 
       const priorityColors = {
-        urgent: 'bg-rose-50 text-rose-700 border-rose-200',
-        exam: 'bg-amber-50 text-amber-700 border-amber-200',
-        holiday: 'bg-purple-50 text-purple-700 border-purple-200',
-        general: 'bg-indigo-50 text-indigo-700 border-indigo-200'
+        urgent: 'bg-rose-100 text-rose-800',
+        exam: 'bg-amber-100 text-amber-800',
+        holiday: 'bg-purple-100 text-purple-800',
+        general: 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]'
       };
 
       const isAdmin = user?.role === 'admin';
+      const isTeacher = user?.role === 'teacher';
+      const teacherClasses = new Set([...(user?.assignedClasses || []), ...(user?.teacherType === 'class' && user?.className ? [user.className] : [])]);
 
       container.innerHTML = filtered.map(ann => {
         const badgeColor = priorityColors[ann.priority] || priorityColors.general;
+        const canDelete = isAdmin || (isTeacher && teacherClasses.has(ann.target_class) && (ann.author_role !== 'admin' || ann.author_id === user.id));
         return `
-          <article class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 card-hover space-y-2.5 w-full break-words ${ann.is_pinned ? 'ring-2 ring-indigo-500/15 border-indigo-200' : ''}">
+          <article class="m3-card m3-card-interactive p-5 space-y-2.5 w-full break-words ${ann.is_pinned ? 'ring-2 ring-[var(--md-primary)]/20' : ''}">
             <div class="flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${badgeColor}">${escapeHtml(ann.priority)}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${badgeColor}">${escapeHtml(ann.priority)}</span>
                 <span class="text-[11px] text-slate-400 tabular-nums">${escapeHtml(formatDate(ann.created_at))}</span>
-                ${ann.is_pinned ? '<span class="text-[10px] text-amber-700 font-bold flex items-center gap-0.5 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200"><i data-lucide="pin" class="w-3 h-3"></i> Pinned</span>' : ''}
+                ${ann.is_pinned ? '<span class="text-[10px] text-amber-800 font-bold flex items-center gap-0.5 bg-amber-100 px-2.5 py-0.5 rounded-full"><i data-lucide="pin" class="w-3 h-3"></i> Pinned</span>' : ''}
               </div>
               <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                <span class="text-[10px] font-bold text-slate-700 bg-[var(--md-surface-container)] px-2.5 py-0.5 rounded-full">
                   ${ann.target_class === 'all' ? 'All Classes' : escapeHtml(ann.target_class)}
                 </span>
-                ${isAdmin ? `
-                  <button class="delete-notice-btn p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                ${canDelete ? `
+                  <button class="delete-notice-btn p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition"
                     data-id="${escapeHtml(ann.id)}" data-title="${escapeHtml(ann.title)}" title="Delete Notice">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   </button>
@@ -127,11 +129,14 @@
               </div>
             </div>
 
-            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">${escapeHtml(ann.title)}</h3>
-            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">${escapeHtml(ann.content)}</p>
+            <h3 class="text-base sm:text-lg font-extrabold leading-snug">${escapeHtml(ann.title)}</h3>
+            <p class="text-xs sm:text-sm text-[var(--md-on-surface-variant)] leading-relaxed whitespace-pre-line">${escapeHtml(ann.content)}</p>
 
-            <div class="pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-400">
-              <span>Published by <strong class="text-slate-600">${escapeHtml(ann.author_name || 'School Office')}</strong></span>
+            <div class="pt-2 border-t border-[var(--md-outline)] flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-500">
+              <span class="flex items-center gap-1.5">
+                Published by <strong>${escapeHtml(ann.author_name || 'School Office')}</strong>
+                ${renderRoleBadgeHtml(ann.author_role, ann.author_teacher_type, ann.author_is_root_admin === 1)}
+              </span>
               ${ann.expires_at ? `<span class="tabular-nums">Auto-deletes ${escapeHtml(formatDate(ann.expires_at))}</span>` : ''}
             </div>
           </article>
@@ -140,30 +145,26 @@
 
       initIcons();
 
-      if (isAdmin) {
-        container.querySelectorAll('.delete-notice-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            if (!confirm(`Delete notice "${btn.dataset.title || 'this notice'}"?`)) return;
-            try {
-              btn.disabled = true;
-              await apiRequest(`/admin/announcements/${encodeURIComponent(btn.dataset.id)}`, { method: 'DELETE' });
-              showToast('Notice deleted successfully', 'info');
-              loadAnnouncements();
-            } catch (err) {
-              showToast(err.message, 'error');
-              btn.disabled = false;
-            }
-          });
+      container.querySelectorAll('.delete-notice-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(`Delete notice "${btn.dataset.title || 'this notice'}"?`)) return;
+          try {
+            btn.disabled = true;
+            await apiRequest(`/admin/announcements/${encodeURIComponent(btn.dataset.id)}`, { method: 'DELETE' });
+            showToast('Notice deleted successfully', 'info');
+            loadAnnouncements();
+          } catch (err) {
+            showToast(err.message, 'error');
+            btn.disabled = false;
+          }
         });
-      }
+      });
     }
 
     document.querySelectorAll('.filter-pill').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-pill').forEach(b => {
-          b.className = 'filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100 transition whitespace-nowrap';
-        });
-        btn.className = 'filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition whitespace-nowrap';
+        document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
         currentFilter = btn.dataset.filter;
         renderAnnouncements();
       });

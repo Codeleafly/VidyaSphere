@@ -4,6 +4,7 @@
  */
 
 import { errorResponse } from '../utils/response.js';
+import { parseStringList } from '../utils/teacherScope.js';
 
 export async function authenticate(request, env, allowedRoles = [], allowPending = false) {
   const authHeader = request.headers.get('Authorization') || '';
@@ -18,7 +19,9 @@ export async function authenticate(request, env, allowedRoles = [], allowPending
 
   // Verify session token directly against Database
   const sessionRow = await env.DB.prepare(
-    `SELECT s.token, s.user_id, s.expires_at, p.username, p.full_name, p.role, p.account_status, p.class_name, p.division, p.roll_number, p.is_root_admin
+    `SELECT s.token, s.user_id, s.expires_at, p.username, p.full_name, p.role, p.account_status,
+            p.class_name, p.division, p.roll_number, p.is_root_admin,
+            p.teacher_type, p.assigned_classes, p.assigned_subjects, p.allow_student_dms
      FROM sessions s
      JOIN profiles p ON s.user_id = p.id
      WHERE s.token = ?`
@@ -53,8 +56,12 @@ export async function authenticate(request, env, allowedRoles = [], allowPending
       fullName: sessionRow.full_name,
       role: sessionRow.role,
       className: sessionRow.class_name,
-      division: sessionRow.division,
-      rollNumber: sessionRow.roll_number,
+      division: sessionRow.division || '',
+      rollNumber: sessionRow.roll_number || '',
+      teacherType: sessionRow.teacher_type || null,
+      assignedClasses: parseStringList(sessionRow.assigned_classes),
+      assignedSubjects: parseStringList(sessionRow.assigned_subjects),
+      allowStudentDms: sessionRow.allow_student_dms !== 0,
       token: sessionRow.token,
       accountStatus: sessionRow.account_status,
       isRootAdmin,

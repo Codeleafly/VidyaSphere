@@ -3,76 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Student Directory | VidyaSphere</title>
+  <title>Directory | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 w-full">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 w-full">
 
   <main class="flex-1 w-full max-w-5xl mx-auto p-3.5 sm:p-6 lg:p-8 space-y-5">
-    <div class="pb-3 border-b border-slate-200/80 flex items-center justify-between gap-2">
+    <div class="m3-tonal-box p-5 flex items-center justify-between gap-2 border border-[var(--md-outline)]">
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Student Directory &amp; Roster</h1>
-        <p class="text-xs text-slate-500">Verified active school members registered on VidyaSphere</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">School Directory</h1>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Verified active students, subject teachers, class teachers &amp; admins</p>
       </div>
-      <span id="roster-count" class="text-xs font-semibold text-slate-500 bg-white border border-slate-200/80 px-2.5 py-1 rounded-lg tabular-nums"></span>
+      <span id="roster-count" class="text-xs font-bold bg-white border border-[var(--md-outline)] px-3 py-1 rounded-full tabular-nums"></span>
     </div>
 
-    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col sm:flex-row gap-2 w-full">
-      <div class="flex-1 relative">
-        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+    <div class="m3-card p-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full">
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
           <i data-lucide="search" class="w-4 h-4"></i>
         </span>
         <input type="text" id="search-input"
-          class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-          placeholder="Search by student name, @username, or roll number...">
+          class="m3-input w-full pl-9 pr-3 py-2 rounded-full border border-[var(--md-outline)] bg-[var(--md-surface)] text-xs sm:text-sm"
+          placeholder="Search name, @username, or roll #...">
       </div>
-
-      <select id="class-filter" class="w-full sm:w-48 px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
+      <select id="role-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
+        <option value="">All Members</option>
+        <option value="student">Students</option>
+        <option value="teacher">Teachers / Faculty</option>
+      </select>
+      <select id="class-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
         <option value="">All Classes (1st - 12th)</option>
-        <option value="Class 1">Class 1</option>
-        <option value="Class 2">Class 2</option>
-        <option value="Class 3">Class 3</option>
-        <option value="Class 4">Class 4</option>
-        <option value="Class 5">Class 5</option>
-        <option value="Class 6">Class 6</option>
-        <option value="Class 7">Class 7</option>
-        <option value="Class 8">Class 8</option>
-        <option value="Class 9">Class 9</option>
-        <option value="Class 10">Class 10</option>
-        <option value="Class 11 (Science)">Class 11 (Science)</option>
-        <option value="Class 11 (Commerce)">Class 11 (Commerce)</option>
-        <option value="Class 11 (Arts)">Class 11 (Arts)</option>
-        <option value="Class 12 (Science)">Class 12 (Science)</option>
-        <option value="Class 12 (Commerce)">Class 12 (Commerce)</option>
-        <option value="Class 12 (Arts)">Class 12 (Arts)</option>
       </select>
     </div>
 
     <div id="students-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 w-full">
-      <div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading student roster...</div>
+      <div class="col-span-full m3-card p-8 text-center text-slate-400 text-xs">Loading directory...</div>
     </div>
   </main>
 
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { initDashboardShell } from '/js/layout.js';
-    import { escapeHtml, initIcons } from '/js/ui.js';
+    import { CLASS_LIST, escapeHtml, renderRoleBadgeHtml, initIcons } from '/js/ui.js';
 
-    const user = initDashboardShell({ active: 'students', mobileTitle: 'Student Directory' });
+    const user = initDashboardShell({ active: 'students', mobileTitle: 'Directory' });
 
     const searchInput = document.getElementById('search-input');
+    const roleFilter = document.getElementById('role-filter');
     const classFilter = document.getElementById('class-filter');
     const container = document.getElementById('students-container');
     const rosterCount = document.getElementById('roster-count');
+
+    CLASS_LIST.forEach(c => { classFilter.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`; });
 
     async function loadStudents() {
       const params = new URLSearchParams();
       if (searchInput.value.trim()) params.append('search', searchInput.value.trim());
       if (classFilter.value) params.append('className', classFilter.value);
+      if (roleFilter.value) params.append('role', roleFilter.value);
 
       try {
         const res = await apiRequest(`/students?${params.toString()}`);
@@ -80,36 +72,36 @@
         rosterCount.textContent = `${list.length} active`;
 
         if (list.length === 0) {
-          container.innerHTML = `
-            <div class="col-span-full p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
-              <i data-lucide="user-x" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-              <p class="text-sm font-semibold text-slate-700">No matching students found</p>
-              <p class="text-xs text-slate-400 mt-1">Approved members appear here automatically.</p>
-            </div>
-          `;
-          initIcons();
+          container.innerHTML = `<div class="col-span-full m3-card p-10 text-center text-slate-400 text-xs">No matching school members found.</div>`;
           return;
         }
 
-        container.innerHTML = list.map(student => {
-          const isRoot = student.is_root_admin === 1 || student.username === 'admin';
-          const isAdmin = isRoot || student.role === 'admin';
-          const initial = (student.full_name || 'S').charAt(0).toUpperCase();
+        container.innerHTML = list.map(member => {
+          const isRoot = member.is_root_admin === 1 || member.username === 'admin';
+          const isTeacher = member.role === 'teacher';
+          const initial = (member.full_name || 'S').charAt(0).toUpperCase();
+
+          let subline = `${member.class_name || ''}${member.division ? ' - ' + member.division : ''}${member.roll_number ? ' • Roll ' + member.roll_number : ''}`;
+          if (isTeacher) {
+            try {
+              const subs = JSON.parse(member.assigned_subjects || '[]');
+              const clss = JSON.parse(member.assigned_classes || '[]');
+              subline = `${subs.slice(0, 2).join(', ') || 'Faculty'} • ${clss.slice(0, 2).join(', ') || member.class_name}`;
+            } catch { /* fallback */ }
+          }
 
           return `
-            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 card-hover flex items-center gap-3 w-full break-words">
-              <div class="w-10 h-10 rounded-xl ${isAdmin ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'} font-bold flex items-center justify-center shrink-0 text-sm">
+            <div class="m3-card m3-card-interactive p-4 flex items-center gap-3 w-full break-words">
+              <div class="w-10 h-10 rounded-2xl ${isTeacher ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]' : 'bg-[var(--md-surface-container)] text-[var(--md-primary)]'} font-extrabold flex items-center justify-center shrink-0 text-sm">
                 ${escapeHtml(initial)}
               </div>
               <div class="overflow-hidden flex-1">
-                <div class="flex items-center gap-1.5">
-                  <h4 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${escapeHtml(student.full_name)}</h4>
-                  ${isAdmin ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-bold uppercase shrink-0">${isRoot ? 'Lead' : 'Admin'}</span>` : ''}
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <h4 class="font-bold text-xs sm:text-sm truncate">${escapeHtml(member.full_name)}</h4>
+                  ${renderRoleBadgeHtml(member.role, member.teacher_type, isRoot)}
                 </div>
-                <p class="text-[11px] text-indigo-600 font-mono font-medium truncate">@${escapeHtml(student.username)}</p>
-                <div class="text-[11px] text-slate-500 mt-0.5 tabular-nums truncate">
-                  ${escapeHtml(student.class_name)} - ${escapeHtml(student.division)} • Roll: ${escapeHtml(student.roll_number)}
-                </div>
+                <p class="text-[11px] text-[var(--md-primary)] font-mono font-medium truncate">@${escapeHtml(member.username)}</p>
+                <div class="text-[11px] text-slate-500 mt-0.5 tabular-nums truncate">${escapeHtml(subline)}</div>
               </div>
             </div>
           `;
@@ -117,14 +109,12 @@
 
         initIcons();
       } catch (err) {
-        container.innerHTML = `<div class="col-span-full p-6 text-center text-rose-600 bg-rose-50 rounded-2xl text-xs">${escapeHtml(err.message)}</div>`;
+        container.innerHTML = `<div class="col-span-full p-6 text-center text-rose-600 bg-rose-50 rounded-3xl text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
 
-    searchInput.addEventListener('input', () => {
-      clearTimeout(window._searchTimer);
-      window._searchTimer = setTimeout(loadStudents, 300);
-    });
+    searchInput.addEventListener('input', () => { clearTimeout(window._searchTimer); window._searchTimer = setTimeout(loadStudents, 300); });
+    roleFilter.addEventListener('change', loadStudents);
     classFilter.addEventListener('change', loadStudents);
 
     if (user) loadStudents();

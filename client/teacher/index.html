@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Teacher Studio | VidyaSphere</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b57d0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 w-full">
+
+  <!-- Desktop Material You Navigation Rail -->
+  <aside class="hidden md:flex flex-col w-64 bg-[var(--md-surface-container)] border-r border-[var(--md-outline)] p-3.5 shrink-0 h-screen sticky top-0 justify-between z-30">
+    <div class="space-y-4 overflow-y-auto no-scrollbar">
+      <div class="flex items-center gap-3 px-2.5 py-1.5">
+        <div class="w-10 h-10 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] flex items-center justify-center shadow-sm">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 class="font-extrabold text-[15px] leading-none">VidyaSphere</h2>
+          <span id="teacher-rail-subtitle" class="text-[11px] text-[var(--md-primary)] font-bold">Teacher Studio</span>
+        </div>
+      </div>
+
+      <nav class="space-y-1">
+        <button data-tab="home" class="t-tab-btn m3-nav-pill active flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Studio Home
+        </button>
+        <button data-tab="lessons" class="t-tab-btn m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <i data-lucide="play-circle" class="w-4 h-4"></i> Lessons &amp; Notes
+        </button>
+        <button data-tab="quizzes" class="t-tab-btn m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <i data-lucide="check-square" class="w-4 h-4"></i> Quizzes &amp; Homework
+        </button>
+        <button data-tab="notices" class="t-tab-btn m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <i data-lucide="megaphone" class="w-4 h-4"></i> Notices &amp; Tests
+        </button>
+        <button data-tab="roster" id="nav-roster-desktop" class="hidden t-tab-btn m3-nav-pill flex items-center justify-between gap-2 px-3.5 py-2.5 text-[13px] w-full text-left font-medium">
+          <span class="flex items-center gap-3"><i data-lucide="user-check" class="w-4 h-4"></i> Class Roster</span>
+          <span id="roster-pending-pill" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 tabular-nums">0</span>
+        </button>
+
+        <div class="pt-3 mt-3 border-t border-[var(--md-outline)] space-y-1">
+          <a href="/dashboard/chat.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
+            <i data-lucide="messages-square" class="w-4 h-4"></i> Class Chat
+          </a>
+          <a href="/dashboard/qa.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
+            <i data-lucide="message-circle-question" class="w-4 h-4"></i> Q&amp;A Forum
+          </a>
+          <a href="/dashboard/index.html" class="m3-nav-pill flex items-center gap-3 px-3.5 py-2.5 text-[13px] font-medium">
+            <i data-lucide="eye" class="w-4 h-4"></i> Student Portal View
+          </a>
+        </div>
+      </nav>
+    </div>
+
+    <div class="pt-3 space-y-2.5 border-t border-[var(--md-outline)]">
+      <div class="flex items-center justify-between px-2" id="teacher-theme-desktop"></div>
+      <div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-[var(--md-surface-card)] border border-[var(--md-outline)]">
+        <div class="overflow-hidden">
+          <p id="teacher-display-name" class="font-bold text-xs truncate">Teacher</p>
+          <p id="teacher-display-type" class="text-[10px] text-[var(--md-primary)] font-bold truncate">Faculty</p>
+        </div>
+        <button id="teacher-logout-btn" title="Sign Out" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition shrink-0">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Material 3 Top App Bar -->
+  <header class="md:hidden sticky top-0 z-30 glass border-b border-[var(--md-outline)] px-4 h-14 flex items-center justify-between w-full shrink-0">
+    <div class="flex items-center gap-2.5 overflow-hidden">
+      <div class="w-8 h-8 rounded-xl bg-[var(--md-primary)] text-[var(--md-on-primary)] flex items-center justify-center shrink-0">
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+      </div>
+      <div class="overflow-hidden">
+        <span class="font-extrabold text-[15px] block leading-tight truncate">Teacher Studio</span>
+        <span id="teacher-mob-badge" class="text-[10px] text-[var(--md-primary)] font-bold block leading-none truncate">Faculty</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <a href="/dashboard/index.html" class="px-3 py-1.5 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] font-bold text-[11px] flex items-center gap-1">
+        <i data-lucide="eye" class="w-3 h-3"></i> Student View
+      </a>
+      <button id="teacher-logout-mob" class="p-2 text-slate-500 hover:text-rose-600 rounded-full" title="Sign Out">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+    <!-- TAB 1: STUDIO HOME -->
+    <section id="tab-home" class="t-tab-content space-y-5">
+      <div class="m3-tonal-box p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[var(--md-outline)]">
+        <div class="space-y-1.5">
+          <span id="home-role-pill" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[11px] font-bold">
+            Faculty Workspace
+          </span>
+          <h1 id="home-greeting" class="text-xl sm:text-2xl font-extrabold tracking-tight">Welcome, Teacher</h1>
+          <div id="home-assignments-chips" class="flex flex-wrap gap-1.5 pt-1"></div>
+        </div>
+        <div class="flex flex-wrap gap-2 shrink-0">
+          <button id="quick-new-lesson-btn" class="m3-btn-primary px-4 py-2.5 text-xs flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-4 h-4"></i> New Lesson
+          </button>
+          <button id="quick-new-quiz-btn" class="m3-btn-tonal px-4 py-2.5 text-xs flex items-center gap-1.5">
+            <i data-lucide="check-square" class="w-4 h-4"></i> New Quiz
+          </button>
+        </div>
+      </div>
+
+      <!-- Studio Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="m3-card p-4">
+          <p class="text-[11px] font-bold text-[var(--md-on-surface-variant)]">Lessons Published</p>
+          <h3 id="t-stat-lessons" class="text-2xl font-extrabold mt-1 tabular-nums text-[var(--md-primary)]">-</h3>
+        </div>
+        <div class="m3-card p-4">
+          <p class="text-[11px] font-bold text-[var(--md-on-surface-variant)]">MCQ Quizzes</p>
+          <h3 id="t-stat-quizzes" class="text-2xl font-extrabold mt-1 tabular-nums text-purple-600">-</h3>
+        </div>
+        <div class="m3-card p-4">
+          <p class="text-[11px] font-bold text-[var(--md-on-surface-variant)]">Homework Posts</p>
+          <h3 id="t-stat-homework" class="text-2xl font-extrabold mt-1 tabular-nums text-amber-600">-</h3>
+        </div>
+        <div class="m3-card p-4">
+          <p class="text-[11px] font-bold text-[var(--md-on-surface-variant)]">Verified Notes</p>
+          <h3 id="t-stat-notes" class="text-2xl font-extrabold mt-1 tabular-nums text-emerald-600">-</h3>
+        </div>
+      </div>
+
+      <!-- Privacy & Quick Actions Card (Android Settings Style) -->
+      <div class="m3-card p-5 space-y-4">
+        <h2 class="text-sm font-extrabold">Teacher Preferences &amp; Quick Access</h2>
+        <div class="flex items-center justify-between gap-4 p-3.5 rounded-2xl bg-[var(--md-surface-container)]">
+          <div>
+            <p class="text-sm font-bold">Allow Student Direct Messages</p>
+            <p class="text-xs text-[var(--md-on-surface-variant)]">When turned off, students cannot send you new 1-on-1 DM requests.</p>
+          </div>
+          <input type="checkbox" id="dm-privacy-switch" class="m3-switch shrink-0" checked>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <button data-jump="lessons" class="quick-jump-btn m3-card p-3.5 text-left m3-card-interactive flex items-center gap-3">
+            <span class="w-9 h-9 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center shrink-0"><i data-lucide="upload" class="w-4 h-4"></i></span>
+            <div><p class="font-bold">Verified Notes</p><p class="text-[11px] text-[var(--md-on-surface-variant)]">20 uploads / 24h quota</p></div>
+          </button>
+          <button data-jump="quizzes" class="quick-jump-btn m3-card p-3.5 text-left m3-card-interactive flex items-center gap-3">
+            <span class="w-9 h-9 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center shrink-0"><i data-lucide="clipboard-list" class="w-4 h-4"></i></span>
+            <div><p class="font-bold">Homework Feed</p><p class="text-[11px] text-[var(--md-on-surface-variant)]">Zero grading overhead</p></div>
+          </button>
+          <a href="/dashboard/qa.html" class="m3-card p-3.5 text-left m3-card-interactive flex items-center gap-3">
+            <span class="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0"><i data-lucide="award" class="w-4 h-4"></i></span>
+            <div><p class="font-bold">Endorse Q&amp;A</p><p class="text-[11px] text-[var(--md-on-surface-variant)]">Mark Faculty Endorsed</p></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: LESSONS & VERIFIED NOTES -->
+    <section id="tab-lessons" class="t-tab-content hidden space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-extrabold">Lessons &amp; Teacher Verified Notes</h2>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">Share YouTube Unlisted classes, Drive PDFs, and verified notes (20/day direct file quota)</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="open-lesson-modal-btn" class="m3-btn-primary px-4 py-2.5 text-xs flex items-center gap-1.5">
+            <i data-lucide="video" class="w-4 h-4"></i> Add Lesson
+          </button>
+          <button id="open-teacher-note-modal-btn" class="m3-btn-tonal px-4 py-2.5 text-xs flex items-center gap-1.5">
+            <i data-lucide="file-plus" class="w-4 h-4"></i> Upload Verified Note
+          </button>
+        </div>
+      </div>
+
+      <div id="teacher-lessons-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div class="col-span-full m3-card p-8 text-center text-xs text-slate-400">Loading your lessons...</div>
+      </div>
+    </section>
+
+    <!-- TAB 3: QUIZZES & HOMEWORK -->
+    <section id="tab-quizzes" class="t-tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-extrabold">5-Min MCQ Quizzes &amp; Homework</h2>
+          <p class="text-xs text-[var(--md-on-surface-variant)]">Auto-graded MCQ quizzes + lightweight daily homework assignments</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="open-quiz-modal-btn" class="m3-btn-primary px-4 py-2.5 text-xs flex items-center gap-1.5">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Build MCQ Quiz
+          </button>
+          <button id="open-hw-modal-btn" class="m3-btn-tonal px-4 py-2.5 text-xs flex items-center gap-1.5">
+            <i data-lucide="clipboard-plus" class="w-4 h-4"></i> Post Homework
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="text-sm font-extrabold text-[var(--md-on-surface)]">Your Published Quizzes</h3>
+        <div id="teacher-quizzes-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="col-span-full m3-card p-6 text-center text-xs text-slate-400">Loading quizzes...</div>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="text-sm font-extrabold text-[var(--md-on-surface)]">Your Homework Feed</h3>
+        <div id="teacher-homework-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="col-span-full m3-card p-6 text-center text-xs text-slate-400">Loading homework...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: SCOPED NOTICES & CLASS TESTS -->
+    <section id="tab-notices" class="t-tab-content hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-extrabold">Scoped Class Notices &amp; Unit Tests</h2>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Publish 30-day notices for classes you teach. Class Teachers can also schedule Unit Tests.</p>
+      </div>
+
+      <div class="m3-card p-5 max-w-2xl space-y-4">
+        <h3 class="text-sm font-extrabold">Post Class Notice</h3>
+        <form id="teacher-notice-form" class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Notice Title</label>
+            <input type="text" id="t-ann-title" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Chapter 5 Revision Worksheet">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Target Class</label>
+              <select id="t-ann-class" required class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] text-xs font-semibold bg-white"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Priority</label>
+              <select id="t-ann-priority" class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] text-xs font-semibold bg-white">
+                <option value="general">General</option>
+                <option value="exam">Class Test / Exam</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Message</label>
+            <textarea id="t-ann-content" rows="3" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="Enter details for students..."></textarea>
+          </div>
+          <button type="submit" class="m3-btn-primary px-5 py-2.5 text-xs">Publish Scoped Notice</button>
+        </form>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="text-sm font-extrabold">Active Notices in Your Classes</h3>
+        <div id="teacher-notices-list" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Class Teacher Unit Test Scheduler -->
+      <div id="class-teacher-tests-panel" class="hidden space-y-4 pt-4 border-t border-[var(--md-outline)]">
+        <div class="m3-card p-5 max-w-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-extrabold flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px]">Class Teacher</span>
+              Schedule Class / Unit Test
+            </h3>
+            <button type="button" id="t-exam-cancel-btn" class="hidden text-xs font-bold text-rose-600">Cancel Edit</button>
+          </div>
+          <form id="teacher-exam-form" class="space-y-3">
+            <input type="hidden" id="t-exam-id" value="">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Test Title</label>
+                <input type="text" id="t-exam-title" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Unit Test 1">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
+                <input type="text" id="t-exam-subject" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Science">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Test Date</label>
+                <input type="date" id="t-exam-date" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs bg-white">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Start Time</label>
+                <input type="text" id="t-exam-start" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs" placeholder="09:00 AM">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Room / Syllabus</label>
+                <input type="text" id="t-exam-syllabus" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] text-xs" placeholder="Chapters 1 & 2">
+              </div>
+            </div>
+            <button type="submit" class="m3-btn-primary px-5 py-2.5 text-xs">Save Unit Test</button>
+          </form>
+        </div>
+        <div id="teacher-unit-tests-list" class="space-y-2.5"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: CLASS ROSTER & APPROVALS (CLASS TEACHER ONLY) -->
+    <section id="tab-roster" class="t-tab-content hidden space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-xl font-extrabold">Class Roster &amp; 1-Click Approvals</h2>
+          <p id="roster-scope-subtitle" class="text-xs text-[var(--md-on-surface-variant)]">Approve pending students in your assigned class</p>
+        </div>
+        <select id="t-roster-filter" class="m3-input px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs font-bold bg-white">
+          <option value="pending" selected>Pending Approvals</option>
+          <option value="active">Active Students</option>
+          <option value="">All Class Students</option>
+        </select>
+      </div>
+      <div id="teacher-roster-list" class="space-y-2.5"></div>
+    </section>
+  </main>
+
+  <!-- Mobile Material 3 Bottom Navigation -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--md-surface-container)]/95 backdrop-blur-md border-t border-[var(--md-outline)] px-1 py-1.5 flex items-center justify-around">
+    <button data-tab="home" class="t-mob-tab flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="t-pill px-3.5 py-1 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)]"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></span>
+      <span class="font-bold">Home</span>
+    </button>
+    <button data-tab="lessons" class="t-mob-tab flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="t-pill px-3.5 py-1 rounded-full text-[var(--md-on-surface-variant)]"><i data-lucide="play-circle" class="w-4 h-4"></i></span>
+      <span class="font-medium">Lessons</span>
+    </button>
+    <button data-tab="quizzes" class="t-mob-tab flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="t-pill px-3.5 py-1 rounded-full text-[var(--md-on-surface-variant)]"><i data-lucide="check-square" class="w-4 h-4"></i></span>
+      <span class="font-medium">Quizzes</span>
+    </button>
+    <button data-tab="notices" class="t-mob-tab flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="t-pill px-3.5 py-1 rounded-full text-[var(--md-on-surface-variant)]"><i data-lucide="megaphone" class="w-4 h-4"></i></span>
+      <span class="font-medium">Notices</span>
+    </button>
+    <button type="button" id="t-more-btn" class="flex-1 py-0.5 flex flex-col items-center gap-0.5 text-[10px]">
+      <span class="px-3.5 py-1 rounded-full text-[var(--md-on-surface-variant)]"><i data-lucide="grid-2x2" class="w-4 h-4"></i></span>
+      <span class="font-medium">More</span>
+    </button>
+  </nav>
+
+  <!-- Mobile More Sheet -->
+  <div id="t-more-sheet" class="md:hidden fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-xs hidden items-end justify-center">
+    <div class="bg-[var(--md-surface-card)] w-full rounded-t-[28px] p-5 pb-7 space-y-4 shadow-2xl modal-enter">
+      <div class="m3-sheet-handle"></div>
+      <div class="flex items-center justify-between">
+        <h3 class="font-extrabold text-sm">Teacher Tools &amp; Theme</h3>
+        <button id="t-more-close" class="p-1.5 rounded-full bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="flex items-center justify-between p-3 rounded-2xl bg-[var(--md-surface-container)]">
+        <span class="text-xs font-bold">Material You Accent</span>
+        <div id="teacher-theme-mob"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <button data-tab="roster" id="nav-roster-mob" class="hidden t-mob-sheet-tab flex items-center gap-2 p-3.5 rounded-2xl bg-amber-50 text-amber-900 font-bold">
+          <i data-lucide="user-check" class="w-4 h-4"></i> Class Roster
+        </button>
+        <a href="/dashboard/chat.html" class="flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
+          <i data-lucide="messages-square" class="w-4 h-4"></i> Class Chat
+        </a>
+        <a href="/dashboard/qa.html" class="flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
+          <i data-lucide="message-circle-question" class="w-4 h-4"></i> Q&amp;A Forum
+        </a>
+        <a href="/dashboard/index.html" class="flex items-center gap-2 p-3.5 rounded-2xl bg-[var(--md-surface-container)] font-semibold">
+          <i data-lucide="eye" class="w-4 h-4"></i> Student Portal
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lesson Modal -->
+  <div id="lesson-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-lg p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <h3 id="lesson-modal-title" class="text-base font-extrabold">Publish Chapter Lesson</h3>
+        <button id="close-lesson-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="lesson-form" class="space-y-3 text-xs">
+        <input type="hidden" id="les-id" value="">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Lesson Title</label>
+          <input type="text" id="les-title" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Newton's Laws of Motion">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Class</label>
+            <select id="les-class" required class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Subject</label>
+            <select id="les-subject" required class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Chapter / Unit</label>
+          <input type="text" id="les-chapter" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="e.g. Chapter 3">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">YouTube Unlisted / Video URL (Optional, 0 MB storage)</label>
+          <input type="url" id="les-video" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] font-mono" placeholder="https://youtu.be/...">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Google Drive PDF / Worksheet URL (Optional)</label>
+          <input type="url" id="les-resource" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] font-mono" placeholder="https://drive.google.com/...">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Key Summary &amp; Explanation</label>
+          <textarea id="les-summary" rows="3" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Key formulas, concepts, or reading points..."></textarea>
+        </div>
+        <button type="submit" class="m3-btn-primary w-full py-3 text-xs">Save Lesson</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Teacher Verified Note Modal -->
+  <div id="t-note-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <h3 class="text-base font-extrabold">Upload Teacher Verified Note</h3>
+        <button id="close-t-note-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="t-note-form" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Title</label>
+          <input type="text" id="tn-title" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Class</label>
+            <select id="tn-class" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Subject</label>
+            <select id="tn-subject" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="cursor-pointer border border-[var(--md-outline)] bg-[var(--md-surface-container)] p-2.5 rounded-2xl flex items-center gap-2">
+            <input type="radio" name="tn-mode" value="drive_link" checked> <span class="font-bold">Drive Link (Permanent)</span>
+          </label>
+          <label class="cursor-pointer border border-[var(--md-outline)] p-2.5 rounded-2xl flex items-center gap-2">
+            <input type="radio" name="tn-mode" value="file"> <span class="font-bold">Direct File (20/day)</span>
+          </label>
+        </div>
+        <div id="tn-drive-wrap">
+          <input type="url" id="tn-drive" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] font-mono" placeholder="https://drive.google.com/...">
+        </div>
+        <div id="tn-file-wrap" class="hidden">
+          <input type="file" id="tn-file" accept="application/pdf,image/*" class="w-full text-xs">
+        </div>
+        <button type="submit" class="m3-btn-primary w-full py-3 text-xs">Publish Verified Note</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MCQ Quiz Builder Modal -->
+  <div id="quiz-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-2xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <h3 class="text-base font-extrabold">Build 5-Min Auto-Graded MCQ Quiz</h3>
+        <button id="close-quiz-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="quiz-form" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Quiz Title</label>
+          <input type="text" id="qz-title" required class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Quick Check: Quadratic Equations">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Class</label>
+            <select id="qz-class" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Subject</label>
+            <select id="qz-subject" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Chapter</label>
+            <input type="text" id="qz-chapter" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Chapter 2">
+          </div>
+        </div>
+        <div id="quiz-questions-builder" class="space-y-3"></div>
+        <button type="button" id="add-quiz-question-btn" class="m3-btn-tonal px-4 py-2 text-xs inline-flex items-center gap-1.5">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add MCQ Question
+        </button>
+        <button type="submit" class="m3-btn-primary w-full py-3 text-xs">Publish MCQ Quiz</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quiz Results Modal -->
+  <div id="quiz-results-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-lg p-5 space-y-3 shadow-2xl max-h-[85vh] overflow-y-auto modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <h3 id="qr-title" class="text-base font-extrabold">Quiz Attempts &amp; Scores</h3>
+        <button id="close-qr-modal" class="p-1.5 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="qr-list" class="space-y-2 text-xs"></div>
+    </div>
+  </div>
+
+  <!-- Homework Modal -->
+  <div id="hw-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-3.5 shadow-2xl max-h-[90vh] overflow-y-auto modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <h3 class="text-base font-extrabold">Assign Homework</h3>
+        <button id="close-hw-modal" class="p-1.5 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="hw-form" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Topic / Title</label>
+          <input type="text" id="hw-title" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-sm" placeholder="e.g. Exercise 4.2 Q1 to Q5">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Class</label>
+            <select id="hw-class" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Subject</label>
+            <select id="hw-subject" required class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white"></select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Due Date</label>
+          <input type="date" id="hw-due" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] bg-white">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Instructions</label>
+          <textarea id="hw-desc" rows="3" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)]" placeholder="Write problems in notebook and bring tomorrow..."></textarea>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Reference PDF / Drive Link (Optional)</label>
+          <input type="url" id="hw-resource" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] font-mono" placeholder="https://drive.google.com/...">
+        </div>
+        <button type="submit" class="m3-btn-primary w-full py-3 text-xs">Publish Homework</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/js/teacher/main.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VidyaSphere | Supreme Knowledge Edge Ecosystem</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
@@ -20,101 +20,104 @@
           var user = JSON.parse(userStr);
           var target = user.accountStatus === 'pending'
             ? '/auth/pending.html'
-            : (user.role === 'admin' ? '/admin/index.html' : '/dashboard/index.html');
+            : (user.role === 'admin' ? '/admin/index.html' : (user.role === 'teacher' ? '/teacher/index.html' : '/dashboard/index.html'));
           window.location.replace(target);
         }
       } catch (e) {}
     })();
   </script>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] antialiased min-h-screen flex flex-col justify-between">
 
-  <!-- Minimal Glass Header -->
-  <header class="sticky top-0 z-40 glass border-b border-slate-200/80">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+  <!-- Material You Top App Bar -->
+  <header class="sticky top-0 z-40 glass border-b border-[var(--md-outline)]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
       <a href="/index.html" class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm">
+        <div class="w-10 h-10 rounded-2xl bg-[var(--md-primary)] flex items-center justify-center text-[var(--md-on-primary)] shadow-sm">
           <i data-lucide="graduation-cap" class="w-5 h-5"></i>
         </div>
         <div>
-          <span class="text-lg font-extrabold tracking-tight text-slate-900">VidyaSphere</span>
-          <span class="hidden sm:inline-block text-xs text-slate-400 ml-2 font-medium">School Edge Core</span>
+          <span class="text-lg font-extrabold tracking-tight">VidyaSphere</span>
+          <span class="hidden sm:inline-block text-xs text-[var(--md-on-surface-variant)] ml-2 font-medium">School Edge Core</span>
         </div>
       </a>
       <div class="flex items-center gap-2 sm:gap-3">
-        <a href="/guide.html" class="px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition">Student Guide</a>
-        <a href="/auth/register.html" class="hidden sm:inline-flex px-3 py-1.5 text-sm font-semibold text-slate-700 hover:text-indigo-600 transition">Register</a>
-        <a href="/auth/login.html" class="px-4 py-2 text-xs sm:text-sm font-bold text-white bg-slate-900 hover:bg-indigo-600 rounded-xl transition">Sign In</a>
+        <div id="landing-theme-dots" class="hidden sm:flex items-center"></div>
+        <a href="/guide.html" class="px-3 py-1.5 text-xs sm:text-sm font-semibold text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition">Guide</a>
+        <a href="/auth/register.html" class="hidden sm:inline-flex m3-btn-tonal px-4 py-2 text-xs sm:text-sm">Register</a>
+        <a href="/auth/login.html" class="m3-btn-primary px-4 sm:px-5 py-2 text-xs sm:text-sm">Sign In</a>
       </div>
     </div>
   </header>
 
-  <!-- Minimal Hero & Bento -->
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20 flex-1 w-full space-y-16">
-    <section class="text-center max-w-3xl mx-auto space-y-6">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold shadow-xs">
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16 flex-1 w-full space-y-12">
+    <!-- Material You Hero Surface -->
+    <section class="m3-tonal-box p-7 sm:p-12 text-center border border-[var(--md-outline)] space-y-6">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[var(--md-outline)] text-xs font-bold shadow-xs">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Class 1 to 12 • Privacy-First Student Network
+        Class 1 to 12 • Students &amp; Faculty • Material You
       </div>
-      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-[1.12]">
-        One clean school hub for notes, exams, Q&amp;A, and safe chat.
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.12] max-w-3xl mx-auto">
+        One clean school hub for lessons, notes, exams, Q&amp;A, and safe chat.
       </h1>
-      <p class="text-sm sm:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto">
-        Built by students, for students. Share 15MB study materials without exposing personal phone numbers, check verified datesheets, and collaborate in real time.
+      <p class="text-sm sm:text-lg text-[var(--md-on-surface-variant)] leading-relaxed max-w-2xl mx-auto">
+        Built by students, for schools. Attend chapter lessons, attempt 5-min auto-graded quizzes, share 15MB compressed notes, and message safely without personal phone numbers.
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-        <a href="/auth/register.html" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition flex items-center justify-center gap-2 text-sm">
-          <i data-lucide="user-plus" class="w-4 h-4"></i> Join Student Network
+        <a href="/auth/register.html" class="m3-btn-primary w-full sm:w-auto px-7 py-3.5 text-sm inline-flex items-center justify-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4"></i> Join Student or Teacher Portal
         </a>
-        <a href="/auth/login.html" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition flex items-center justify-center gap-2 text-sm">
-          <i data-lucide="arrow-right" class="w-4 h-4"></i> Student Portal Sign In
+        <a href="/auth/login.html" class="w-full sm:w-auto px-7 py-3.5 rounded-full font-bold bg-white border border-[var(--md-outline)] hover:bg-slate-50 transition flex items-center justify-center gap-2 text-sm">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i> Sign In to Workspace
         </a>
       </div>
     </section>
 
-    <!-- Bento Grid -->
+    <!-- Bento Feature Grid -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 card-hover">
-        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
-          <i data-lucide="shield-check" class="w-5 h-5"></i>
+      <div class="m3-card m3-card-interactive p-6">
+        <div class="w-11 h-11 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center mb-4">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
         </div>
-        <h3 class="text-base font-bold text-slate-900">1-Click Verification</h3>
-        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">Direct password signup with instant admin review—zero messy codes or phone leaks.</p>
+        <h3 class="text-base font-extrabold">Teacher Studio &amp; Quizzes</h3>
+        <p class="text-xs text-[var(--md-on-surface-variant)] mt-1.5 leading-relaxed">Chapter lessons, 5-minute auto-graded MCQ quizzes, daily homework, and verified notes.</p>
       </div>
 
-      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 card-hover">
-        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+      <div class="m3-card m3-card-interactive p-6">
+        <div class="w-11 h-11 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center mb-4">
           <i data-lucide="calendar" class="w-5 h-5"></i>
         </div>
-        <h3 class="text-base font-bold text-slate-900">Exams &amp; Notices</h3>
-        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">Official datesheets with live countdowns, room numbers, syllabus, and priority circulars.</p>
+        <h3 class="text-base font-extrabold">Exams &amp; Notices</h3>
+        <p class="text-xs text-[var(--md-on-surface-variant)] mt-1.5 leading-relaxed">Board datesheets &amp; class unit tests with live countdowns, room numbers, and 30-day circulars.</p>
       </div>
 
-      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 card-hover">
-        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+      <div class="m3-card m3-card-interactive p-6">
+        <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-4">
           <i data-lucide="book-open" class="w-5 h-5"></i>
         </div>
-        <h3 class="text-base font-bold text-slate-900">Compressed Notes</h3>
-        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">Class &amp; subject indexed study library with lossless gzip PDFs and permanent Drive links.</p>
+        <h3 class="text-base font-extrabold">Compressed Notes</h3>
+        <p class="text-xs text-[var(--md-on-surface-variant)] mt-1.5 leading-relaxed">Lossless gzip PDFs up to 15MB and unlimited permanent Google Drive material links.</p>
       </div>
 
-      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 card-hover">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
+      <div class="m3-card m3-card-interactive p-6">
+        <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-4">
           <i data-lucide="messages-square" class="w-5 h-5"></i>
         </div>
-        <h3 class="text-base font-bold text-slate-900">Chat, Q&amp;A &amp; Polls</h3>
-        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">Consent-first DMs, study groups with 7-day auto-purge, peer Q&amp;A, and duplicate-proof polls.</p>
+        <h3 class="text-base font-extrabold">Chat, Q&amp;A &amp; Polls</h3>
+        <p class="text-xs text-[var(--md-on-surface-variant)] mt-1.5 leading-relaxed">Consent-first DMs, study groups with 7-day auto-purge, faculty-endorsed Q&amp;A, and polls.</p>
       </div>
     </section>
 
     <!-- Live Notices Preview -->
-    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-6 sm:p-7">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-        <div class="flex items-center gap-2">
-          <i data-lucide="megaphone" class="w-5 h-5 text-indigo-600"></i>
-          <h2 class="text-lg font-bold text-slate-900">Latest School Announcements</h2>
+    <section class="m3-card p-6 sm:p-7">
+      <div class="flex items-center justify-between pb-4 border-b border-[var(--md-outline)]">
+        <div class="flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-2xl bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] flex items-center justify-center">
+            <i data-lucide="megaphone" class="w-4 h-4"></i>
+          </span>
+          <h2 class="text-lg font-extrabold">Latest School Announcements</h2>
         </div>
-        <a href="/dashboard/index.html" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+        <a href="/dashboard/index.html" class="m3-btn-tonal px-3.5 py-1.5 text-xs inline-flex items-center gap-1">
           Open Portal <i data-lucide="chevron-right" class="w-4 h-4"></i>
         </a>
       </div>
@@ -124,16 +127,18 @@
     </section>
   </main>
 
-  <footer class="bg-white border-t border-slate-200/80 py-6 text-center text-xs text-slate-400">
+  <footer class="bg-[var(--md-surface-container)] border-t border-[var(--md-outline)] py-6 text-center text-xs text-[var(--md-on-surface-variant)]">
     <div class="max-w-6xl mx-auto px-4">
-      VidyaSphere Global Edge Ecosystem • Built by Students, For Students
+      VidyaSphere Global Edge Ecosystem • Built by Students, For Schools
     </div>
   </footer>
 
   <script type="module">
     import { apiRequest } from '/js/api.js';
-    import { escapeHtml, formatDate, initIcons } from '/js/ui.js';
+    import { escapeHtml, formatDate, initIcons, renderThemePickerHtml, bindThemePicker } from '/js/ui.js';
 
+    const dots = document.getElementById('landing-theme-dots');
+    if (dots) { dots.innerHTML = renderThemePickerHtml(); bindThemePicker(dots); }
     initIcons();
 
     async function loadAnnouncements() {
@@ -145,34 +150,28 @@
           container.innerHTML = '<div class="py-6 text-center text-slate-400 text-xs">No announcements posted yet.</div>';
           return;
         }
-
         const priorityBadges = {
-          urgent: 'bg-rose-50 text-rose-700 border-rose-200',
-          exam: 'bg-amber-50 text-amber-700 border-amber-200',
-          holiday: 'bg-purple-50 text-purple-700 border-purple-200',
-          general: 'bg-indigo-50 text-indigo-700 border-indigo-200'
+          urgent: 'bg-rose-100 text-rose-800',
+          exam: 'bg-amber-100 text-amber-800',
+          holiday: 'bg-purple-100 text-purple-800',
+          general: 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]'
         };
-
-        container.innerHTML = list.slice(0, 3).map(ann => {
-          const badgeClass = priorityBadges[ann.priority] || priorityBadges.general;
-          return `
-            <div class="py-4 space-y-1">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${badgeClass}">${escapeHtml(ann.priority)}</span>
-                <span class="text-[11px] text-slate-400">${escapeHtml(formatDate(ann.created_at))}</span>
-                ${ann.is_pinned ? '<span class="text-[11px] text-amber-600 font-semibold flex items-center gap-0.5"><i data-lucide="pin" class="w-3 h-3"></i> Pinned</span>' : ''}
-              </div>
-              <h4 class="font-bold text-slate-900 text-sm sm:text-base">${escapeHtml(ann.title)}</h4>
-              <p class="text-xs sm:text-sm text-slate-500 line-clamp-2">${escapeHtml(ann.content)}</p>
+        container.innerHTML = list.slice(0, 3).map(ann => `
+          <div class="py-4 space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${priorityBadges[ann.priority] || priorityBadges.general}">${escapeHtml(ann.priority)}</span>
+              <span class="text-[11px] text-slate-400">${escapeHtml(formatDate(ann.created_at))}</span>
+              ${ann.is_pinned ? '<span class="text-[11px] text-amber-700 font-bold flex items-center gap-0.5"><i data-lucide="pin" class="w-3 h-3"></i> Pinned</span>' : ''}
             </div>
-          `;
-        }).join('');
+            <h4 class="font-bold text-sm sm:text-base">${escapeHtml(ann.title)}</h4>
+            <p class="text-xs sm:text-sm text-[var(--md-on-surface-variant)] line-clamp-2">${escapeHtml(ann.content)}</p>
+          </div>
+        `).join('');
         initIcons();
       } catch {
         container.innerHTML = '<div class="py-6 text-center text-slate-400 text-xs">Announcements unavailable right now.</div>';
       }
     }
-
     loadAnnouncements();
   </script>
 </body>

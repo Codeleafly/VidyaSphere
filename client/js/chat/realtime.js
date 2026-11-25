@@ -4,8 +4,23 @@
 
 import { apiRequest } from '/js/api.js';
 import { getToken } from '/js/auth.js';
-import { initIcons, showToast, bindModalBackdropAndEsc } from '/js/ui.js';
+import { initIcons, showToast, bindModalBackdropAndEsc, escapeHtml } from '/js/ui.js';
 import { chatState, getDom, renderMessageHtml, scrollToBottom } from '/js/chat/state.js';
+
+function renderPinnedBar(pinnedMessages = []) {
+  const bar = document.getElementById('pinned-bar');
+  const txt = document.getElementById('pinned-bar-text');
+  const cnt = document.getElementById('pinned-bar-count');
+  if (!bar || !txt || !cnt) return;
+  if (!pinnedMessages || pinnedMessages.length === 0) {
+    bar.classList.add('hidden');
+    return;
+  }
+  const latest = pinnedMessages[0];
+  txt.innerHTML = `<strong>${escapeHtml(latest.sender_name || 'Faculty')}:</strong> ${escapeHtml(latest.content)}`;
+  cnt.textContent = `${pinnedMessages.length} pinned`;
+  bar.classList.remove('hidden');
+}
 
 function reconcileTempElement(tempEl, serverMsg) {
   if (!tempEl || !serverMsg?.id) return false;
@@ -21,6 +36,7 @@ export async function loadMessages() {
   try {
     const res = await apiRequest(`/chat/messages?channel=${encodeURIComponent(chatState.currentChannel)}`);
     const messages = res.messages || [];
+    renderPinnedBar(res.pinnedMessages || []);
 
     chatState.knownMessageIds.clear();
     chatState.lastMessageCreatedAt = null;
@@ -153,6 +169,20 @@ export function attachMessageActionListeners() {
       editMsgModal.classList.remove('hidden');
       editMsgModal.classList.add('flex');
       editMsgInput.focus();
+    });
+  });
+
+  messagesContainer.querySelectorAll('.pin-msg-btn').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', async () => {
+      try {
+        const res = await apiRequest(`/chat/messages/${encodeURIComponent(btn.dataset.msgId)}/pin`, { method: 'POST' });
+        showToast(res.message || 'Pin updated', 'info');
+        loadMessages();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
     });
   });
 

@@ -36,6 +36,10 @@
 6. **💬 Native Realtime Class Chat**
    - Built on Cloudflare `WebSocketPair` with instant edge broadcasting and REST messaging fallback.
 
+7. **🧑‍🏫 Dedicated Teacher Studio, Lessons, 5-Min MCQ Quizzes & Homework (Material You UI)**
+   - Separate mobile-first **Teacher Studio** (`/teacher/index.html`) with Android Material You (M3) dynamic themes.
+   - Chapter lessons (data-saver click-to-load YouTube Unlisted embeds & Drive PDFs), auto-graded 5-min MCQ quizzes, daily homework feed, scoped class notices, Class Teacher approvals/unit tests, and Q&A Faculty Endorsement.
+
 ---
 
 ## 🏛️ Zero-NPM Architecture
@@ -64,7 +68,7 @@ Open your browser at `http://localhost:8787` (or `http://<phone-ip>:8787` on you
 ```bash
 node test.js
 ```
-Runs 21 automated end-to-end integration tests in-memory.
+Runs 62 automated end-to-end integration tests in-memory.
 
 ---
 

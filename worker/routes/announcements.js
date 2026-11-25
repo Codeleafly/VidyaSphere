@@ -1,11 +1,14 @@
 /**
  * Announcements / Official School Notice Board
- * Notices automatically expire after 30 days (1 month) and can be deleted manually by Lead or Secondary Admins.
+ * - 30-day auto-expiry enforced in queries and cron
+ * - Lead & Secondary Admins can post/delete any notice
+ * - Teachers can post/delete notices scoped strictly to classes they teach/manage
  */
 
 import { errorResponse, successResponse } from '../utils/response.js';
 import { generateId } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
+import { canTeacherManageClass } from '../utils/teacherScope.js';
 
 const THIRTY_DAYS_MS = 30 * 24 * 3600 * 1000;
 
@@ -21,6 +24,7 @@ export async function handleAnnouncementRoutes(request, env, path, method) {
              COALESCE(strftime('%Y-%m-%dT%H:%M:%SZ', a.expires_at), strftime('%Y-%m-%dT%H:%M:%SZ', datetime(a.created_at, '+30 days'))) as expires_at,
              p.full_name as author_name,
              p.role as author_role,
+             p.teacher_type as author_teacher_type,
              p.is_root_admin as author_is_root_admin
       FROM announcements a
       LEFT JOIN profiles p ON a.author_id = p.id
@@ -40,7 +44,7 @@ export async function handleAnnouncementRoutes(request, env, path, method) {
     return successResponse({ announcements: results || [] });
   }
 
-  // POST /api/admin/announcements - Create new announcement (Lead Admin, Secondary Admin, or Teacher)
+  // POST /api/admin/announcements - Create new announcement (Admins or Scoped Teachers)
   if (path === '/api/admin/announcements' && method === 'POST') {
     const auth = await authenticate(request, env, ['admin', 'teacher']);
     if (auth.error) return auth.error;
@@ -51,6 +55,10 @@ export async function handleAnnouncementRoutes(request, env, path, method) {
 
       if (!title || !content) {
         return errorResponse('Announcement title and content are required');
+      }
+
+      if (auth.user.role === 'teacher' && !canTeacherManageClass(auth.user, targetClass)) {
+        return errorResponse(`Forbidden: Teachers can only publish notices for their assigned classes (not "${targetClass}").`, 403);
       }
 
       const id = generateId('ann', 8);
@@ -64,7 +72,7 @@ export async function handleAnnouncementRoutes(request, env, path, method) {
         env.DB.prepare(
           `INSERT INTO audit_logs (id, action, actor_id, details)
            VALUES (?, 'ANNOUNCEMENT_CREATED', ?, ?)`
-        ).bind(generateId('log', 8), auth.user.id, `Published notice "${title.trim()}" (auto-expires ${expiresAt})`),
+        ).bind(generateId('log', 8), auth.user.id, `Published notice "${title.trim()}" for ${targetClass} (auto-expires ${expiresAt})`),
       ]);
 
       return successResponse({ id, expiresAt }, 'Announcement published (auto-deletes after 30 days)', 201);
@@ -73,7 +81,7 @@ export async function handleAnnouncementRoutes(request, env, path, method) {
     }
   }
 
-  // DELETE /api/admin/announcements/:id - Both Lead Admin and Secondary Admin can delete notices
+  // DELETE /api/admin/announcements/:id - Admins (any) or Teachers (scoped to their taught classes & non-admin notices)
   if (path.startsWith('/api/admin/announcements/') && method === 'DELETE') {
     const auth = await authenticate(request, env, ['admin', 'teacher']);
     if (auth.error) return auth.error;
@@ -81,8 +89,22 @@ export async function handleAnnouncementRoutes(request, env, path, method) {
     const id = path.replace('/api/admin/announcements/', '').trim();
     if (!id) return errorResponse('Announcement ID is required', 400);
 
-    const existing = await env.DB.prepare(`SELECT id, title FROM announcements WHERE id = ?`).bind(id).first();
+    const existing = await env.DB.prepare(
+      `SELECT a.id, a.title, a.target_class, a.author_id, p.role as author_role
+       FROM announcements a
+       LEFT JOIN profiles p ON a.author_id = p.id
+       WHERE a.id = ?`
+    ).bind(id).first();
     if (!existing) return errorResponse('Announcement not found', 404);
+
+    if (auth.user.role === 'teacher') {
+      if (!canTeacherManageClass(auth.user, existing.target_class)) {
+        return errorResponse('Forbidden: Teachers can only delete notices in classes they teach or manage.', 403);
+      }
+      if (existing.author_role === 'admin' && existing.author_id !== auth.user.id) {
+        return errorResponse('Forbidden: Teachers cannot delete official Administrator notices.', 403);
+      }
+    }
 
     await env.DB.batch([
       env.DB.prepare(`DELETE FROM announcements WHERE id = ?`).bind(id),

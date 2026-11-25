@@ -1,7 +1,7 @@
--- VIDYASPHERE DATABASE SCHEMA (PHASES 1 - 5)
+-- VIDYASPHERE DATABASE SCHEMA (PHASES 1 - 6)
 -- Pure SQLite / Cloudflare D1 Compatible
 
--- PHASE 1: User Profiles & Identity (Integrated Registration + Direct Password Setup)
+-- PHASE 1 & 6: User Profiles & Identity (Students, Teachers, Admins)
 CREATE TABLE IF NOT EXISTS profiles (
     id TEXT PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
@@ -9,13 +9,17 @@ CREATE TABLE IF NOT EXISTS profiles (
     salt TEXT NOT NULL,
     full_name TEXT NOT NULL,
     class_name TEXT NOT NULL,
-    division TEXT NOT NULL,
-    roll_number TEXT NOT NULL,
+    division TEXT NOT NULL DEFAULT '',
+    roll_number TEXT NOT NULL DEFAULT '',
     email TEXT,
     role TEXT NOT NULL DEFAULT 'student' CHECK(role IN ('student', 'teacher', 'admin')),
     account_status TEXT NOT NULL DEFAULT 'pending' CHECK(account_status IN ('pending', 'active', 'suspended', 'rejected')),
     is_root_admin INTEGER DEFAULT 0,
     rejection_reason TEXT,
+    teacher_type TEXT DEFAULT NULL CHECK(teacher_type IN ('subject', 'class')),
+    assigned_classes TEXT DEFAULT '[]',
+    assigned_subjects TEXT DEFAULT '[]',
+    allow_student_dms INTEGER DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -70,6 +74,7 @@ CREATE TABLE IF NOT EXISTS notes (
     file_type TEXT DEFAULT 'application/pdf',
     file_size INTEGER DEFAULT 0,
     moderation_status TEXT NOT NULL DEFAULT 'approved' CHECK(moderation_status IN ('pending', 'approved', 'flagged', 'rejected')),
+    is_teacher_verified INTEGER DEFAULT 0,
     download_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (uploader_id) REFERENCES profiles(id)
@@ -115,13 +120,15 @@ CREATE TABLE IF NOT EXISTS questions (
     FOREIGN KEY (author_id) REFERENCES profiles(id)
 );
 
--- PHASE 3: Academic Q&A Answers
+-- PHASE 3 & 6: Academic Q&A Answers
 CREATE TABLE IF NOT EXISTS answers (
     id TEXT PRIMARY KEY,
     question_id TEXT NOT NULL,
     author_id TEXT NOT NULL,
     answer_text TEXT NOT NULL,
     is_accepted INTEGER DEFAULT 0,
+    is_faculty_endorsed INTEGER DEFAULT 0,
+    endorsed_by TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (question_id) REFERENCES questions(id),
     FOREIGN KEY (author_id) REFERENCES profiles(id)
@@ -157,13 +164,15 @@ CREATE TABLE IF NOT EXISTS rate_limits (
     reset_at INTEGER NOT NULL
 );
 
--- PHASE 4: Realtime School & Class Chat Messages (Ephemeral 7-Day Auto-Purge)
+-- PHASE 4 & 6: Realtime School & Class Chat Messages (Ephemeral 7-Day Auto-Purge)
 CREATE TABLE IF NOT EXISTS messages (
     id TEXT PRIMARY KEY,
     sender_id TEXT NOT NULL,
     channel TEXT NOT NULL DEFAULT 'school',
     content TEXT NOT NULL,
     is_edited INTEGER DEFAULT 0,
+    is_pinned INTEGER DEFAULT 0,
+    pinned_by TEXT,
     has_attachment INTEGER DEFAULT 0,
     attachment_name TEXT,
     attachment_type TEXT,
@@ -221,7 +230,7 @@ CREATE TABLE IF NOT EXISTS group_members (
     FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
--- PHASE 5: Official Examination Schedules & Timetables
+-- PHASE 5 & 6: Official Examination Schedules & Class Unit Tests
 CREATE TABLE IF NOT EXISTS exams (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
@@ -233,9 +242,69 @@ CREATE TABLE IF NOT EXISTS exams (
     room_or_hall TEXT,
     syllabus TEXT,
     drive_link TEXT,
+    exam_type TEXT NOT NULL DEFAULT 'board' CHECK(exam_type IN ('board', 'unit_test')),
     academic_year TEXT NOT NULL DEFAULT '2026-2027',
     created_by TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES profiles(id)
+);
+
+-- PHASE 6: Chapter-Wise Teacher Lessons (YouTube Unlisted + Drive + Summary)
+CREATE TABLE IF NOT EXISTS lessons (
+    id TEXT PRIMARY KEY,
+    teacher_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    class_name TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    chapter TEXT DEFAULT '',
+    summary TEXT DEFAULT '',
+    video_url TEXT,
+    resource_url TEXT,
+    academic_year TEXT NOT NULL DEFAULT '2026-2027',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_id) REFERENCES profiles(id) ON DELETE CASCADE
+);
+
+-- PHASE 6: 5-Minute Auto-Graded MCQ Quizzes
+CREATE TABLE IF NOT EXISTS quizzes (
+    id TEXT PRIMARY KEY,
+    teacher_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    class_name TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    chapter TEXT DEFAULT '',
+    questions_json TEXT NOT NULL,
+    is_published INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_id) REFERENCES profiles(id) ON DELETE CASCADE
+);
+
+-- PHASE 6: Student Quiz Attempts (Single-Attempt Auto-Score Ledger)
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+    id TEXT PRIMARY KEY,
+    quiz_id TEXT NOT NULL,
+    student_id TEXT NOT NULL,
+    answers_json TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    total INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(quiz_id, student_id),
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES profiles(id) ON DELETE CASCADE
+);
+
+-- PHASE 6: Lightweight Daily Homework Feed
+CREATE TABLE IF NOT EXISTS homework (
+    id TEXT PRIMARY KEY,
+    teacher_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    class_name TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    due_date TEXT,
+    resource_url TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_id) REFERENCES profiles(id) ON DELETE CASCADE
 );

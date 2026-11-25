@@ -1,15 +1,9 @@
 /**
- * VidyaSphere Re-Architected Authentication & Identity Engine
+ * VidyaSphere Authentication & Identity Engine (Students & Teachers)
  * Zero npm dependencies, 100% native Web Standards.
- * 
- * Flow:
- * 1. Student registers with personal details, chooses username, and SETS PASSWORD immediately.
- * 2. Account is created in profiles with account_status = 'pending'.
- * 3. Student can log in immediately; pending screen informs that admin approval is awaited.
- * 4. Admin approves with 1 click; status becomes 'active'. Student portal unlocks automatically without any code!
  */
 
-import { jsonResponse, errorResponse, successResponse } from '../utils/response.js';
+import { errorResponse, successResponse } from '../utils/response.js';
 import { checkRateLimit } from '../utils/rateLimit.js';
 import {
   generateId,
@@ -18,11 +12,12 @@ import {
   verifyPassword,
 } from '../auth/crypto.js';
 import { authenticate } from '../auth/middleware.js';
+import { formatUserProfile, parseStringList } from '../utils/teacherScope.js';
 
 export async function handleAuthRoutes(request, env, path, method) {
   const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || 'local_client';
 
-  // POST /api/auth/register - Direct account creation with password
+  // POST /api/auth/register - Direct account creation for Students & Teachers
   if (path === '/api/auth/register' && method === 'POST') {
     try {
       const rate = await checkRateLimit(env, `reg_${clientIp}`, 10, 60);
@@ -33,16 +28,59 @@ export async function handleAuthRoutes(request, env, path, method) {
       const body = await request.json();
       const {
         fullName,
-        className,
-        division,
-        rollNumber,
+        className = '',
+        division = '',
+        rollNumber = '',
         username,
         password,
-        email = null
+        email = null,
+        role = 'student',
+        teacherType = null,
+        assignedClasses = [],
+        assignedSubjects = [],
       } = body;
 
-      if (!fullName || !className || !division || !rollNumber || !username || !password) {
-        return errorResponse('Missing required fields: fullName, className, division, rollNumber, username, password', 400);
+      const requestedRole = role === 'teacher' ? 'teacher' : 'student';
+      if (role === 'admin') {
+        return errorResponse('Admin accounts cannot be self-registered.', 403);
+      }
+
+      if (!fullName || !username || !password) {
+        return errorResponse('Missing required fields: fullName, username, password', 400);
+      }
+
+      let finalClassName = String(className || '').trim();
+      let finalDivision = String(division || '').trim().toUpperCase();
+      let finalRollNumber = String(rollNumber || '').trim();
+      let finalTeacherType = null;
+      let cleanClasses = [];
+      let cleanSubjects = [];
+
+      if (requestedRole === 'student') {
+        if (!finalClassName || !finalDivision || !finalRollNumber) {
+          return errorResponse('Missing required fields: className, division, rollNumber', 400);
+        }
+      } else {
+        // Teacher onboarding validation (No Staff/Invite Code required)
+        if (!['subject', 'class'].includes(teacherType)) {
+          return errorResponse('Teacher Type must be "subject" (Subject Teacher) or "class" (Class Teacher).', 400);
+        }
+        finalTeacherType = teacherType;
+        cleanClasses = parseStringList(assignedClasses);
+        cleanSubjects = parseStringList(assignedSubjects);
+
+        if (finalTeacherType === 'class' && finalClassName && !cleanClasses.includes(finalClassName)) {
+          cleanClasses.unshift(finalClassName);
+        }
+        if (cleanClasses.length === 0) {
+          return errorResponse('Please select at least one assigned class.', 400);
+        }
+        if (cleanSubjects.length === 0) {
+          return errorResponse('Please select at least one assigned subject.', 400);
+        }
+        if (!finalClassName) {
+          finalClassName = cleanClasses[0];
+        }
       }
 
       // Username normalization & validation (3 to 20 chars, lowercase alphanumeric + underscores)
@@ -51,12 +89,10 @@ export async function handleAuthRoutes(request, env, path, method) {
         return errorResponse('Username must be 3-20 characters long and contain only letters, numbers, or underscores.', 400);
       }
 
-      // Password length check
       if (password.length < 6) {
         return errorResponse('Password must be at least 6 characters long.', 400);
       }
 
-      // Check unique username
       const existingUser = await env.DB.prepare(
         `SELECT id FROM profiles WHERE username = ?`
       ).bind(cleanUsername).first();
@@ -67,30 +103,35 @@ export async function handleAuthRoutes(request, env, path, method) {
 
       const cleanEmail = email ? email.trim().toLowerCase() : null;
       const { hash: passwordHash, salt } = await hashPassword(password);
-      const userId = generateId('usr', 8);
+      const userId = generateId(requestedRole === 'teacher' ? 'tch' : 'usr', 8);
 
       await env.DB.prepare(
-        `INSERT INTO profiles (id, username, password_hash, salt, full_name, class_name, division, roll_number, email, role, account_status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'student', 'pending')`
+        `INSERT INTO profiles (
+           id, username, password_hash, salt, full_name, class_name, division, roll_number,
+           email, role, account_status, teacher_type, assigned_classes, assigned_subjects, allow_student_dms
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, 1)`
       ).bind(
         userId,
         cleanUsername,
         passwordHash,
         salt,
         fullName.trim(),
-        className.trim(),
-        division.trim().toUpperCase(),
-        rollNumber.trim(),
-        cleanEmail
+        finalClassName,
+        finalDivision,
+        finalRollNumber,
+        cleanEmail,
+        requestedRole,
+        finalTeacherType,
+        JSON.stringify(cleanClasses),
+        JSON.stringify(cleanSubjects)
       ).run();
 
-      // Issue session token so student is logged in immediately in pending state
       const sessionToken = generateSecureSessionToken();
       const expiresAt = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
 
       await env.DB.prepare(
-        `INSERT INTO sessions (token, user_id, role, expires_at) VALUES (?, ?, 'student', ?)`
-      ).bind(sessionToken, userId, expiresAt).run();
+        `INSERT INTO sessions (token, user_id, role, expires_at) VALUES (?, ?, ?, ?)`
+      ).bind(sessionToken, userId, requestedRole, expiresAt).run();
 
       return successResponse(
         {
@@ -100,15 +141,19 @@ export async function handleAuthRoutes(request, env, path, method) {
             id: userId,
             username: cleanUsername,
             fullName: fullName.trim(),
-            className: className.trim(),
-            division: division.trim().toUpperCase(),
-            rollNumber: rollNumber.trim(),
+            className: finalClassName,
+            division: finalDivision,
+            rollNumber: finalRollNumber,
             email: cleanEmail,
-            role: 'student',
-            accountStatus: 'pending'
+            role: requestedRole,
+            accountStatus: 'pending',
+            teacherType: finalTeacherType,
+            assignedClasses: cleanClasses,
+            assignedSubjects: cleanSubjects,
+            allowStudentDms: true,
           }
         },
-        'Account created successfully! Your request is pending school administrator approval.',
+        `${requestedRole === 'teacher' ? 'Teacher' : 'Student'} account created! Your request is pending administrator approval.`,
         201
       );
     } catch (err) {
@@ -116,7 +161,7 @@ export async function handleAuthRoutes(request, env, path, method) {
     }
   }
 
-  // POST /api/auth/login - Universal student & admin login
+  // POST /api/auth/login - Universal student, teacher & admin login
   if (path === '/api/auth/login' && method === 'POST') {
     try {
       const rate = await checkRateLimit(env, `login_${clientIp}`, 15, 60);
@@ -145,16 +190,14 @@ export async function handleAuthRoutes(request, env, path, method) {
         return errorResponse('Invalid username or password', 401);
       }
 
-      // Check account status
       if (user.account_status === 'suspended') {
         return errorResponse('Your account has been suspended by school administration. Please contact school office.', 403);
       }
 
       if (user.account_status === 'rejected') {
-        return errorResponse(user.rejection_reason || 'Your registration request was rejected by student lead administration.', 403);
+        return errorResponse(user.rejection_reason || 'Your registration request was rejected by school administration.', 403);
       }
 
-      // Generate session token (30 days validity)
       const sessionToken = generateSecureSessionToken();
       const expiresAt = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
 
@@ -168,18 +211,7 @@ export async function handleAuthRoutes(request, env, path, method) {
         {
           token: sessionToken,
           isPending,
-          user: {
-            id: user.id,
-            username: user.username,
-            fullName: user.full_name,
-            className: user.class_name,
-            division: user.division,
-            rollNumber: user.roll_number,
-            email: user.email,
-            role: user.role,
-            accountStatus: user.account_status,
-            isRootAdmin: user.is_root_admin === 1 || user.username === 'admin',
-          }
+          user: formatUserProfile(user),
         },
         isPending ? 'Logged in! Request is pending admin approval.' : 'Login successful'
       );
@@ -193,9 +225,9 @@ export async function handleAuthRoutes(request, env, path, method) {
     const auth = await authenticate(request, env, [], true);
     if (auth.error) return auth.error;
 
-    // Fetch live profile from DB so pending -> active switch is reflected instantly
     const profile = await env.DB.prepare(
-      `SELECT id, username, full_name, class_name, division, roll_number, email, role, account_status, rejection_reason, is_root_admin
+      `SELECT id, username, full_name, class_name, division, roll_number, email, role, account_status,
+              rejection_reason, is_root_admin, teacher_type, assigned_classes, assigned_subjects, allow_student_dms
        FROM profiles WHERE id = ?`
     ).bind(auth.user.id).first();
 
@@ -207,23 +239,29 @@ export async function handleAuthRoutes(request, env, path, method) {
       return errorResponse('Account suspended', 403);
     }
 
-    const isRootAdmin = profile.is_root_admin === 1 || profile.username === 'admin';
+    return successResponse({ user: formatUserProfile(profile) });
+  }
 
-    return successResponse({
-      user: {
-        id: profile.id,
-        username: profile.username,
-        fullName: profile.full_name,
-        className: profile.class_name,
-        division: profile.division,
-        rollNumber: profile.roll_number,
-        email: profile.email,
-        role: profile.role,
-        accountStatus: profile.account_status,
-        rejectionReason: profile.rejection_reason || null,
-        isRootAdmin,
-      }
-    });
+  // PUT /api/auth/preferences - Update user privacy settings (e.g., Teacher Allow Student DMs)
+  if (path === '/api/auth/preferences' && (method === 'PUT' || method === 'POST')) {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    try {
+      const body = await request.json();
+      const allowStudentDms = body.allowStudentDms === false || body.allowStudentDms === 0 ? 0 : 1;
+
+      await env.DB.prepare(
+        `UPDATE profiles SET allow_student_dms = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+      ).bind(allowStudentDms, auth.user.id).run();
+
+      return successResponse(
+        { allowStudentDms: allowStudentDms === 1 },
+        `Student direct messages ${allowStudentDms === 1 ? 'enabled' : 'disabled'}`
+      );
+    } catch (err) {
+      return errorResponse(`Preferences error: ${err.message}`, 500);
+    }
   }
 
   // POST /api/auth/logout - Invalidate session

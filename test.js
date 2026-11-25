@@ -8,6 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import worker from './worker/index.js';
 import { runModerationAndNoticeTests } from './tests/moderation.js';
+import { runTeacherEcosystemTests } from './tests/teachers.js';
 
 console.log("=================================================");
 console.log("   🎓 VIDYASPHERE MASTER VERIFICATION SUITE      ");
@@ -639,8 +640,32 @@ async function runTests() {
 
   await runModerationAndNoticeTests({ worker, mockEnv, db, adminToken, studentId });
 
+  // Re-login a clean student & secondary admin token for Phase 6 tests
+  const rSecLoginP6 = await worker.fetch(new Request('http://localhost/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'aarav_10a_21', password: 'studentSecurePassword123' })
+  }), mockEnv);
+  const secAdminTokenP6 = (await rSecLoginP6.json()).token;
+
+  const rPriyaLoginP6 = await worker.fetch(new Request('http://localhost/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'priya_10a_22', password: 'priyaPassword123' })
+  }), mockEnv);
+  const priyaTokenP6 = (await rPriyaLoginP6.json()).token;
+
+  await runTeacherEcosystemTests({
+    worker,
+    mockEnv,
+    adminToken,
+    secAdminToken: secAdminTokenP6,
+    studentToken: priyaTokenP6,
+    studentId,
+  });
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 50 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 62 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 

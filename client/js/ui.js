@@ -1,6 +1,75 @@
 /**
- * Shared UI Utilities: Safe HTML Escaping, URL Sanitization, Toasts & Formatters
+ * Shared UI Utilities: Material You Theme Engine, XSS Escaping, URL Sanitization, Toasts & Formatters
  */
+
+export const M3_THEMES = {
+  blue: { label: 'Pixel Blue', swatch: '#0b57d0' },
+  violet: { label: 'Material Violet', swatch: '#6750a4' },
+  emerald: { label: 'Sage Emerald', swatch: '#146c2e' },
+  rose: { label: 'Pixel Berry', swatch: '#b3261e' },
+};
+
+export const CLASS_LIST = [
+  'Class 1', 'Class 2', 'Class 3', 'Class 4',
+  'Class 5', 'Class 6', 'Class 7', 'Class 8',
+  'Class 9', 'Class 10',
+  'Class 11 (Science)', 'Class 11 (Commerce)', 'Class 11 (Arts)',
+  'Class 12 (Science)', 'Class 12 (Commerce)', 'Class 12 (Arts)'
+];
+
+export const SUBJECT_LIST = [
+  'English', 'Marathi', 'Hindi', 'Sanskrit',
+  'Mathematics', 'Algebra (Maths I)', 'Geometry (Maths II)', 'Mathematics & Statistics',
+  'General Science', 'Science & Technology (Part 1)', 'Science & Technology (Part 2)',
+  'Physics', 'Chemistry', 'Biology', 'Environmental Studies (EVS)',
+  'Social Science', 'History & Political Science', 'Geography & Economics',
+  'Book-Keeping & Accountancy (BK)', 'Organization of Commerce (OCM)', 'Secretarial Practice (SP)',
+  'Economics', 'Computer Science', 'Information Technology (IT)'
+];
+
+export function applyM3Theme(themeKey = 'blue') {
+  const valid = M3_THEMES[themeKey] ? themeKey : 'blue';
+  document.documentElement.setAttribute('data-m3-theme', valid);
+  try { localStorage.setItem('vidyasphere_m3_theme', valid); } catch { /* ignore */ }
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute('content', M3_THEMES[valid].swatch);
+  document.querySelectorAll('[data-m3-dot]').forEach(btn => {
+    const isActive = btn.dataset.m3Dot === valid;
+    btn.classList.toggle('ring-2', isActive);
+    btn.classList.toggle('ring-offset-2', isActive);
+    btn.classList.toggle('ring-slate-800', isActive);
+    btn.classList.toggle('scale-110', isActive);
+  });
+  return valid;
+}
+
+export function initM3Theme() {
+  let saved = 'blue';
+  try { saved = localStorage.getItem('vidyasphere_m3_theme') || 'blue'; } catch { /* ignore */ }
+  return applyM3Theme(saved);
+}
+
+export function renderThemePickerHtml() {
+  let current = 'blue';
+  try { current = localStorage.getItem('vidyasphere_m3_theme') || 'blue'; } catch { /* ignore */ }
+  return `
+    <div class="flex items-center gap-1.5" title="Material You Dynamic Color">
+      ${Object.entries(M3_THEMES).map(([key, cfg]) => `
+        <button type="button" data-m3-dot="${key}" aria-label="${cfg.label}" title="${cfg.label}"
+          class="w-4 h-4 rounded-full transition-transform cursor-pointer border border-white shadow-xs ${current === key ? 'ring-2 ring-offset-2 ring-slate-800 scale-110' : 'opacity-80 hover:opacity-100'}"
+          style="background-color: ${cfg.swatch};"></button>
+      `).join('')}
+    </div>
+  `;
+}
+
+export function bindThemePicker(rootEl = document) {
+  rootEl.querySelectorAll('[data-m3-dot]').forEach(btn => {
+    if (btn.dataset.m3Bound) return;
+    btn.dataset.m3Bound = '1';
+    btn.addEventListener('click', () => applyM3Theme(btn.dataset.m3Dot));
+  });
+}
 
 export function escapeHtml(str) {
   return String(str ?? '')
@@ -22,6 +91,42 @@ export function safeUrl(url) {
   return '';
 }
 
+export function extractYouTubeId(url) {
+  const safe = safeUrl(url);
+  if (!safe) return null;
+  try {
+    const u = new URL(safe);
+    if (u.hostname.includes('youtu.be')) {
+      const id = u.pathname.replace('/', '').trim();
+      return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+    }
+    if (u.hostname.includes('youtube.com') || u.hostname.includes('youtube-nocookie.com')) {
+      const v = u.searchParams.get('v');
+      if (v && /^[a-zA-Z0-9_-]{11}$/.test(v)) return v;
+      const parts = u.pathname.split('/').filter(Boolean);
+      const idx = parts.findIndex(p => p === 'embed' || p === 'shorts' || p === 'live');
+      if (idx !== -1 && parts[idx + 1] && /^[a-zA-Z0-9_-]{11}$/.test(parts[idx + 1])) {
+        return parts[idx + 1];
+      }
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+export function renderRoleBadgeHtml(role, teacherType = null, isRootAdmin = false) {
+  if (isRootAdmin) {
+    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Lead Admin</span>`;
+  }
+  if (role === 'admin') {
+    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">Admin</span>`;
+  }
+  if (role === 'teacher') {
+    const label = teacherType === 'class' ? 'Class Teacher' : 'Teacher';
+    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${label}</span>`;
+  }
+  return '';
+}
+
 export function showToast(message, type = 'info') {
   let toastContainer = document.getElementById('toast-container');
   if (!toastContainer) {
@@ -32,20 +137,20 @@ export function showToast(message, type = 'info') {
   }
 
   const styles = {
-    success: 'bg-slate-900 text-white border-emerald-500/40',
-    error: 'bg-rose-600 text-white border-rose-400/40',
-    info: 'bg-slate-900 text-white border-indigo-400/40',
-    warning: 'bg-amber-500 text-slate-950 border-amber-300',
+    success: 'bg-[#1f2937] text-white border-emerald-400/30',
+    error: 'bg-[#b3261e] text-white border-rose-300/30',
+    info: 'bg-[#1f2937] text-white border-sky-400/30',
+    warning: 'bg-amber-400 text-slate-950 border-amber-500/40',
   };
   const dotColors = {
     success: 'bg-emerald-400',
     error: 'bg-rose-200',
-    info: 'bg-indigo-400',
+    info: 'bg-sky-400',
     warning: 'bg-amber-950',
   };
 
   const toast = document.createElement('div');
-  toast.className = `${styles[type] || styles.info} border px-4 py-3 rounded-xl shadow-lg shadow-slate-900/15 flex items-center gap-3 text-xs sm:text-sm font-medium toast-enter pointer-events-auto`;
+  toast.className = `${styles[type] || styles.info} border px-4 py-3 rounded-2xl shadow-xl shadow-slate-900/20 flex items-center gap-3 text-xs sm:text-sm font-medium toast-enter pointer-events-auto`;
 
   const dot = document.createElement('span');
   dot.className = `w-2 h-2 rounded-full shrink-0 ${dotColors[type] || dotColors.info}`;
@@ -140,6 +245,9 @@ export function bindModalBackdropAndEsc(modalEl, onClose) {
     }
   });
 }
+
+// Auto-apply Material You color palette immediately on script load
+initM3Theme();
 
 // Purge stale service workers for zero-delay network loads
 if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {

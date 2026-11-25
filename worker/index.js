@@ -13,6 +13,10 @@ import { handlePollsRoutes } from './routes/polls.js';
 import { handleChatRoutes } from './routes/chat.js';
 import { handleExamsRoutes } from './routes/exams.js';
 import { handleStudentsRoutes } from './routes/students.js';
+import { handleTeacherRoutes } from './routes/teacher.js';
+import { handleLessonsRoutes } from './routes/lessons.js';
+import { handleQuizzesRoutes } from './routes/quizzes.js';
+import { handleHomeworkRoutes } from './routes/homework.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -48,9 +52,25 @@ export default {
           return await handleAnnouncementRoutes(request, env, path, method);
         }
 
-        // Phase 5: Examination Schedules & Timetables (Admin manage & Student read)
-        if (path === '/api/exams' || path.startsWith('/api/admin/exams')) {
+        // Phase 5 & 6: Examination Schedules & Class Teacher Unit Tests
+        if (path === '/api/exams' || path.startsWith('/api/admin/exams') || path.startsWith('/api/teacher/exams')) {
           return await handleExamsRoutes(request, env, path, method);
+        }
+
+        // Phase 6: Teacher Studio & Class Teacher Scoped Endpoints
+        if (path.startsWith('/api/teacher/')) {
+          return await handleTeacherRoutes(request, env, path, method);
+        }
+
+        // Phase 6: Lessons, MCQ Quizzes & Homework
+        if (path === '/api/lessons' || path.startsWith('/api/lessons/')) {
+          return await handleLessonsRoutes(request, env, path, method);
+        }
+        if (path === '/api/quizzes' || path.startsWith('/api/quizzes/')) {
+          return await handleQuizzesRoutes(request, env, path, method);
+        }
+        if (path === '/api/homework' || path.startsWith('/api/homework/')) {
+          return await handleHomeworkRoutes(request, env, path, method);
         }
 
         // Administrative Core

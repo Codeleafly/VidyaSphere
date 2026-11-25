@@ -5,50 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Academic Q&amp;A Forum | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 w-full">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 w-full">
 
   <main class="flex-1 w-full max-w-5xl mx-auto p-3.5 sm:p-6 lg:p-8 space-y-5">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
+    <div class="m3-tonal-box p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-[var(--md-outline)]">
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Academic Q&amp;A Forum</h1>
-        <p class="text-xs text-slate-500">Ask homework questions, help classmates, and mark verified solutions</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Academic Q&amp;A Forum</h1>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Ask homework questions, get Teacher Verified replies, and Faculty Endorsed solutions</p>
       </div>
-      <button id="open-ask-btn"
-        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs transition flex items-center justify-center gap-2">
+      <button id="open-ask-btn" class="m3-btn-primary w-full sm:w-auto px-5 py-2.5 text-xs flex items-center justify-center gap-2">
         <i data-lucide="help-circle" class="w-4 h-4"></i> Ask Question
       </button>
     </div>
 
-    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col sm:flex-row gap-2 w-full">
-      <select id="qa-subject-filter" class="w-full sm:flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
-        <option value="">All Subjects (MH &amp; CBSE)</option>
-        <option value="English">English</option>
-        <option value="Marathi">Marathi</option>
-        <option value="Hindi">Hindi</option>
-        <option value="Sanskrit">Sanskrit</option>
-        <option value="Mathematics">Mathematics</option>
-        <option value="Algebra (Maths I)">Algebra (Maths I)</option>
-        <option value="Geometry (Maths II)">Geometry (Maths II)</option>
-        <option value="General Science">General Science</option>
-        <option value="Science & Technology (Part 1)">Science &amp; Tech I</option>
-        <option value="Science & Technology (Part 2)">Science &amp; Tech II</option>
-        <option value="Physics">Physics</option>
-        <option value="Chemistry">Chemistry</option>
-        <option value="Biology">Biology</option>
-        <option value="Social Science">Social Science</option>
-        <option value="History & Political Science">History &amp; Pol Sci</option>
-        <option value="Geography & Economics">Geography &amp; Economics</option>
-        <option value="Book-Keeping & Accountancy (BK)">Book-Keeping (BK)</option>
-        <option value="Economics">Economics</option>
-        <option value="Information Technology (IT)">IT / Computer Science</option>
+    <div class="m3-card p-3.5 flex flex-col sm:flex-row gap-2.5 w-full">
+      <select id="qa-subject-filter" class="m3-input w-full sm:flex-1 px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
+        <option value="">All Subjects</option>
       </select>
-
-      <select id="qa-status-filter" class="w-full sm:w-48 px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
+      <select id="qa-status-filter" class="m3-input w-full sm:w-48 px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
         <option value="">All Questions</option>
         <option value="resolved">Solved</option>
         <option value="unanswered">Unanswered</option>
@@ -56,100 +35,69 @@
     </div>
 
     <div id="questions-list" class="space-y-3 w-full">
-      <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading Q&amp;A discussions...</div>
+      <div class="m3-card p-8 text-center text-slate-400 text-xs">Loading Q&amp;A discussions...</div>
     </div>
   </main>
 
   <!-- Ask Question Modal -->
-  <div id="ask-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-lg p-5 space-y-3.5 shadow-2xl border border-slate-200/80 overflow-y-auto max-h-[90vh] modal-enter">
+  <div id="ask-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-lg p-5 space-y-3.5 shadow-2xl overflow-y-auto max-h-[90vh] modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-base font-bold text-slate-900">Ask a Question</h3>
-        <button id="close-ask-modal" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-1">&times;</button>
+        <h3 class="text-base font-extrabold">Ask a Question</h3>
+        <button id="close-ask-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form id="ask-form" class="space-y-3">
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Question Title</label>
-          <input type="text" id="ask-title" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="e.g. How to solve quadratic equations by factoring?">
+          <input type="text" id="ask-title" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs sm:text-sm" placeholder="e.g. How to solve quadratic equations by factoring?">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
-            <select id="ask-subject" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white">
-              <option value="Mathematics">Mathematics</option>
-              <option value="Algebra (Maths I)">Algebra (Maths I)</option>
-              <option value="Geometry (Maths II)">Geometry (Maths II)</option>
-              <option value="General Science" selected>General Science</option>
-              <option value="Science & Technology (Part 1)">Science &amp; Tech I</option>
-              <option value="Science & Technology (Part 2)">Science &amp; Tech II</option>
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Biology">Biology</option>
-              <option value="English">English</option>
-              <option value="Marathi">Marathi</option>
-              <option value="Hindi">Hindi</option>
-              <option value="History & Political Science">History &amp; Pol Sci</option>
-              <option value="Geography & Economics">Geography &amp; Eco</option>
-              <option value="Information Technology (IT)">Computer / IT</option>
-            </select>
+            <select id="ask-subject" required class="m3-input w-full px-2.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs bg-white"></select>
           </div>
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Class</label>
-            <select id="ask-class" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white">
-              <option value="Class 1">Class 1</option>
-              <option value="Class 2">Class 2</option>
-              <option value="Class 3">Class 3</option>
-              <option value="Class 4">Class 4</option>
-              <option value="Class 5">Class 5</option>
-              <option value="Class 6">Class 6</option>
-              <option value="Class 7">Class 7</option>
-              <option value="Class 8">Class 8</option>
-              <option value="Class 9">Class 9</option>
-              <option value="Class 10" selected>Class 10</option>
-              <option value="Class 11 (Science)">Class 11 (Science)</option>
-              <option value="Class 11 (Commerce)">Class 11 (Commerce)</option>
-              <option value="Class 11 (Arts)">Class 11 (Arts)</option>
-              <option value="Class 12 (Science)">Class 12 (Science)</option>
-              <option value="Class 12 (Commerce)">Class 12 (Commerce)</option>
-              <option value="Class 12 (Arts)">Class 12 (Arts)</option>
-            </select>
+            <select id="ask-class" required class="m3-input w-full px-2.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs bg-white"></select>
           </div>
         </div>
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Problem Details</label>
-          <textarea id="ask-desc" rows="3" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="Explain what steps you tried and where you got stuck..."></textarea>
+          <textarea id="ask-desc" rows="3" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs sm:text-sm" placeholder="Explain what steps you tried..."></textarea>
         </div>
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs sm:text-sm transition">Post Question</button>
+        <button type="submit" class="m3-btn-primary w-full py-3 text-xs sm:text-sm">Post Question</button>
       </form>
     </div>
   </div>
 
   <!-- Question Detail Modal -->
-  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-2xl p-5 space-y-3.5 shadow-2xl border border-slate-200/80 max-h-[90vh] flex flex-col justify-between overflow-hidden modal-enter">
+  <div id="detail-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-2xl p-5 space-y-3.5 shadow-2xl max-h-[90vh] flex flex-col justify-between overflow-hidden modal-enter">
+      <div class="m3-sheet-handle sm:hidden shrink-0"></div>
       <div class="flex items-center justify-between pb-2 border-b border-slate-100 shrink-0">
-        <span id="detail-subject-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-100"></span>
-        <button id="close-detail-modal" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-1">&times;</button>
+        <span id="detail-subject-badge" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]"></span>
+        <button id="close-detail-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
       <div class="overflow-y-auto space-y-3.5 pr-1 flex-1 break-words">
         <div>
-          <h2 id="detail-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug"></h2>
+          <h2 id="detail-title" class="text-base sm:text-lg font-extrabold leading-snug"></h2>
           <p class="text-[11px] text-slate-400 mt-1" id="detail-meta"></p>
-          <div id="detail-desc" class="text-xs sm:text-sm text-slate-700 mt-2.5 whitespace-pre-line bg-slate-50 p-3.5 rounded-xl border border-slate-200/70"></div>
+          <div id="detail-desc" class="text-xs sm:text-sm text-[var(--md-on-surface-variant)] mt-2.5 whitespace-pre-line bg-[var(--md-surface-container)] p-3.5 rounded-2xl"></div>
         </div>
 
         <div class="space-y-2 pt-1">
-          <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
-            <i data-lucide="message-circle" class="w-4 h-4 text-indigo-600"></i> Answers
+          <h4 class="font-extrabold text-xs sm:text-sm flex items-center gap-1.5">
+            <i data-lucide="message-circle" class="w-4 h-4 text-[var(--md-primary)]"></i> Answers
           </h4>
           <div id="answers-container" class="space-y-2"></div>
         </div>
       </div>
 
       <form id="answer-form" class="pt-3 border-t border-slate-100 flex gap-2 shrink-0">
-        <input type="text" id="answer-text" required class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="Write your answer...">
-        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl text-xs sm:text-sm transition">Reply</button>
+        <input type="text" id="answer-text" required class="m3-input flex-1 px-4 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm" placeholder="Write your answer...">
+        <button type="submit" class="m3-btn-primary px-5 py-2 text-xs sm:text-sm">Reply</button>
       </form>
     </div>
   </div>
@@ -157,7 +105,7 @@
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { initDashboardShell } from '/js/layout.js';
-    import { escapeHtml, formatDate, showToast, initIcons, bindModalBackdropAndEsc } from '/js/ui.js';
+    import { CLASS_LIST, SUBJECT_LIST, escapeHtml, formatDate, renderRoleBadgeHtml, showToast, initIcons, bindModalBackdropAndEsc } from '/js/ui.js';
 
     const user = initDashboardShell({ active: 'qa', mobileTitle: 'Academic Q&A' });
 
@@ -169,13 +117,18 @@
     let currentQuestionId = null;
     let currentQuestionAuthorId = null;
 
+    SUBJECT_LIST.forEach(s => {
+      subjectFilter.innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+      document.getElementById('ask-subject').innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+    });
+    CLASS_LIST.forEach(c => {
+      document.getElementById('ask-class').innerHTML += `<option value="${escapeHtml(c)}" ${c === (user?.className || 'Class 10') ? 'selected' : ''}>${escapeHtml(c)}</option>`;
+    });
+
     const closeAsk = () => { askModal.classList.add('hidden'); askModal.classList.remove('flex'); };
     const closeDetail = () => { detailModal.classList.add('hidden'); detailModal.classList.remove('flex'); };
 
-    document.getElementById('open-ask-btn').addEventListener('click', () => {
-      askModal.classList.remove('hidden');
-      askModal.classList.add('flex');
-    });
+    document.getElementById('open-ask-btn').addEventListener('click', () => { askModal.classList.remove('hidden'); askModal.classList.add('flex'); });
     document.getElementById('close-ask-modal').addEventListener('click', closeAsk);
     document.getElementById('close-detail-modal').addEventListener('click', closeDetail);
     bindModalBackdropAndEsc(askModal, closeAsk);
@@ -191,32 +144,25 @@
         const questions = res.questions || [];
 
         if (questions.length === 0) {
-          questionsList.innerHTML = `
-            <div class="p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
-              <i data-lucide="help-circle" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-              <p class="text-sm font-semibold text-slate-700">No questions asked yet</p>
-              <p class="text-xs text-slate-400 mt-1">Be the first to post an academic question!</p>
-            </div>
-          `;
-          initIcons();
+          questionsList.innerHTML = `<div class="m3-card p-10 text-center text-slate-400 text-xs">No questions asked yet.</div>`;
           return;
         }
 
         questionsList.innerHTML = questions.map(q => `
-          <article class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 card-hover space-y-2.5 cursor-pointer view-question-btn w-full break-words" data-id="${escapeHtml(q.id)}">
+          <article class="m3-card m3-card-interactive p-5 space-y-2.5 cursor-pointer view-question-btn w-full break-words" data-id="${escapeHtml(q.id)}">
             <div class="flex items-center justify-between gap-2 flex-wrap">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-100">${escapeHtml(q.subject)}</span>
-                <span class="text-[11px] text-slate-500 font-medium">${escapeHtml(q.class_name)}</span>
-                ${q.is_resolved ? '<span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200"><i data-lucide="check-circle" class="w-3 h-3"></i> Solved</span>' : ''}
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${escapeHtml(q.subject)}</span>
+                <span class="text-[11px] text-slate-500 font-semibold">${escapeHtml(q.class_name)}</span>
+                ${q.is_resolved ? '<span class="text-[10px] font-bold text-emerald-800 flex items-center gap-1 bg-emerald-100 px-2.5 py-0.5 rounded-full"><i data-lucide="check-circle" class="w-3 h-3"></i> Solved</span>' : ''}
               </div>
               <span class="text-[11px] text-slate-400 tabular-nums">${escapeHtml(formatDate(q.created_at))}</span>
             </div>
-            <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-snug">${escapeHtml(q.title)}</h3>
-            <p class="text-xs text-slate-500 line-clamp-2">${escapeHtml(q.description)}</p>
-            <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Asked by <strong>${escapeHtml(q.author_name || 'Student')}</strong></span>
-              <span class="flex items-center gap-1 font-bold text-indigo-600 tabular-nums">
+            <h3 class="font-extrabold text-sm sm:text-base leading-snug">${escapeHtml(q.title)}</h3>
+            <p class="text-xs text-[var(--md-on-surface-variant)] line-clamp-2">${escapeHtml(q.description)}</p>
+            <div class="pt-2 border-t border-[var(--md-outline)] flex items-center justify-between text-[11px] text-slate-500">
+              <span class="flex items-center gap-1.5">Asked by <strong>${escapeHtml(q.author_name || 'Student')}</strong> ${renderRoleBadgeHtml(q.author_role, q.author_teacher_type)}</span>
+              <span class="flex items-center gap-1 font-bold text-[var(--md-primary)] tabular-nums">
                 <i data-lucide="message-square" class="w-3 h-3"></i> ${q.answer_count} Answers
               </span>
             </div>
@@ -228,7 +174,7 @@
           card.addEventListener('click', () => openQuestionDetail(card.dataset.id));
         });
       } catch (err) {
-        questionsList.innerHTML = `<div class="p-6 text-center text-rose-600 bg-rose-50 rounded-2xl text-xs">${escapeHtml(err.message)}</div>`;
+        questionsList.innerHTML = `<div class="p-6 text-center text-rose-600 bg-rose-50 rounded-3xl text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
 
@@ -245,24 +191,31 @@
         document.getElementById('detail-meta').textContent = `Asked by ${q.author_name || 'Student'} on ${formatDate(q.created_at)}`;
         document.getElementById('detail-desc').textContent = q.description;
 
+        const isFaculty = user && (user.role === 'teacher' || user.role === 'admin');
         const answersContainer = document.getElementById('answers-container');
         if (answers.length === 0) {
           answersContainer.innerHTML = '<p class="text-xs text-slate-400 italic py-2">No answers yet. Share your explanation below!</p>';
         } else {
           answersContainer.innerHTML = answers.map(ans => {
             const isAccepted = ans.is_accepted === 1;
+            const isEndorsed = ans.is_faculty_endorsed === 1;
             const canAccept = user && (user.id === currentQuestionAuthorId || user.role === 'admin') && !isAccepted;
             return `
-              <div class="p-3 rounded-xl border ${isAccepted ? 'bg-emerald-50/70 border-emerald-300' : 'bg-white border-slate-200'} space-y-1.5 break-words">
-                <div class="flex items-center justify-between flex-wrap gap-1">
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold text-xs text-slate-900">${escapeHtml(ans.author_name || 'Peer')}</span>
+              <div class="p-3.5 rounded-2xl border ${isAccepted ? 'bg-emerald-50/70 border-emerald-300' : (isEndorsed ? 'bg-sky-50/70 border-sky-200' : 'bg-white border-[var(--md-outline)]')} space-y-1.5 break-words">
+                <div class="flex items-center justify-between flex-wrap gap-1.5">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-xs">${escapeHtml(ans.author_name || 'Peer')}</span>
+                    ${ans.author_role === 'teacher' ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">Teacher Verified</span>' : renderRoleBadgeHtml(ans.author_role, ans.author_teacher_type)}
                     <span class="text-[10px] text-slate-400 tabular-nums">${escapeHtml(formatDate(ans.created_at))}</span>
                   </div>
-                  ${isAccepted ? '<span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Accepted Solution</span>' : ''}
-                  ${canAccept ? `<button class="accept-btn text-xs text-indigo-600 hover:underline font-bold" data-ans-id="${escapeHtml(ans.id)}">Mark Accepted</button>` : ''}
+                  <div class="flex items-center gap-2 flex-wrap">
+                    ${isEndorsed ? '<span class="text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full inline-flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i> Faculty Endorsed</span>' : ''}
+                    ${isAccepted ? '<span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full inline-flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Accepted</span>' : ''}
+                    ${canAccept ? `<button class="accept-btn text-xs text-[var(--md-primary)] hover:underline font-bold" data-ans-id="${escapeHtml(ans.id)}">Mark Accepted</button>` : ''}
+                    ${isFaculty && !isEndorsed ? `<button class="endorse-btn text-xs text-sky-700 hover:underline font-bold" data-ans-id="${escapeHtml(ans.id)}">Endorse</button>` : ''}
+                  </div>
                 </div>
-                <p class="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed">${escapeHtml(ans.answer_text)}</p>
+                <p class="text-xs sm:text-sm text-[var(--md-on-surface-variant)] whitespace-pre-line leading-relaxed">${escapeHtml(ans.answer_text)}</p>
               </div>
             `;
           }).join('');
@@ -275,6 +228,19 @@
                 showToast('Marked as verified solution!', 'success');
                 openQuestionDetail(currentQuestionId);
                 loadQuestions();
+              } catch (err) {
+                showToast(err.message, 'error');
+              }
+            });
+          });
+
+          answersContainer.querySelectorAll('.endorse-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              try {
+                await apiRequest(`/qa/answers/${encodeURIComponent(btn.dataset.ansId)}/endorse`, { method: 'POST' });
+                showToast('Answer marked as Faculty Endorsed!', 'success');
+                openQuestionDetail(currentQuestionId);
               } catch (err) {
                 showToast(err.message, 'error');
               }

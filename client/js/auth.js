@@ -1,5 +1,5 @@
 /**
- * Auth State & Session Management for VidyaSphere
+ * Auth State & Session Management for VidyaSphere (Students, Teachers, Admins)
  * Pure Vanilla JS
  */
 
@@ -38,6 +38,14 @@ export function clearSession() {
   localStorage.removeItem('vidyasphere_tracking_token');
 }
 
+export function getHomeRouteForUser(user) {
+  if (!user) return '/auth/login.html';
+  if (user.accountStatus === 'pending') return '/auth/pending.html';
+  if (user.role === 'admin') return '/admin/index.html';
+  if (user.role === 'teacher') return '/teacher/index.html';
+  return '/dashboard/index.html';
+}
+
 export async function logout() {
   const token = getToken();
   if (token) {
@@ -56,15 +64,7 @@ export function redirectIfLoggedIn() {
   const token = getToken();
   const user = getUser();
   if (token && user) {
-    if (user.accountStatus === 'pending') {
-      window.location.replace('/auth/pending.html');
-      return true;
-    }
-    if (user.role === 'admin') {
-      window.location.replace('/admin/index.html');
-      return true;
-    }
-    window.location.replace('/dashboard/index.html');
+    window.location.replace(getHomeRouteForUser(user));
     return true;
   }
   return false;
@@ -84,12 +84,22 @@ export function requireAuth() {
     return null;
   }
 
-  // If user account is pending approval, redirect to waiting room
   if (user.accountStatus === 'pending' && !window.location.pathname.includes('/auth/pending')) {
     window.location.replace('/auth/pending.html');
     return null;
   }
 
+  return user;
+}
+
+export function requireTeacher() {
+  const user = requireAuth();
+  if (!user) return null;
+
+  if (user.role !== 'teacher' && user.role !== 'admin') {
+    window.location.replace('/dashboard/index.html');
+    return null;
+  }
   return user;
 }
 
@@ -99,7 +109,7 @@ export function requireAdmin() {
 
   if (user.role !== 'admin') {
     alert('Access restricted to School Administration only.');
-    window.location.replace('/dashboard/index.html');
+    window.location.replace(getHomeRouteForUser(user));
     return null;
   }
   return user;

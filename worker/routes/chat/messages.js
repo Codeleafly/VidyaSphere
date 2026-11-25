@@ -6,6 +6,7 @@ import { errorResponse, successResponse, corsHeaders } from '../../utils/respons
 import { compressData, decompressData, toUint8Array, parseUtcTimestamp } from '../../utils/compression.js';
 import { generateId } from '../../auth/crypto.js';
 import { authenticate } from '../../auth/middleware.js';
+import { canTeacherModerateChannel } from '../../utils/teacherScope.js';
 import { parseDmId } from './dms.js';
 import { broadcastChatMessage } from './ws.js';
 
@@ -63,11 +64,11 @@ export async function handleMessageRoutes(request, env, path, method) {
     let messages = [];
     if (since) {
       const { results } = await env.DB.prepare(`
-        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.has_attachment,
+        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.is_pinned, m.pinned_by, m.has_attachment,
                m.attachment_name, m.attachment_type, m.attachment_size,
                strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
                strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
-               p.full_name as sender_name, p.role as sender_role, p.class_name, p.division, p.roll_number, p.is_root_admin
+               p.full_name as sender_name, p.role as sender_role, p.teacher_type as sender_teacher_type, p.class_name, p.division, p.roll_number, p.is_root_admin
         FROM messages m
         JOIN profiles p ON m.sender_id = p.id
         WHERE m.channel IN (${placeholders})
@@ -78,11 +79,11 @@ export async function handleMessageRoutes(request, env, path, method) {
       messages = results || [];
     } else {
       const { results } = await env.DB.prepare(`
-        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.has_attachment,
+        SELECT m.id, m.sender_id, m.channel, m.content, m.is_edited, m.is_pinned, m.pinned_by, m.has_attachment,
                m.attachment_name, m.attachment_type, m.attachment_size,
                strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at,
                strftime('%Y-%m-%dT%H:%M:%SZ', m.updated_at) as updated_at,
-               p.full_name as sender_name, p.role as sender_role, p.class_name, p.division, p.roll_number, p.is_root_admin
+               p.full_name as sender_name, p.role as sender_role, p.teacher_type as sender_teacher_type, p.class_name, p.division, p.roll_number, p.is_root_admin
         FROM messages m
         JOIN profiles p ON m.sender_id = p.id
         WHERE m.channel IN (${placeholders}) AND datetime(m.created_at) >= datetime('now', '-7 days')
@@ -91,7 +92,18 @@ export async function handleMessageRoutes(request, env, path, method) {
       messages = (results || []).reverse();
     }
 
-    return successResponse({ messages });
+    const { results: pinnedMessages } = await env.DB.prepare(`
+      SELECT m.id, m.content, m.sender_id, p.full_name as sender_name, p.role as sender_role,
+             strftime('%Y-%m-%dT%H:%M:%SZ', m.created_at) as created_at
+      FROM messages m
+      JOIN profiles p ON m.sender_id = p.id
+      WHERE m.channel IN (${placeholders})
+        AND m.is_pinned = 1
+        AND datetime(m.created_at) >= datetime('now', '-7 days')
+      ORDER BY m.created_at DESC LIMIT 5
+    `).bind(...matchChannels).all();
+
+    return successResponse({ messages, pinnedMessages: pinnedMessages || [] });
   }
 
   // POST /api/chat/messages
@@ -241,6 +253,8 @@ export async function handleMessageRoutes(request, env, path, method) {
         senderName: auth.user.fullName,
         sender_role: auth.user.role,
         senderRole: auth.user.role,
+        sender_teacher_type: auth.user.teacherType || null,
+        senderTeacherType: auth.user.teacherType || null,
         class_name: auth.user.className || null,
         className: auth.user.className || null,
         division: auth.user.division || null,
@@ -252,6 +266,8 @@ export async function handleMessageRoutes(request, env, path, method) {
         content: finalContent,
         is_edited: 0,
         isEdited: 0,
+        is_pinned: 0,
+        isPinned: false,
         has_attachment: hasAttachment,
         hasAttachment,
         attachment_name: fileName || null,
@@ -309,8 +325,46 @@ export async function handleMessageRoutes(request, env, path, method) {
     }
   }
 
+  // POST /api/chat/messages/:id/pin - Pin/Unpin message (Admins, Scoped Teachers, Group Admins, or DM participants)
+  if (path.startsWith('/api/chat/messages/') && path.endsWith('/pin') && method === 'POST') {
+    const auth = await authenticate(request, env);
+    if (auth.error) return auth.error;
+
+    const msgId = path.split('/')[4];
+    const existing = await env.DB.prepare(`SELECT * FROM messages WHERE id = ?`).bind(msgId).first();
+    if (!existing) return errorResponse('Message not found', 404);
+
+    if (existing.channel.startsWith('dm_')) {
+      const access = await verifyChannelReadAccess(env, existing.channel, auth.user);
+      if (access.error) return access.error;
+    } else if (existing.channel.startsWith('grp_')) {
+      const grpId = existing.channel.replace('grp_', '');
+      const member = await env.DB.prepare(
+        `SELECT role, invite_status FROM group_members WHERE group_id = ? AND user_id = ?`
+      ).bind(grpId, auth.user.id).first();
+      if (!member || member.invite_status !== 'accepted') {
+        return errorResponse('Forbidden: You are not a member of this group', 403);
+      }
+      if (member.role !== 'admin' && auth.user.role !== 'teacher' && auth.user.role !== 'admin') {
+        return errorResponse('Forbidden: Only group admins or faculty can pin group messages', 403);
+      }
+    } else {
+      const allowed = auth.user.role === 'admin' || canTeacherModerateChannel(auth.user, existing.channel);
+      if (!allowed) {
+        return errorResponse('Forbidden: Only Admins or Teachers assigned to this channel can pin messages here', 403);
+      }
+    }
+
+    const nextPinned = existing.is_pinned === 1 ? 0 : 1;
+    await env.DB.prepare(
+      `UPDATE messages SET is_pinned = ?, pinned_by = ? WHERE id = ?`
+    ).bind(nextPinned, nextPinned === 1 ? auth.user.id : null, msgId).run();
+
+    return successResponse({ id: msgId, isPinned: nextPinned === 1 }, nextPinned === 1 ? 'Message pinned!' : 'Message unpinned');
+  }
+
   // DELETE /api/chat/messages/:id
-  if (path.startsWith('/api/chat/messages/') && !path.includes('/attachments') && method === 'DELETE') {
+  if (path.startsWith('/api/chat/messages/') && !path.includes('/attachments') && !path.endsWith('/pin') && method === 'DELETE') {
     const auth = await authenticate(request, env);
     if (auth.error) return auth.error;
 
@@ -318,7 +372,7 @@ export async function handleMessageRoutes(request, env, path, method) {
 
     try {
       const existing = await env.DB.prepare(`
-        SELECT m.*, p.username as sender_username, p.is_root_admin as sender_is_root_admin
+        SELECT m.*, p.username as sender_username, p.role as sender_role, p.is_root_admin as sender_is_root_admin
         FROM messages m
         JOIN profiles p ON m.sender_id = p.id
         WHERE m.id = ?
@@ -329,6 +383,7 @@ export async function handleMessageRoutes(request, env, path, method) {
       const isViewerRoot = auth.user.isRootAdmin || auth.user.username === 'admin';
       const isViewerAdmin = auth.user.role === 'admin';
       const isSenderRoot = existing.sender_is_root_admin === 1 || existing.sender_username === 'admin';
+      const isSenderAdmin = isSenderRoot || existing.sender_role === 'admin';
 
       // Personal 1-on-1 DMs are strictly private: even Lead Admin cannot moderate someone else's DM
       if (existing.channel.startsWith('dm_')) {
@@ -357,11 +412,15 @@ export async function handleMessageRoutes(request, env, path, method) {
       } else {
         // Public school / class / subject channels
         if (!isSelf) {
-          if (!isViewerAdmin) {
+          const canTeacherMod = canTeacherModerateChannel(auth.user, existing.channel);
+          if (!isViewerAdmin && !canTeacherMod) {
             return errorResponse('Forbidden: You can only delete your own messages', 403);
           }
           if (isSenderRoot && !isViewerRoot) {
             return errorResponse('Forbidden: Secondary Admins cannot delete Lead Root Admin messages', 403);
+          }
+          if (!isViewerAdmin && isSenderAdmin) {
+            return errorResponse('Forbidden: Teachers cannot delete Administrator messages', 403);
           }
         }
       }

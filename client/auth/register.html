@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Registration | VidyaSphere</title>
+  <title>Create Account | VidyaSphere</title>
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
@@ -16,135 +17,151 @@
           var user = JSON.parse(userStr);
           var target = user.accountStatus === 'pending'
             ? '/auth/pending.html'
-            : (user.role === 'admin' ? '/admin/index.html' : '/dashboard/index.html');
+            : (user.role === 'admin' ? '/admin/index.html' : (user.role === 'teacher' ? '/teacher/index.html' : '/dashboard/index.html'));
           window.location.replace(target);
         }
       } catch (e) {}
     })();
   </script>
 </head>
-<body class="bg-slate-50 min-h-screen py-8 px-4 flex items-center justify-center">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] min-h-screen py-8 px-4 flex items-center justify-center">
 
-  <div class="w-full max-w-lg space-y-4">
+  <div class="w-full max-w-xl space-y-4">
     <div class="text-center">
-      <a href="/index.html?landing=1" class="inline-flex items-center gap-2 text-slate-900 font-extrabold text-lg">
-        <span class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
+      <a href="/index.html?landing=1" class="inline-flex items-center gap-2.5 font-extrabold text-xl tracking-tight">
+        <span class="w-10 h-10 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] flex items-center justify-center shadow-sm">
           <i data-lucide="graduation-cap" class="w-5 h-5"></i>
         </span>
         VidyaSphere
       </a>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-[0_12px_32px_-16px_rgba(15,23,42,0.16)] border border-slate-200/80 overflow-hidden">
-      <div class="p-6 sm:p-7 pb-0">
-        <h1 class="text-xl font-extrabold text-slate-900">Create student account</h1>
-        <p class="text-xs text-slate-500 mt-1">Set your username and password directly. Admin approval unlocks your portal automatically.</p>
+    <div class="m3-card p-6 sm:p-8 space-y-5 shadow-lg shadow-slate-900/5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight">Create account</h1>
+          <p class="text-xs text-[var(--md-on-surface-variant)] mt-0.5">No staff or invite codes needed — 1-click verification unlocks your portal.</p>
+        </div>
+
+        <!-- Material 3 Segmented Role Selector -->
+        <div class="inline-flex p-1 rounded-full bg-[var(--md-surface-container)] border border-[var(--md-outline)] shrink-0 self-start">
+          <button type="button" id="role-btn-student" class="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] transition">Student</button>
+          <button type="button" id="role-btn-teacher" class="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-on-surface-variant)] transition">Teacher</button>
+        </div>
       </div>
 
-      <div class="p-6 sm:p-7 space-y-5">
-        <form id="register-form" class="space-y-4">
-          <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Full Name</label>
-            <input type="text" id="fullName" required
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 text-sm"
-              placeholder="e.g. Aarav Patel">
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Class / Grade</label>
-              <select id="className" required
-                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm">
-                <option value="">Select Class</option>
-                <optgroup label="Secondary (SSC / 10th)">
-                  <option value="Class 10" selected>Class 10</option>
-                  <option value="Class 9">Class 9</option>
-                </optgroup>
-                <optgroup label="Higher Secondary">
-                  <option value="Class 12">Class 12</option>
-                  <option value="Class 11">Class 11</option>
-                </optgroup>
-                <optgroup label="Middle School">
-                  <option value="Class 8">Class 8</option>
-                  <option value="Class 7">Class 7</option>
-                  <option value="Class 6">Class 6</option>
-                  <option value="Class 5">Class 5</option>
-                </optgroup>
-                <optgroup label="Primary School">
-                  <option value="Class 4">Class 4</option>
-                  <option value="Class 3">Class 3</option>
-                  <option value="Class 2">Class 2</option>
-                  <option value="Class 1">Class 1</option>
-                </optgroup>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Division</label>
-              <input type="text" id="division" required maxlength="10"
-                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm uppercase text-center"
-                placeholder="A">
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Roll Number</label>
-              <input type="text" id="rollNumber" required
-                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm text-center"
-                placeholder="21">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Choose Username</label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-mono text-sm">@</span>
-              <input type="text" id="username" required minlength="3" maxlength="20"
-                class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm font-mono lowercase"
-                placeholder="aarav_patel10">
-            </div>
-            <p class="text-[10px] text-slate-400 mt-1">Letters, numbers, and underscores (3–20 characters).</p>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Create Password</label>
-              <input type="password" id="password" required minlength="6"
-                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm"
-                placeholder="Min 6 characters">
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Confirm Password</label>
-              <input type="password" id="confirmPassword" required minlength="6"
-                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm"
-                placeholder="Re-enter password">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-              Email Address <span class="text-slate-400 font-normal lowercase">(optional)</span>
-            </label>
-            <input type="email" id="email"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-sm"
-              placeholder="student@gmail.com">
-          </div>
-
-          <div class="p-3 bg-indigo-50/70 border border-indigo-200/80 rounded-xl text-[11px] text-indigo-900 leading-relaxed">
-            <strong>1-Click Verification:</strong> Once the Student Lead Admin verifies your profile, your dashboard unlocks automatically without any access codes.
-          </div>
-
-          <button type="submit" id="submit-btn"
-            class="w-full py-3 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-sm transition flex items-center justify-center gap-2">
-            <i data-lucide="check-circle" class="w-4 h-4"></i>
-            <span>Create Account &amp; Submit</span>
-          </button>
-        </form>
-
-        <div class="border-t border-slate-100 pt-3 text-center">
-          <a href="/auth/login.html" class="text-xs font-bold text-indigo-600 hover:underline">
-            Already have an account? Sign In &rarr;
-          </a>
+      <form id="register-form" class="space-y-4">
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Full Name</label>
+          <input type="text" id="fullName" required
+            class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm"
+            placeholder="e.g. Aarav Patel">
         </div>
+
+        <!-- STUDENT FIELDS -->
+        <div id="student-fields" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Class / Grade</label>
+            <select id="className" class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-white text-sm"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Division</label>
+            <input type="text" id="division" maxlength="10"
+              class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm uppercase text-center"
+              placeholder="A">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Roll Number</label>
+            <input type="text" id="rollNumber"
+              class="m3-input w-full px-3 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm text-center"
+              placeholder="21">
+          </div>
+        </div>
+
+        <!-- TEACHER FIELDS -->
+        <div id="teacher-fields" class="hidden space-y-4 p-4 rounded-3xl bg-[var(--md-surface-container)] border border-[var(--md-outline)]">
+          <div class="space-y-1.5">
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)]">Teacher Role Type</label>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="cursor-pointer p-3 rounded-2xl bg-white border border-[var(--md-outline)] flex items-center gap-2">
+                <input type="radio" name="teacherType" value="subject" checked>
+                <span><strong>Subject Teacher</strong><br><span class="text-[10px] text-slate-500">Teach multiple classes</span></span>
+              </label>
+              <label class="cursor-pointer p-3 rounded-2xl bg-white border border-[var(--md-outline)] flex items-center gap-2">
+                <input type="radio" name="teacherType" value="class">
+                <span><strong>Class Teacher</strong><br><span class="text-[10px] text-slate-500">Approve class students &amp; tests</span></span>
+              </label>
+            </div>
+          </div>
+
+          <div id="class-teacher-primary-row" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Assigned Home Class</label>
+              <select id="tPrimaryClass" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white text-xs"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Division <span class="font-normal lowercase">(optional)</span></label>
+              <input type="text" id="tDivision" maxlength="10" class="m3-input w-full px-3 py-2 rounded-2xl border border-[var(--md-outline)] bg-white text-xs uppercase" placeholder="e.g. A (or leave blank)">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1.5">Assigned Classes (Tap to select)</label>
+            <div id="t-classes-chips" class="flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1.5">Assigned Subjects (Tap to select)</label>
+            <div id="t-subjects-chips" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Choose Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-mono text-sm">@</span>
+            <input type="text" id="username" required minlength="3" maxlength="20"
+              class="m3-input w-full pl-8 pr-4 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm font-mono lowercase"
+              placeholder="aarav_patel10">
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1">Letters, numbers, and underscores (3–20 characters).</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Create Password</label>
+            <input type="password" id="password" required minlength="6"
+              class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm"
+              placeholder="Min 6 characters">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">Confirm Password</label>
+            <input type="password" id="confirmPassword" required minlength="6"
+              class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm"
+              placeholder="Re-enter password">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-1">
+            Email Address <span class="text-slate-400 font-normal lowercase">(optional)</span>
+          </label>
+          <input type="email" id="email"
+            class="m3-input w-full px-3.5 py-2.5 rounded-2xl border border-[var(--md-outline)] bg-[var(--md-surface)] focus:bg-white text-sm"
+            placeholder="name@school.edu">
+        </div>
+
+        <button type="submit" id="submit-btn"
+          class="m3-btn-primary w-full py-3 text-sm flex items-center justify-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>Create Account &amp; Submit</span>
+        </button>
+      </form>
+
+      <div class="border-t border-[var(--md-outline)] pt-3 text-center">
+        <a href="/auth/login.html" class="text-xs font-bold text-[var(--md-primary)] hover:underline">
+          Already have an account? Sign In &rarr;
+        </a>
       </div>
     </div>
   </div>
@@ -152,9 +169,69 @@
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { setAuthToken, setCurrentUser } from '/js/auth.js';
-    import { showToast, initIcons } from '/js/ui.js';
+    import { CLASS_LIST, SUBJECT_LIST, escapeHtml, showToast, initIcons } from '/js/ui.js';
 
     initIcons();
+
+    let selectedRole = 'student';
+    const selectedClasses = new Set();
+    const selectedSubjects = new Set();
+
+    const classSel = document.getElementById('className');
+    const tPrimarySel = document.getElementById('tPrimaryClass');
+    CLASS_LIST.forEach(c => {
+      classSel.innerHTML += `<option value="${escapeHtml(c)}" ${c === 'Class 10' ? 'selected' : ''}>${escapeHtml(c)}</option>`;
+      tPrimarySel.innerHTML += `<option value="${escapeHtml(c)}" ${c === 'Class 10' ? 'selected' : ''}>${escapeHtml(c)}</option>`;
+    });
+
+    function buildChips(containerId, items, setRef) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = items.map(item => `
+        <button type="button" class="m3-chip px-3 py-1 text-[11px] font-semibold" data-val="${escapeHtml(item)}">${escapeHtml(item)}</button>
+      `).join('');
+      el.querySelectorAll('.m3-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = btn.dataset.val;
+          if (setRef.has(val)) {
+            setRef.delete(val);
+            btn.classList.remove('active');
+          } else {
+            setRef.add(val);
+            btn.classList.add('active');
+          }
+        });
+      });
+    }
+    buildChips('t-classes-chips', CLASS_LIST, selectedClasses);
+    buildChips('t-subjects-chips', SUBJECT_LIST, selectedSubjects);
+
+    const studentFields = document.getElementById('student-fields');
+    const teacherFields = document.getElementById('teacher-fields');
+    const btnStu = document.getElementById('role-btn-student');
+    const btnTch = document.getElementById('role-btn-teacher');
+
+    function setRoleMode(role) {
+      selectedRole = role;
+      const isTeacher = role === 'teacher';
+      studentFields.classList.toggle('hidden', isTeacher);
+      teacherFields.classList.toggle('hidden', !isTeacher);
+      btnStu.className = !isTeacher
+        ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] transition'
+        : 'px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-on-surface-variant)] transition';
+      btnTch.className = isTeacher
+        ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] transition'
+        : 'px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-on-surface-variant)] transition';
+      document.getElementById('fullName').placeholder = isTeacher ? 'e.g. Prof. Sunita Verma' : 'e.g. Aarav Patel';
+    }
+
+    btnStu.addEventListener('click', () => setRoleMode('student'));
+    btnTch.addEventListener('click', () => setRoleMode('teacher'));
+
+    document.querySelectorAll('input[name="teacherType"]').forEach(r => {
+      r.addEventListener('change', (e) => {
+        document.getElementById('class-teacher-primary-row').classList.toggle('hidden', e.target.value !== 'class');
+      });
+    });
 
     const form = document.getElementById('register-form');
     const submitBtn = document.getElementById('submit-btn');
@@ -165,23 +242,49 @@
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       if (password !== confirmPassword) {
-        showToast('Passwords do not match. Please re-enter carefully.', 'error');
-        return;
-      }
-      if (password.length < 6) {
-        showToast('Password must be at least 6 characters long.', 'error');
+        showToast('Passwords do not match.', 'error');
         return;
       }
 
       const payload = {
+        role: selectedRole,
         fullName: document.getElementById('fullName').value.trim(),
-        className: document.getElementById('className').value,
-        division: document.getElementById('division').value.trim().toUpperCase(),
-        rollNumber: document.getElementById('rollNumber').value.trim(),
         username: document.getElementById('username').value.trim().toLowerCase(),
         password,
         email: document.getElementById('email').value.trim() || null,
       };
+
+      if (selectedRole === 'student') {
+        payload.className = document.getElementById('className').value;
+        payload.division = document.getElementById('division').value.trim().toUpperCase();
+        payload.rollNumber = document.getElementById('rollNumber').value.trim();
+        if (!payload.className || !payload.division || !payload.rollNumber) {
+          showToast('Please fill Class, Division, and Roll Number', 'warning');
+          return;
+        }
+      } else {
+        const tType = document.querySelector('input[name="teacherType"]:checked')?.value || 'subject';
+        const classesArr = Array.from(selectedClasses);
+        if (tType === 'class') {
+          payload.className = document.getElementById('tPrimaryClass').value;
+          payload.division = document.getElementById('tDivision').value.trim().toUpperCase();
+          if (payload.className && !classesArr.includes(payload.className)) {
+            classesArr.unshift(payload.className);
+          }
+        }
+        payload.teacherType = tType;
+        payload.assignedClasses = classesArr;
+        payload.assignedSubjects = Array.from(selectedSubjects);
+
+        if (payload.assignedClasses.length === 0) {
+          showToast('Select at least one assigned class', 'warning');
+          return;
+        }
+        if (payload.assignedSubjects.length === 0) {
+          showToast('Select at least one assigned subject', 'warning');
+          return;
+        }
+      }
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Creating account...';
@@ -192,8 +295,8 @@
           setAuthToken(res.token);
           setCurrentUser(res.user);
         }
-        showToast('Account created! Awaiting admin approval.', 'success');
-        setTimeout(() => window.location.replace('/auth/pending.html'), 500);
+        showToast('Account created! Awaiting approval.', 'success');
+        setTimeout(() => window.location.replace('/auth/pending.html'), 450);
       } catch (err) {
         showToast(err.message, 'error');
         submitBtn.disabled = false;

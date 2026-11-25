@@ -23,8 +23,8 @@ export async function handleDmRoutes(request, env, path, method) {
 
     const { results } = await env.DB.prepare(`
       SELECT dc.id, dc.user1_id, dc.user2_id, dc.status, dc.requested_by, dc.created_at, dc.updated_at,
-             p1.username as u1_username, p1.full_name as u1_name, p1.class_name as u1_class, p1.division as u1_division, p1.roll_number as u1_roll, p1.is_root_admin as u1_root,
-             p2.username as u2_username, p2.full_name as u2_name, p2.class_name as u2_class, p2.division as u2_division, p2.roll_number as u2_roll, p2.is_root_admin as u2_root,
+             p1.username as u1_username, p1.full_name as u1_name, p1.class_name as u1_class, p1.division as u1_division, p1.roll_number as u1_roll, p1.role as u1_role, p1.teacher_type as u1_teacher_type, p1.is_root_admin as u1_root,
+             p2.username as u2_username, p2.full_name as u2_name, p2.class_name as u2_class, p2.division as u2_division, p2.roll_number as u2_roll, p2.role as u2_role, p2.teacher_type as u2_teacher_type, p2.is_root_admin as u2_root,
              (SELECT content FROM messages WHERE channel = ('dm_' || dc.id) AND datetime(created_at) >= datetime('now', '-7 days') ORDER BY created_at DESC, rowid DESC LIMIT 1) as last_message,
              (SELECT created_at FROM messages WHERE channel = ('dm_' || dc.id) AND datetime(created_at) >= datetime('now', '-7 days') ORDER BY created_at DESC, rowid DESC LIMIT 1) as last_message_time
       FROM direct_chats dc
@@ -43,6 +43,8 @@ export async function handleDmRoutes(request, env, path, method) {
         className: isUser1 ? r.u2_class : r.u1_class,
         division: isUser1 ? r.u2_division : r.u1_division,
         rollNumber: isUser1 ? r.u2_roll : r.u1_roll,
+        role: isUser1 ? r.u2_role : r.u1_role,
+        teacherType: isUser1 ? r.u2_teacher_type : r.u1_teacher_type,
         isRootAdmin: (isUser1 ? r.u2_root : r.u1_root) === 1,
       };
       return {
@@ -71,29 +73,33 @@ export async function handleDmRoutes(request, env, path, method) {
       let target = null;
       if (targetUserId) {
         target = await env.DB.prepare(
-          `SELECT id, username, full_name, class_name FROM profiles WHERE id = ? AND account_status = 'active'`
+          `SELECT id, username, full_name, class_name, role, allow_student_dms FROM profiles WHERE id = ? AND account_status = 'active'`
         ).bind(targetUserId).first();
       } else {
         const cleanQuery = (targetUsername || query || '').toString().trim();
         const cleanHandle = cleanQuery.replace(/^@/, '').toLowerCase();
         if (cleanHandle) {
           target = await env.DB.prepare(
-            `SELECT id, username, full_name, class_name FROM profiles WHERE LOWER(username) = ? AND account_status = 'active'`
+            `SELECT id, username, full_name, class_name, role, allow_student_dms FROM profiles WHERE LOWER(username) = ? AND account_status = 'active'`
           ).bind(cleanHandle).first();
         }
         if (!target && /^\d+$/.test(cleanQuery)) {
           target = await env.DB.prepare(
-            `SELECT id, username, full_name, class_name FROM profiles WHERE roll_number = ? AND account_status = 'active'`
+            `SELECT id, username, full_name, class_name, role, allow_student_dms FROM profiles WHERE roll_number = ? AND account_status = 'active'`
           ).bind(cleanQuery).first();
         }
       }
 
       if (!target) {
-        return errorResponse('Student not found in school directory', 404);
+        return errorResponse('User not found in school directory', 404);
       }
 
       if (target.id === auth.user.id) {
         return errorResponse('You cannot start a direct chat with yourself', 400);
+      }
+
+      if (target.role === 'teacher' && target.allow_student_dms === 0 && auth.user.role === 'student') {
+        return errorResponse('This teacher has disabled student direct messages in their privacy settings.', 403);
       }
 
       const [u1, u2] = [auth.user.id, target.id].sort();

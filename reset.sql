@@ -1,6 +1,10 @@
 -- VIDYASPHERE DATABASE CLEAN RESET SCRIPT
 -- Completely wipes all tables in foreign-key-safe order for a 100% fresh start
 
+DROP TABLE IF EXISTS homework;
+DROP TABLE IF EXISTS quiz_attempts;
+DROP TABLE IF EXISTS quizzes;
+DROP TABLE IF EXISTS lessons;
 DROP TABLE IF EXISTS exams;
 DROP TABLE IF EXISTS school_settings;
 DROP TABLE IF EXISTS note_files;

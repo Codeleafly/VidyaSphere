@@ -18,7 +18,7 @@ export async function handleNotesRoutes(request, env, path, method) {
     const sortBy = url.searchParams.get('sort') || 'newest';
 
     let query = `
-      SELECT n.*, p.full_name as uploader_name, p.role as uploader_role
+      SELECT n.*, p.full_name as uploader_name, p.role as uploader_role, p.teacher_type as uploader_teacher_type
       FROM notes n
       LEFT JOIN profiles p ON n.uploader_id = p.id
       WHERE n.moderation_status = 'approved'
@@ -123,15 +123,19 @@ export async function handleNotesRoutes(request, env, path, method) {
         cleanDriveUrl = urlCheck.url;
       }
 
-      // Check daily upload limit for direct files: Max 4 uploads per 24 hours per student
-      if (noteType === 'file') {
+      // Daily upload limit for direct files: Teachers 20/24h, Students 4/24h
+      if (noteType === 'file' && auth.user.role !== 'admin') {
+        const dailyLimit = auth.user.role === 'teacher' ? 20 : 4;
         const uploadCountRow = await env.DB.prepare(
           `SELECT COUNT(*) as count FROM notes
            WHERE uploader_id = ? AND note_type = 'file' AND datetime(created_at) >= datetime('now', '-1 day')`
         ).bind(auth.user.id).first();
 
-        if (uploadCountRow && uploadCountRow.count >= 4) {
-          return errorResponse('Daily upload limit reached. To conserve edge storage, each student can upload a maximum of 4 study materials per 24 hours. You can still share unlimited Google Drive links.', 429);
+        if (uploadCountRow && uploadCountRow.count >= dailyLimit) {
+          return errorResponse(
+            `Daily upload limit reached (${dailyLimit} files / 24 hours). You can still share unlimited Google Drive links.`,
+            429
+          );
         }
       }
 
@@ -144,10 +148,11 @@ export async function handleNotesRoutes(request, env, path, method) {
       const expiresAt = noteType === 'drive_link'
         ? null
         : new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
+      const isTeacherVerified = auth.user.role === 'teacher' ? 1 : 0;
 
       await env.DB.prepare(
-        `INSERT INTO notes (id, uploader_id, title, description, class_name, subject, chapter, note_type, drive_url, academic_year, expires_at, r2_key, file_type, file_size, moderation_status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved')`
+        `INSERT INTO notes (id, uploader_id, title, description, class_name, subject, chapter, note_type, drive_url, academic_year, expires_at, r2_key, file_type, file_size, moderation_status, is_teacher_verified)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved', ?)`
       ).bind(
         noteId,
         auth.user.id,
@@ -162,7 +167,8 @@ export async function handleNotesRoutes(request, env, path, method) {
         expiresAt,
         r2Key,
         fileType,
-        fileSize
+        fileSize,
+        isTeacherVerified
       ).run();
 
       if (fileBuffer && noteType === 'file') {
@@ -203,7 +209,8 @@ export async function handleNotesRoutes(request, env, path, method) {
         noteType,
         driveUrl: cleanDriveUrl,
         academicYear: activeAcademicYear,
-        expiresAt
+        expiresAt,
+        isTeacherVerified: isTeacherVerified === 1
       }, noteType === 'drive_link' ? 'Google Drive material linked successfully (Permanent for Academic Year)!' : 'Note uploaded successfully (Valid for 30 days)!', 201);
     } catch (err) {
       return errorResponse(`Upload error: ${err.message}`, 500);

@@ -188,7 +188,10 @@ export function renderStudentPicker(students) {
   }
 
   picker.innerHTML = list.slice(0, 50).map(s => {
+    const isTeacher = s.role === 'teacher';
+    const dmsDisabled = isTeacher && s.allow_student_dms === 0 && chatState.user?.role === 'student';
     const academicDetail = [
+      isTeacher ? (s.teacher_type === 'class' ? 'Class Teacher' : 'Teacher') : '',
       s.class_name ? `${s.class_name}${s.division ? ' (' + s.division + ')' : ''}` : '',
       s.roll_number ? `Roll #${s.roll_number}` : '',
       `@${s.username}`
@@ -200,10 +203,12 @@ export function renderStudentPicker(students) {
           <div class="font-bold text-slate-800 text-xs">${escapeHtml(s.full_name)}</div>
           <div class="text-[10px] text-indigo-600 font-medium truncate mt-0.5">${escapeHtml(academicDetail)}</div>
         </div>
-        <button class="invite-student-btn px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-xs transition shrink-0"
-          data-user-id="${escapeHtml(s.id)}">
-          Chat
-        </button>
+        ${dmsDisabled
+          ? `<span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 font-bold text-[10px] shrink-0">DMs Off</span>`
+          : `<button class="invite-student-btn px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-xs transition shrink-0"
+              data-user-id="${escapeHtml(s.id)}">
+              Chat
+            </button>`}
       </div>
     `;
   }).join('');

@@ -10,7 +10,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-900 h-[100dvh] flex flex-col md:flex-row pb-14 md:pb-0 overflow-hidden w-full selection:bg-indigo-500 selection:text-white">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] h-[100dvh] flex flex-col md:flex-row pb-16 md:pb-0 overflow-hidden w-full selection:bg-indigo-500 selection:text-white">
 
   <!-- Mobile Channels Backdrop -->
   <div id="channels-backdrop" class="fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-40 hidden md:hidden transition-opacity"></div>
@@ -19,7 +19,7 @@
   <main class="flex-1 min-h-0 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-5 flex flex-col md:flex-row gap-3 overflow-hidden">
 
     <!-- Conversations / Channels Sidebar -->
-    <div id="channels-panel" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r md:border border-slate-200/80 p-3 flex-col shrink-0 h-full overflow-hidden shadow-2xl md:shadow-[0_1px_2px_rgba(15,23,42,0.04)] hidden md:flex md:relative md:inset-auto md:z-auto md:rounded-2xl">
+    <div id="channels-panel" class="fixed inset-y-0 left-0 z-50 w-72 bg-[var(--md-surface-card)] border-r md:border border-[var(--md-outline)] p-3 flex-col shrink-0 h-full overflow-hidden shadow-2xl md:shadow-[0_1px_2px_rgba(15,23,42,0.04)] hidden md:flex md:relative md:inset-auto md:z-auto md:rounded-3xl">
       <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
         <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
           <i data-lucide="message-circle" class="w-4 h-4 text-indigo-600"></i> Chats & DMs
@@ -91,7 +91,7 @@
     </div>
 
     <!-- Active Chat Window -->
-    <div class="flex-1 min-h-0 bg-white rounded-2xl border border-slate-200/80 flex flex-col h-full overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+    <div class="flex-1 min-h-0 bg-[var(--md-surface-card)] rounded-3xl border border-[var(--md-outline)] flex flex-col h-full overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
 
       <!-- Chat Header -->
       <div class="px-3.5 py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
@@ -139,6 +139,15 @@
           <button id="accept-dm-btn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs transition">Accept</button>
           <button id="decline-dm-btn" class="px-3 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg font-bold text-xs transition">Decline</button>
         </div>
+      </div>
+
+      <!-- Pinned Messages Bar (Admins & Scoped Teachers) -->
+      <div id="pinned-bar" class="hidden px-3.5 py-2 bg-[var(--md-primary-container)]/60 border-b border-[var(--md-outline)] text-xs flex items-center justify-between gap-2 shrink-0">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <i data-lucide="pin" class="w-3.5 h-3.5 text-[var(--md-primary)] shrink-0"></i>
+          <span id="pinned-bar-text" class="truncate font-semibold text-[var(--md-on-primary-container)]"></span>
+        </div>
+        <span id="pinned-bar-count" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/80 shrink-0"></span>
       </div>
 
       <!-- Messages Stream -->

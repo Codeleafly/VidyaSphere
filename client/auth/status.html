@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Account Status | VidyaSphere</title>
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
@@ -16,36 +17,33 @@
           var user = JSON.parse(userStr);
           var target = user.accountStatus === 'pending'
             ? '/auth/pending.html'
-            : (user.role === 'admin' ? '/admin/index.html' : '/dashboard/index.html');
+            : (user.role === 'admin' ? '/admin/index.html' : (user.role === 'teacher' ? '/teacher/index.html' : '/dashboard/index.html'));
           window.location.replace(target);
         }
       } catch (e) {}
     })();
   </script>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 flex items-center justify-center">
-
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-[0_12px_32px_-16px_rgba(15,23,42,0.16)] border border-slate-200/80 p-6 sm:p-7 text-center space-y-5">
-    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] min-h-screen p-4 flex items-center justify-center">
+  <div class="w-full max-w-md m3-card p-7 text-center space-y-5 shadow-lg shadow-slate-900/5">
+    <div class="w-12 h-12 rounded-2xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center mx-auto">
       <i data-lucide="sparkles" class="w-6 h-6"></i>
     </div>
     <div class="space-y-1.5">
-      <h1 class="text-xl font-extrabold text-slate-900">1-Click Verification Active</h1>
-      <p class="text-xs text-slate-500 leading-relaxed">
-        VidyaSphere no longer requires tracking tokens or 6-digit activation codes. Sign in with the username and password you created during registration to check your approval status in real time.
+      <h1 class="text-xl font-extrabold">1-Click Verification Active</h1>
+      <p class="text-xs text-[var(--md-on-surface-variant)] leading-relaxed">
+        Sign in with the username and password you created during registration to check your Student or Teacher approval status in real time.
       </p>
     </div>
-
     <div class="space-y-2.5 pt-1">
-      <a href="/auth/login.html" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+      <a href="/auth/login.html" class="m3-btn-primary w-full py-3 text-sm flex items-center justify-center gap-2">
         <i data-lucide="log-in" class="w-4 h-4"></i> Sign In to Check Status
       </a>
-      <a href="/auth/register.html" class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center justify-center gap-2">
-        New Student? Create Account
+      <a href="/auth/register.html" class="m3-btn-tonal w-full py-2.5 text-xs flex items-center justify-center gap-2">
+        New User? Create Account
       </a>
     </div>
   </div>
-
   <script type="module">
     import { initIcons } from '/js/ui.js';
     initIcons();

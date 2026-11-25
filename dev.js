@@ -20,14 +20,38 @@ const DB_FILE = './vidyasphere.db';
 const isNewDb = !fs.existsSync(DB_FILE);
 const sqlite = new DatabaseSync(DB_FILE);
 
+// Ensure idempotent Phase 6 additive columns on pre-existing local SQLite databases
+function ensurePhase6Columns(db) {
+  const columnAdditions = [
+    ['profiles', 'teacher_type', `TEXT DEFAULT NULL CHECK(teacher_type IN ('subject', 'class'))`],
+    ['profiles', 'assigned_classes', `TEXT DEFAULT '[]'`],
+    ['profiles', 'assigned_subjects', `TEXT DEFAULT '[]'`],
+    ['profiles', 'allow_student_dms', `INTEGER DEFAULT 1`],
+    ['notes', 'is_teacher_verified', `INTEGER DEFAULT 0`],
+    ['answers', 'is_faculty_endorsed', `INTEGER DEFAULT 0`],
+    ['answers', 'endorsed_by', `TEXT`],
+    ['messages', 'is_pinned', `INTEGER DEFAULT 0`],
+    ['messages', 'pinned_by', `TEXT`],
+    ['exams', 'exam_type', `TEXT NOT NULL DEFAULT 'board' CHECK(exam_type IN ('board', 'unit_test'))`],
+  ];
+
+  for (const [table, col, def] of columnAdditions) {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+    if (!cols.some(c => c.name === col)) {
+      db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def};`);
+    }
+  }
+}
+
 if (isNewDb) {
   console.log('📦 Initializing local database schema & seed data...');
   sqlite.exec(fs.readFileSync('./schema.sql', 'utf8'));
   sqlite.exec(fs.readFileSync('./seed.sql', 'utf8'));
   console.log('✓ Database initialized: vidyasphere.db');
 } else {
-  // Ensure schema tables exist in case of partial runs
+  // Ensure schema tables & Phase 6 columns exist in case of partial runs
   sqlite.exec(fs.readFileSync('./schema.sql', 'utf8'));
+  ensurePhase6Columns(sqlite);
 }
 
 // 2. Cloudflare D1 Native Adapter

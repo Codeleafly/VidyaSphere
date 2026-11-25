@@ -5,208 +5,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Study Notes Library | VidyaSphere</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b57d0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col md:flex-row pb-16 md:pb-0 w-full">
+<body class="bg-[var(--md-surface)] text-[var(--md-on-surface)] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 w-full">
 
   <main class="flex-1 w-full max-w-5xl mx-auto p-3.5 sm:p-6 lg:p-8 space-y-5">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
+    <div class="m3-tonal-box p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-[var(--md-outline)]">
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Academic Notes &amp; Materials</h1>
-        <p class="text-xs text-slate-500">Download verified lecture notes, revision summaries, and worksheets</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Academic Notes &amp; Materials</h1>
+        <p class="text-xs text-[var(--md-on-surface-variant)]">Download Teacher Verified notes, gzip-compressed PDFs &amp; permanent Drive links</p>
       </div>
-      <button id="open-upload-btn"
-        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs transition flex items-center justify-center gap-2">
+      <button id="open-upload-btn" class="m3-btn-primary w-full sm:w-auto px-5 py-2.5 text-xs flex items-center justify-center gap-2">
         <i data-lucide="upload" class="w-4 h-4"></i> Upload Material
       </button>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 w-full">
+    <div class="m3-card p-3.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 w-full">
       <div class="relative w-full">
-        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
           <i data-lucide="search" class="w-4 h-4"></i>
         </span>
         <input type="text" id="note-search"
-          class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+          class="m3-input w-full pl-9 pr-3 py-2 rounded-full border border-[var(--md-outline)] bg-[var(--md-surface)] text-xs sm:text-sm"
           placeholder="Search topic, chapter...">
       </div>
-
-      <select id="note-class-filter" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
+      <select id="note-class-filter" class="m3-input w-full px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
         <option value="">All Classes (1st - 12th)</option>
-        <option value="Class 1">Class 1</option>
-        <option value="Class 2">Class 2</option>
-        <option value="Class 3">Class 3</option>
-        <option value="Class 4">Class 4</option>
-        <option value="Class 5">Class 5</option>
-        <option value="Class 6">Class 6</option>
-        <option value="Class 7">Class 7</option>
-        <option value="Class 8">Class 8</option>
-        <option value="Class 9">Class 9</option>
-        <option value="Class 10">Class 10</option>
-        <option value="Class 11 (Science)">Class 11 - Science</option>
-        <option value="Class 11 (Commerce)">Class 11 - Commerce</option>
-        <option value="Class 11 (Arts)">Class 11 - Arts</option>
-        <option value="Class 12 (Science)">Class 12 - Science</option>
-        <option value="Class 12 (Commerce)">Class 12 - Commerce</option>
-        <option value="Class 12 (Arts)">Class 12 - Arts</option>
       </select>
-
-      <select id="note-subject-filter" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
-        <option value="">All Subjects (MH &amp; CBSE)</option>
-        <optgroup label="Languages">
-          <option value="English">English</option>
-          <option value="Marathi">Marathi</option>
-          <option value="Hindi">Hindi</option>
-          <option value="Sanskrit">Sanskrit</option>
-        </optgroup>
-        <optgroup label="Mathematics">
-          <option value="Mathematics">Mathematics</option>
-          <option value="Algebra (Maths I)">Algebra (Maths I)</option>
-          <option value="Geometry (Maths II)">Geometry (Maths II)</option>
-          <option value="Mathematics & Statistics">Mathematics &amp; Statistics</option>
-        </optgroup>
-        <optgroup label="Sciences">
-          <option value="General Science">General Science</option>
-          <option value="Science & Technology (Part 1)">Science &amp; Tech I</option>
-          <option value="Science & Technology (Part 2)">Science &amp; Tech II</option>
-          <option value="Physics">Physics</option>
-          <option value="Chemistry">Chemistry</option>
-          <option value="Biology">Biology</option>
-          <option value="Environmental Studies (EVS)">EVS</option>
-        </optgroup>
-        <optgroup label="Social Sciences">
-          <option value="Social Science">Social Science</option>
-          <option value="History & Political Science">History &amp; Pol Sci</option>
-          <option value="Geography & Economics">Geography &amp; Economics</option>
-        </optgroup>
-        <optgroup label="Commerce &amp; Technology">
-          <option value="Book-Keeping & Accountancy (BK)">Book-Keeping (BK)</option>
-          <option value="Organization of Commerce (OCM)">OCM</option>
-          <option value="Secretarial Practice (SP)">Secretarial Practice</option>
-          <option value="Economics">Economics</option>
-          <option value="Computer Science">Computer Science</option>
-          <option value="Information Technology (IT)">IT</option>
-        </optgroup>
+      <select id="note-subject-filter" class="m3-input w-full px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
+        <option value="">All Subjects</option>
       </select>
-
-      <select id="note-sort" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white">
+      <select id="note-sort" class="m3-input w-full px-3.5 py-2 rounded-full border border-[var(--md-outline)] text-xs sm:text-sm bg-white">
         <option value="newest">Newest First</option>
         <option value="downloads">Most Downloaded</option>
       </select>
     </div>
 
     <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 w-full">
-      <div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading notes repository...</div>
+      <div class="col-span-full m3-card p-8 text-center text-slate-400 text-xs">Loading notes repository...</div>
     </div>
   </main>
 
-  <!-- Upload Modal -->
-  <div id="upload-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-md p-5 space-y-3.5 shadow-2xl border border-slate-200/80 overflow-y-auto max-h-[90vh] modal-enter">
+  <!-- Upload Modal (Material 3 Bottom Sheet on Mobile) -->
+  <div id="upload-modal" class="m3-modal-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="m3-modal-panel bg-white rounded-[28px] w-full max-w-md p-5 space-y-3.5 shadow-2xl overflow-y-auto max-h-[90vh] modal-enter">
+      <div class="m3-sheet-handle sm:hidden"></div>
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="text-base font-bold text-slate-900">Upload Study Material</h3>
-        <button id="close-upload-modal" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-1">&times;</button>
+        <h3 class="text-base font-extrabold">Upload Study Material</h3>
+        <button id="close-upload-modal" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
       <form id="upload-form" class="space-y-3">
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Title / Topic</label>
-          <input type="text" id="up-title" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="e.g. Chapter 4: Carbon Compounds">
+          <input type="text" id="up-title" required class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs sm:text-sm" placeholder="e.g. Chapter 4: Carbon Compounds">
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Class</label>
-            <select id="up-class" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white">
-              <option value="Class 1">Class 1</option>
-              <option value="Class 2">Class 2</option>
-              <option value="Class 3">Class 3</option>
-              <option value="Class 4">Class 4</option>
-              <option value="Class 5">Class 5</option>
-              <option value="Class 6">Class 6</option>
-              <option value="Class 7">Class 7</option>
-              <option value="Class 8">Class 8</option>
-              <option value="Class 9">Class 9</option>
-              <option value="Class 10" selected>Class 10</option>
-              <option value="Class 11 (Science)">Class 11 (Science)</option>
-              <option value="Class 11 (Commerce)">Class 11 (Commerce)</option>
-              <option value="Class 11 (Arts)">Class 11 (Arts)</option>
-              <option value="Class 12 (Science)">Class 12 (Science)</option>
-              <option value="Class 12 (Commerce)">Class 12 (Commerce)</option>
-              <option value="Class 12 (Arts)">Class 12 (Arts)</option>
-            </select>
+            <select id="up-class" required class="m3-input w-full px-2.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs bg-white"></select>
           </div>
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
-            <select id="up-subject" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white">
-              <option value="English">English</option>
-              <option value="Marathi">Marathi</option>
-              <option value="Hindi">Hindi</option>
-              <option value="Sanskrit">Sanskrit</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Algebra (Maths I)">Algebra (Maths I)</option>
-              <option value="Geometry (Maths II)">Geometry (Maths II)</option>
-              <option value="General Science" selected>General Science</option>
-              <option value="Science & Technology (Part 1)">Science &amp; Tech I</option>
-              <option value="Science & Technology (Part 2)">Science &amp; Tech II</option>
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Biology">Biology</option>
-              <option value="Social Science">Social Science</option>
-              <option value="History & Political Science">History &amp; Pol Sci</option>
-              <option value="Geography & Economics">Geography &amp; Eco</option>
-              <option value="Book-Keeping & Accountancy (BK)">Book-Keeping (BK)</option>
-              <option value="Organization of Commerce (OCM)">OCM</option>
-              <option value="Secretarial Practice (SP)">Secretarial Practice</option>
-              <option value="Economics">Economics</option>
-              <option value="Information Technology (IT)">IT / Computer</option>
-            </select>
+            <select id="up-subject" required class="m3-input w-full px-2.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs bg-white"></select>
           </div>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Chapter</label>
-          <input type="text" id="up-chapter" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="e.g. Chapter 4">
+          <input type="text" id="up-chapter" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs sm:text-sm" placeholder="e.g. Chapter 4">
         </div>
 
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Description</label>
-          <textarea id="up-desc" rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm" placeholder="Important formulas, solved examples..."></textarea>
+          <textarea id="up-desc" rows="2" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs sm:text-sm" placeholder="Important formulas, solved examples..."></textarea>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Storage Mode</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="cursor-pointer border border-indigo-200 bg-indigo-50/70 p-2.5 rounded-xl flex items-center gap-2">
-              <input type="radio" name="note-type-radio" value="drive_link" checked class="text-indigo-600">
-              <span class="text-xs font-bold text-indigo-900 leading-tight">Google Drive<br><span class="text-[10px] font-normal text-emerald-700">Permanent • Full Session</span></span>
+            <label class="cursor-pointer border border-[var(--md-outline)] bg-[var(--md-surface-container)] p-2.5 rounded-2xl flex items-center gap-2">
+              <input type="radio" name="note-type-radio" value="drive_link" checked>
+              <span class="text-xs font-bold leading-tight">Google Drive<br><span class="text-[10px] font-normal text-emerald-700">Permanent • Full Session</span></span>
             </label>
-            <label class="cursor-pointer border border-slate-200 bg-slate-50 p-2.5 rounded-xl flex items-center gap-2">
-              <input type="radio" name="note-type-radio" value="file" class="text-indigo-600">
-              <span class="text-xs font-bold text-slate-800 leading-tight">Direct PDF/Img<br><span class="text-[10px] font-normal text-amber-600">Max 15MB • 30 Days</span></span>
+            <label class="cursor-pointer border border-[var(--md-outline)] bg-white p-2.5 rounded-2xl flex items-center gap-2">
+              <input type="radio" name="note-type-radio" value="file">
+              <span class="text-xs font-bold leading-tight">Direct PDF/Img<br><span id="quota-hint" class="text-[10px] font-normal text-amber-700">Max 15MB • 30 Days</span></span>
             </label>
           </div>
         </div>
 
         <div id="drive-link-box">
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Public Google Drive / Cloud Link</label>
-          <input type="url" id="up-drive-url" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono" placeholder="https://drive.google.com/file/d/.../view">
-          <p class="text-[10px] text-slate-500 mt-1">Ensure permission is set to "Anyone with the link can view".</p>
+          <input type="url" id="up-drive-url" class="m3-input w-full px-3.5 py-2 rounded-2xl border border-[var(--md-outline)] text-xs font-mono" placeholder="https://drive.google.com/file/d/.../view">
         </div>
 
         <div id="direct-file-box" class="hidden">
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Select PDF or Image (Max 15MB)</label>
-          <input type="file" id="up-file" accept="application/pdf,image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700">
-          <p class="text-[10px] text-amber-600 font-medium mt-1">Direct uploads expire after 30 days (max 4/day per student).</p>
+          <input type="file" id="up-file" accept="application/pdf,image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[var(--md-primary-container)] file:text-[var(--md-on-primary-container)]">
+          <p id="direct-quota-msg" class="text-[10px] text-amber-700 font-medium mt-1">Direct uploads expire after 30 days (max 4/day for students, 20/day for teachers).</p>
         </div>
 
-        <button type="submit" id="up-submit-btn" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs sm:text-sm transition">
-          Publish to Library
-        </button>
+        <button type="submit" id="up-submit-btn" class="m3-btn-primary w-full py-3 text-xs sm:text-sm">Publish to Library</button>
       </form>
     </div>
   </div>
@@ -214,9 +118,12 @@
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { initDashboardShell } from '/js/layout.js';
-    import { escapeHtml, safeUrl, formatDate, showToast, initIcons, bindModalBackdropAndEsc } from '/js/ui.js';
+    import { CLASS_LIST, SUBJECT_LIST, escapeHtml, safeUrl, formatDate, showToast, initIcons, bindModalBackdropAndEsc } from '/js/ui.js';
 
     const user = initDashboardShell({ active: 'notes', mobileTitle: 'Study Notes' });
+    if (user?.role === 'teacher') {
+      document.getElementById('direct-quota-msg').textContent = 'Teacher Verified: Up to 20 direct uploads per 24 hours (30-day storage).';
+    }
 
     const searchInput = document.getElementById('note-search');
     const classFilter = document.getElementById('note-class-filter');
@@ -226,14 +133,17 @@
     const uploadModal = document.getElementById('upload-modal');
     const uploadForm = document.getElementById('upload-form');
 
-    const closeModal = () => {
-      uploadModal.classList.add('hidden');
-      uploadModal.classList.remove('flex');
-    };
-    document.getElementById('open-upload-btn').addEventListener('click', () => {
-      uploadModal.classList.remove('hidden');
-      uploadModal.classList.add('flex');
+    CLASS_LIST.forEach(c => {
+      classFilter.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+      document.getElementById('up-class').innerHTML += `<option value="${escapeHtml(c)}" ${c === (user?.className || 'Class 10') ? 'selected' : ''}>${escapeHtml(c)}</option>`;
     });
+    SUBJECT_LIST.forEach(s => {
+      subjectFilter.innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+      document.getElementById('up-subject').innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+    });
+
+    const closeModal = () => { uploadModal.classList.add('hidden'); uploadModal.classList.remove('flex'); };
+    document.getElementById('open-upload-btn').addEventListener('click', () => { uploadModal.classList.remove('hidden'); uploadModal.classList.add('flex'); });
     document.getElementById('close-upload-modal').addEventListener('click', closeModal);
     bindModalBackdropAndEsc(uploadModal, closeModal);
 
@@ -249,14 +159,7 @@
         const notes = res.notes || [];
 
         if (notes.length === 0) {
-          grid.innerHTML = `
-            <div class="col-span-full p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
-              <i data-lucide="book-open" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-              <p class="text-sm font-semibold text-slate-700">No study notes match this filter</p>
-              <p class="text-xs text-slate-400 mt-1">Click "Upload Material" above to share study resources.</p>
-            </div>
-          `;
-          initIcons();
+          grid.innerHTML = `<div class="col-span-full m3-card p-10 text-center text-slate-400 text-xs">No study notes match this filter.</div>`;
           return;
         }
 
@@ -264,43 +167,50 @@
           const isDrive = note.note_type === 'drive_link';
           const driveHref = safeUrl(note.drive_url);
           const canDelete = user && (user.id === note.uploader_id || user.role === 'admin');
+          const isTeacherVerified = note.is_teacher_verified === 1 || note.uploader_role === 'teacher';
 
           return `
-            <article class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 card-hover space-y-3 flex flex-col justify-between w-full break-words">
+            <article class="m3-card m3-card-interactive p-5 space-y-3 flex flex-col justify-between w-full break-words">
               <div class="space-y-2">
                 <div class="flex items-center justify-between gap-2 flex-wrap">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-100">${escapeHtml(note.subject)}</span>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">${escapeHtml(note.subject)}</span>
+                    ${isTeacherVerified ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 inline-flex items-center gap-1"><i data-lucide="badge-check" class="w-3 h-3"></i> Teacher Verified</span>` : ''}
+                  </div>
                   ${isDrive
-                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Drive • ${escapeHtml(note.academic_year || '2026-2027')}</span>`
-                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 tabular-nums">PDF • ${note.expires_at ? 'Exp ' + escapeHtml(formatDate(note.expires_at)) : '30-Day'}</span>`
+                    ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Drive • ${escapeHtml(note.academic_year || '2026-2027')}</span>`
+                    : `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 tabular-nums">PDF • ${note.expires_at ? 'Exp ' + escapeHtml(formatDate(note.expires_at)) : '30-Day'}</span>`
                   }
                 </div>
-                <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-snug">${escapeHtml(note.title)}</h3>
-                <p class="text-xs text-slate-500 line-clamp-2">${escapeHtml(note.description || 'No description provided')}</p>
+                <h3 class="font-extrabold text-sm sm:text-base leading-snug">${escapeHtml(note.title)}</h3>
+                <p class="text-xs text-[var(--md-on-surface-variant)] line-clamp-2">${escapeHtml(note.description || 'No description provided')}</p>
               </div>
 
-              <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
+              <div class="pt-3 border-t border-[var(--md-outline)] flex items-center justify-between text-xs gap-2">
                 <div class="flex items-center gap-1.5 text-slate-500 text-[11px] truncate tabular-nums">
-                  <span class="font-semibold text-slate-700">${escapeHtml(note.class_name)}</span>
+                  <span class="font-bold text-slate-700">${escapeHtml(note.class_name)}</span>
                   <span>•</span>
                   <span class="flex items-center gap-0.5"><i data-lucide="eye" class="w-3 h-3"></i> ${note.download_count}</span>
                   ${note.uploader_name ? `<span>•</span><span class="truncate max-w-[110px]">By ${escapeHtml(note.uploader_name)}</span>` : ''}
                 </div>
 
-                <div class="flex items-center gap-1.5 shrink-0">
+                <div class="flex items-center gap-1 shrink-0">
+                  <button data-note-id="${escapeHtml(note.id)}" class="report-note-btn p-1.5 text-slate-400 hover:text-amber-700 hover:bg-amber-50 rounded-full transition" title="Report inaccurate note">
+                    <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                  </button>
                   ${canDelete ? `
-                    <button data-note-id="${escapeHtml(note.id)}" data-note-title="${escapeHtml(note.title)}" class="delete-note-btn p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Delete Note">
+                    <button data-note-id="${escapeHtml(note.id)}" data-note-title="${escapeHtml(note.title)}" class="delete-note-btn p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition" title="Delete Note">
                       <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                   ` : ''}
                   ${isDrive && driveHref ? `
                     <a href="${escapeHtml(driveHref)}" target="_blank" rel="noopener noreferrer"
-                      class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition">
+                      class="px-3.5 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition">
                       <i data-lucide="external-link" class="w-3 h-3"></i> Open Drive
                     </a>
                   ` : `
                     <a href="/api/notes/${encodeURIComponent(note.id)}/file" target="_blank"
-                      class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs flex items-center gap-1 transition">
+                      class="m3-btn-primary px-3.5 py-1.5 text-xs flex items-center gap-1">
                       <i data-lucide="arrow-down-to-line" class="w-3 h-3"></i> Download
                     </a>
                   `}
@@ -311,6 +221,22 @@
         }).join('');
 
         initIcons();
+
+        grid.querySelectorAll('.report-note-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const reason = prompt('Why are you reporting this note (e.g. wrong answers, outdated syllabus)?');
+            if (!reason || !reason.trim()) return;
+            try {
+              await apiRequest(`/notes/${encodeURIComponent(btn.dataset.noteId)}/report`, {
+                method: 'POST',
+                body: { reason: reason.trim() }
+              });
+              showToast('Note reported to moderators.', 'info');
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          });
+        });
 
         grid.querySelectorAll('.delete-note-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
@@ -327,7 +253,7 @@
           });
         });
       } catch (err) {
-        grid.innerHTML = `<div class="col-span-full p-6 text-center text-rose-600 bg-rose-50 rounded-2xl text-xs">${escapeHtml(err.message)}</div>`;
+        grid.innerHTML = `<div class="col-span-full p-6 text-center text-rose-600 bg-rose-50 rounded-3xl text-xs">${escapeHtml(err.message)}</div>`;
       }
     }
 
@@ -353,16 +279,8 @@
       try {
         let res;
         if (selectedType === 'file') {
-          if (!file) {
-            showToast('Please select a file to upload', 'warning');
-            submitBtn.disabled = false;
-            return;
-          }
-          if (file.size > 15 * 1024 * 1024) {
-            showToast('File size exceeds the 15MB limit. Please compress or use Google Drive.', 'warning');
-            submitBtn.disabled = false;
-            return;
-          }
+          if (!file) { showToast('Please select a file', 'warning'); submitBtn.disabled = false; return; }
+          if (file.size > 15 * 1024 * 1024) { showToast('File exceeds 15MB limit', 'warning'); submitBtn.disabled = false; return; }
           const formData = new FormData();
           formData.append('title', document.getElementById('up-title').value.trim());
           formData.append('className', document.getElementById('up-class').value);
@@ -373,11 +291,7 @@
           formData.append('file', file);
           res = await apiRequest('/notes/upload', { method: 'POST', body: formData });
         } else {
-          if (!safeUrl(driveUrl)) {
-            showToast('Please enter a valid http:// or https:// Google Drive link', 'warning');
-            submitBtn.disabled = false;
-            return;
-          }
+          if (!safeUrl(driveUrl)) { showToast('Enter a valid http:// or https:// Drive link', 'warning'); submitBtn.disabled = false; return; }
           res = await apiRequest('/notes/upload', {
             method: 'POST',
             body: {
@@ -405,10 +319,7 @@
       }
     });
 
-    searchInput.addEventListener('input', () => {
-      clearTimeout(window._searchTimer);
-      window._searchTimer = setTimeout(loadNotes, 300);
-    });
+    searchInput.addEventListener('input', () => { clearTimeout(window._searchTimer); window._searchTimer = setTimeout(loadNotes, 300); });
     classFilter.addEventListener('change', loadNotes);
     subjectFilter.addEventListener('change', loadNotes);
     sortFilter.addEventListener('change', loadNotes);
