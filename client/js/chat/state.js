@@ -134,18 +134,28 @@ export function renderMessageHtml(msg) {
     `;
   }
 
+  const isViewerRoot = user?.isRootAdmin || user?.username === 'admin';
+  const isViewerAdmin = user?.role === 'admin';
+  const isPublicOrGroup = chatState.currentChatType !== 'dm';
+  const canEdit = isMe;
+  const canDelete = isMe || (isPublicOrGroup && isViewerAdmin && (isViewerRoot || !isRoot));
+
   let actionsHtml = '';
-  if (isMe || user?.role === 'admin') {
+  if (canEdit || canDelete) {
     actionsHtml = `
-      <div class="flex items-center gap-2.5 mt-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 text-[10px] transition">
-        <button type="button" class="edit-msg-btn text-slate-400 hover:text-indigo-600 flex items-center gap-0.5 font-medium"
-          data-msg-id="${escapeHtml(msg.id)}" data-content="${escapeHtml(msg.content)}" title="Edit message">
-          <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
-        </button>
-        <button type="button" class="delete-msg-btn text-slate-400 hover:text-rose-600 flex items-center gap-0.5 font-medium"
-          data-msg-id="${escapeHtml(msg.id)}" title="Delete message">
-          <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
-        </button>
+      <div class="flex items-center gap-2.5 mt-1 opacity-80 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 text-[10px] transition">
+        ${canEdit ? `
+          <button type="button" class="edit-msg-btn text-slate-400 hover:text-indigo-600 flex items-center gap-0.5 font-medium"
+            data-msg-id="${escapeHtml(msg.id)}" data-content="${escapeHtml(msg.content)}" title="Edit message">
+            <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+          </button>
+        ` : ''}
+        ${canDelete ? `
+          <button type="button" class="delete-msg-btn text-slate-400 hover:text-rose-600 flex items-center gap-0.5 font-medium"
+            data-msg-id="${escapeHtml(msg.id)}" title="Delete message">
+            <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
+          </button>
+        ` : ''}
       </div>
     `;
   }

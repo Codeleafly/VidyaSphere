@@ -280,10 +280,10 @@
     </section>
 
     <!-- TAB 4: PUBLISH NOTICES -->
-    <section id="tab-announcements" class="admin-tab-content space-y-4 hidden">
+    <section id="tab-announcements" class="admin-tab-content space-y-6 hidden">
       <div class="pb-3 border-b border-slate-200/80">
         <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Publish Official Announcement</h2>
-        <p class="text-xs text-slate-500">Post circulars with priority levels (urgent, exam, holiday, general)</p>
+        <p class="text-xs text-slate-500">Post circulars (holiday, exam, urgent, general). Notices auto-delete after 30 days or anytime manually.</p>
       </div>
 
       <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.03)] max-w-2xl">
@@ -337,6 +337,16 @@
             Publish Official Circular
           </button>
         </form>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-900">Active Published Notices</h3>
+          <span id="notice-count-badge" class="text-xs text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 font-bold tabular-nums">0 active</span>
+        </div>
+        <div id="admin-notices-container" class="space-y-3">
+          <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">Loading active notices...</div>
+        </div>
       </div>
     </section>
 

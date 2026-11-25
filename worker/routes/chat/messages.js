@@ -35,7 +35,8 @@ async function verifyChannelReadAccess(env, channel, user) {
       `SELECT user_id, invite_status FROM group_members WHERE group_id = ? AND user_id = ?`
     ).bind(grpId, user.id).first();
 
-    if (user.role !== 'admin' && (!member || member.invite_status !== 'accepted')) {
+    // Strict privacy: Even Lead Admin cannot view private study groups they haven't joined
+    if (!member || member.invite_status !== 'accepted') {
       return { error: errorResponse('You are not an active member of this study group', 403) };
     }
   }
@@ -288,7 +289,7 @@ export async function handleMessageRoutes(request, env, path, method) {
       const existing = await env.DB.prepare(`SELECT * FROM messages WHERE id = ?`).bind(msgId).first();
       if (!existing) return errorResponse('Message not found', 404);
 
-      if (existing.sender_id !== auth.user.id && auth.user.role !== 'admin') {
+      if (existing.sender_id !== auth.user.id) {
         return errorResponse('Forbidden: You can only edit your own messages', 403);
       }
 
@@ -316,11 +317,53 @@ export async function handleMessageRoutes(request, env, path, method) {
     const msgId = path.split('/')[4];
 
     try {
-      const existing = await env.DB.prepare(`SELECT * FROM messages WHERE id = ?`).bind(msgId).first();
+      const existing = await env.DB.prepare(`
+        SELECT m.*, p.username as sender_username, p.is_root_admin as sender_is_root_admin
+        FROM messages m
+        JOIN profiles p ON m.sender_id = p.id
+        WHERE m.id = ?
+      `).bind(msgId).first();
       if (!existing) return errorResponse('Message not found', 404);
 
-      if (existing.sender_id !== auth.user.id && auth.user.role !== 'admin') {
-        return errorResponse('Forbidden: You can only delete your own messages', 403);
+      const isSelf = existing.sender_id === auth.user.id;
+      const isViewerRoot = auth.user.isRootAdmin || auth.user.username === 'admin';
+      const isViewerAdmin = auth.user.role === 'admin';
+      const isSenderRoot = existing.sender_is_root_admin === 1 || existing.sender_username === 'admin';
+
+      // Personal 1-on-1 DMs are strictly private: even Lead Admin cannot moderate someone else's DM
+      if (existing.channel.startsWith('dm_')) {
+        if (!isSelf) {
+          return errorResponse('Forbidden: Personal direct messages are strictly private', 403);
+        }
+      } else if (existing.channel.startsWith('grp_')) {
+        const grpId = existing.channel.replace('grp_', '');
+        const member = await env.DB.prepare(
+          `SELECT role, invite_status FROM group_members WHERE group_id = ? AND user_id = ?`
+        ).bind(grpId, auth.user.id).first();
+
+        if (!member || member.invite_status !== 'accepted') {
+          return errorResponse('Forbidden: Study group conversations are private to members', 403);
+        }
+
+        const isGroupModerator = member.role === 'admin' || isViewerAdmin;
+        if (!isSelf) {
+          if (!isGroupModerator) {
+            return errorResponse('Forbidden: You can only delete your own messages', 403);
+          }
+          if (isSenderRoot && !isViewerRoot) {
+            return errorResponse('Forbidden: Secondary Admins cannot delete Lead Root Admin messages', 403);
+          }
+        }
+      } else {
+        // Public school / class / subject channels
+        if (!isSelf) {
+          if (!isViewerAdmin) {
+            return errorResponse('Forbidden: You can only delete your own messages', 403);
+          }
+          if (isSenderRoot && !isViewerRoot) {
+            return errorResponse('Forbidden: Secondary Admins cannot delete Lead Root Admin messages', 403);
+          }
+        }
       }
 
       await env.DB.batch([

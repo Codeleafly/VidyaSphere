@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
--- PHASE 1: School Official Announcements / Notice Board
+-- PHASE 1: School Official Announcements / Notice Board (Auto-expires after 30 days / 1 month)
 CREATE TABLE IF NOT EXISTS announcements (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS announcements (
     target_class TEXT NOT NULL DEFAULT 'all',
     author_id TEXT NOT NULL,
     is_pinned INTEGER DEFAULT 0,
+    expires_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES profiles(id)
 );

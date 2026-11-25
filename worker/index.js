@@ -151,13 +151,14 @@ export default {
       await env.DB.batch([
         env.DB.prepare(`DELETE FROM sessions WHERE datetime(expires_at) < datetime('now')`),
         env.DB.prepare(`DELETE FROM rate_limits WHERE reset_at < ?`).bind(now),
+        env.DB.prepare(`DELETE FROM announcements WHERE (expires_at IS NOT NULL AND datetime(expires_at) < datetime('now')) OR (expires_at IS NULL AND datetime(created_at) < datetime('now', '-30 days'))`),
         env.DB.prepare(`DELETE FROM note_reports WHERE note_id IN (SELECT id FROM notes WHERE note_type = 'file' AND expires_at IS NOT NULL AND datetime(expires_at) < datetime('now'))`),
         env.DB.prepare(`DELETE FROM note_files WHERE note_id IN (SELECT id FROM notes WHERE note_type = 'file' AND expires_at IS NOT NULL AND datetime(expires_at) < datetime('now'))`),
         env.DB.prepare(`DELETE FROM notes WHERE note_type = 'file' AND expires_at IS NOT NULL AND datetime(expires_at) < datetime('now')`),
         env.DB.prepare(`DELETE FROM message_attachments WHERE message_id IN (SELECT id FROM messages WHERE datetime(created_at) < datetime('now', '-7 days'))`),
         env.DB.prepare(`DELETE FROM messages WHERE datetime(created_at) < datetime('now', '-7 days')`)
       ]);
-      console.log('Daily Edge Cron Maintenance complete: purged expired sessions, rate limits, expired notes & 7-day old messages.');
+      console.log('Daily Edge Cron Maintenance complete: purged expired sessions, rate limits, 30-day notices, expired notes & 7-day old messages.');
     } catch (err) {
       console.error('Scheduled cron error:', err);
     }

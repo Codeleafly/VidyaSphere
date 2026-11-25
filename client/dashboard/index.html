@@ -52,7 +52,7 @@
   <script type="module">
     import { apiRequest } from '/js/api.js';
     import { initDashboardShell } from '/js/layout.js';
-    import { escapeHtml, formatDate, initIcons } from '/js/ui.js';
+    import { escapeHtml, formatDate, initIcons, showToast } from '/js/ui.js';
 
     const user = initDashboardShell({ active: 'notices', mobileTitle: 'Notice Board' });
     if (user) {
@@ -102,32 +102,60 @@
         general: 'bg-indigo-50 text-indigo-700 border-indigo-200'
       };
 
+      const isAdmin = user?.role === 'admin';
+
       container.innerHTML = filtered.map(ann => {
         const badgeColor = priorityColors[ann.priority] || priorityColors.general;
         return `
           <article class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 card-hover space-y-2.5 w-full break-words ${ann.is_pinned ? 'ring-2 ring-indigo-500/15 border-indigo-200' : ''}">
             <div class="flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${badgeColor}">${escapeHtml(ann.priority)}</span>
                 <span class="text-[11px] text-slate-400 tabular-nums">${escapeHtml(formatDate(ann.created_at))}</span>
                 ${ann.is_pinned ? '<span class="text-[10px] text-amber-700 font-bold flex items-center gap-0.5 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200"><i data-lucide="pin" class="w-3 h-3"></i> Pinned</span>' : ''}
               </div>
-              <span class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
-                ${ann.target_class === 'all' ? 'All Classes' : escapeHtml(ann.target_class)}
-              </span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                  ${ann.target_class === 'all' ? 'All Classes' : escapeHtml(ann.target_class)}
+                </span>
+                ${isAdmin ? `
+                  <button class="delete-notice-btn p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                    data-id="${escapeHtml(ann.id)}" data-title="${escapeHtml(ann.title)}" title="Delete Notice">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                ` : ''}
+              </div>
             </div>
 
             <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">${escapeHtml(ann.title)}</h3>
             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">${escapeHtml(ann.content)}</p>
 
-            <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-400">
-              Published by <strong class="text-slate-600">${escapeHtml(ann.author_name || 'School Office')}</strong>
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-400">
+              <span>Published by <strong class="text-slate-600">${escapeHtml(ann.author_name || 'School Office')}</strong></span>
+              ${ann.expires_at ? `<span class="tabular-nums">Auto-deletes ${escapeHtml(formatDate(ann.expires_at))}</span>` : ''}
             </div>
           </article>
         `;
       }).join('');
 
       initIcons();
+
+      if (isAdmin) {
+        container.querySelectorAll('.delete-notice-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm(`Delete notice "${btn.dataset.title || 'this notice'}"?`)) return;
+            try {
+              btn.disabled = true;
+              await apiRequest(`/admin/announcements/${encodeURIComponent(btn.dataset.id)}`, { method: 'DELETE' });
+              showToast('Notice deleted successfully', 'info');
+              loadAnnouncements();
+            } catch (err) {
+              showToast(err.message, 'error');
+              btn.disabled = false;
+            }
+          });
+        });
+      }
     }
 
     document.querySelectorAll('.filter-pill').forEach(btn => {

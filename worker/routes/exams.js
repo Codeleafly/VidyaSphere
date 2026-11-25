@@ -99,14 +99,15 @@ export async function handleExamsRoutes(request, env, path, method) {
         VALUES (?, 'EXAM_SCHEDULED', ?, ?)
       `).bind(generateId('log', 8), auth.user.id, `Scheduled ${title} for ${className} on ${examDate}`).run();
 
-      // Optionally broadcast notice to school notice board
+      // Optionally broadcast notice to school notice board (auto-expires in 30 days)
       if (broadcastNotice) {
         const annId = generateId('ann', 8);
+        const expiresAt = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
         const annContent = `Official Exam Scheduled: ${title} (${subject}) on ${examDate}${startTime ? ' at ' + startTime : ''}.${roomOrHall ? ' Room/Hall: ' + roomOrHall : ''}\nCheck the Exam Timetable for complete syllabus and guidelines.`;
         await env.DB.prepare(`
-          INSERT INTO announcements (id, title, content, priority, target_class, author_id, is_pinned)
-          VALUES (?, ?, ?, 'exam', ?, ?, 1)
-        `).bind(annId, `Exam Alert: ${title}`, annContent, className, auth.user.id).run();
+          INSERT INTO announcements (id, title, content, priority, target_class, author_id, is_pinned, expires_at)
+          VALUES (?, ?, ?, 'exam', ?, ?, 1, ?)
+        `).bind(annId, `Exam Alert: ${title}`, annContent, className, auth.user.id, expiresAt).run();
       }
 
       return successResponse({ id: examId }, 'Exam schedule created successfully', 201);

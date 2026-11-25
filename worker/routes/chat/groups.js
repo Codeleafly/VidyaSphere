@@ -100,11 +100,11 @@ export async function handleGroupRoutes(request, env, path, method) {
 
     const groupId = path.split('/')[4];
     const callerMember = await env.DB.prepare(
-      `SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`
+      `SELECT * FROM group_members WHERE group_id = ? AND user_id = ? AND invite_status = 'accepted'`
     ).bind(groupId, auth.user.id).first();
 
-    if (!callerMember && auth.user.role !== 'admin') {
-      return errorResponse('Forbidden: You are not a member of this study group', 403);
+    if (!callerMember) {
+      return errorResponse('Forbidden: You are not an active member of this study group', 403);
     }
 
     const { results } = await env.DB.prepare(`
@@ -133,7 +133,7 @@ export async function handleGroupRoutes(request, env, path, method) {
       `SELECT * FROM group_members WHERE group_id = ? AND user_id = ? AND invite_status = 'accepted'`
     ).bind(groupId, auth.user.id).first();
 
-    if (!callerMember && auth.user.role !== 'admin') {
+    if (!callerMember) {
       return errorResponse('Forbidden: Only active study group members can add classmates', 403);
     }
 
@@ -238,18 +238,17 @@ export async function handleGroupRoutes(request, env, path, method) {
     if (!group) return errorResponse('Study group not found', 404);
 
     const callerMember = await env.DB.prepare(
-      `SELECT * FROM group_members WHERE group_id = ? AND user_id = ?`
+      `SELECT * FROM group_members WHERE group_id = ? AND user_id = ? AND invite_status = 'accepted'`
     ).bind(groupId, auth.user.id).first();
 
-    if (!callerMember && auth.user.role !== 'admin') {
-      return errorResponse('Forbidden: You are not a member of this group', 403);
+    if (!callerMember) {
+      return errorResponse('Forbidden: You are not an active member of this group', 403);
     }
 
     const isSelfLeaving = targetUserId === auth.user.id;
-    const isGroupAdmin = callerMember && callerMember.role === 'admin';
-    const isSystemAdmin = auth.user.role === 'admin';
+    const isGroupAdmin = callerMember.role === 'admin';
 
-    if (!isSelfLeaving && !isGroupAdmin && !isSystemAdmin) {
+    if (!isSelfLeaving && !isGroupAdmin) {
       return errorResponse('Forbidden: Only group admins can remove other members', 403);
     }
 
@@ -269,8 +268,8 @@ export async function handleGroupRoutes(request, env, path, method) {
     const group = await env.DB.prepare(`SELECT * FROM chat_groups WHERE id = ?`).bind(groupId).first();
     if (!group) return errorResponse('Study group not found', 404);
 
-    if (group.creator_id !== auth.user.id && auth.user.role !== 'admin') {
-      return errorResponse('Forbidden: Only the group creator or admin can delete the study group', 403);
+    if (group.creator_id !== auth.user.id) {
+      return errorResponse('Forbidden: Only the study group creator can delete this group', 403);
     }
 
     await env.DB.batch([

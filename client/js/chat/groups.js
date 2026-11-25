@@ -178,7 +178,7 @@ async function loadGroupMembers(groupId) {
 
     const me = chatState.currentGroupMembers.find(m => m.user_id === chatState.user?.id);
     if (me) chatState.currentGroupRole = me.member_role;
-    const isGroupAdmin = chatState.currentGroupRole === 'admin' || chatState.user?.role === 'admin';
+    const isGroupAdmin = chatState.currentGroupRole === 'admin';
 
     deleteBtn.classList.toggle('hidden', !isGroupAdmin);
     renderGroupMembers(chatState.currentGroupMembers, isGroupAdmin);

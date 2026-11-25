@@ -8,6 +8,7 @@ import { initIcons, showToast } from '/js/ui.js';
 import { loadApplications } from '/js/admin/applications.js';
 import { loadStudentAccounts, initQuickPromoter } from '/js/admin/students.js';
 import { loadExamsAdmin, initExamsManager } from '/js/admin/exams.js';
+import { loadAdminNotices } from '/js/admin/notices.js';
 
 let currentAdminUser = null;
 
@@ -90,6 +91,7 @@ function switchTab(tabId) {
   if (tabId === 'applications') loadApplications(currentAdminUser, refreshAllData);
   if (tabId === 'students') loadStudentAccounts(currentAdminUser, refreshAllData);
   if (tabId === 'exams') loadExamsAdmin();
+  if (tabId === 'announcements') loadAdminNotices();
   if (tabId === 'settings') loadSettings();
 }
 
@@ -114,8 +116,9 @@ document.getElementById('create-ann-form')?.addEventListener('submit', async (e)
         isPinned: document.getElementById('ann-pinned').checked,
       },
     });
-    showToast('Official notice published to school board!', 'success');
+    showToast('Official notice published (auto-deletes after 30 days)!', 'success');
     e.target.reset();
+    loadAdminNotices();
     loadStats();
   } catch (err) {
     showToast(err.message, 'error');

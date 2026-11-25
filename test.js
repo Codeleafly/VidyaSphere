@@ -7,6 +7,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import worker from './worker/index.js';
+import { runModerationAndNoticeTests } from './tests/moderation.js';
 
 console.log("=================================================");
 console.log("   🎓 VIDYASPHERE MASTER VERIFICATION SUITE      ");
@@ -636,8 +637,10 @@ async function runTests() {
   }), mockEnv);
   console.log("✓ [Notes Integrity - Report & Cascade Delete]:", (rRep.status === 200 && rDelReported.status === 200) ? 'PASS' : 'FAIL');
 
+  await runModerationAndNoticeTests({ worker, mockEnv, db, adminToken, studentId });
+
   console.log("\n=================================================");
-  console.log(" 🎉 ALL 44 VERIFICATION MODULES PASSED (100%)    ");
+  console.log(" 🎉 ALL 50 VERIFICATION MODULES PASSED (100%)    ");
   console.log("=================================================");
 }
 
