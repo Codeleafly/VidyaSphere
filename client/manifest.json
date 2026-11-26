@@ -1,16 +1,16 @@
 {
-  "name": "VidyaSphere Digital Edge School",
+  "name": "VidyaSphere | Supreme Knowledge Edge Ecosystem",
   "short_name": "VidyaSphere",
-  "description": "High-Performance Edge School Management, Academic Library & Q&A Ecosystem",
+  "description": "Edge School Portal, Teacher Studio & Governance Platform with verified study notes, chapter lessons, quizzes, homework, Q&A, and realtime school chat.",
   "start_url": "/dashboard/index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
+  "background_color": "#f8f9fc",
+  "theme_color": "#0b57d0",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🎓</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%230b57d0'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='white'>🎓</text></svg>",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"

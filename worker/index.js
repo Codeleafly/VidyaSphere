@@ -166,6 +166,16 @@ export default {
 
     // Static Assets delivery (Cloudflare Pages or Workers Static Assets)
     if (env.ASSETS) {
+      const withHtmlHeaders = (assetRes) => {
+        const headers = new Headers(assetRes.headers);
+        headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        headers.set('Pragma', 'no-cache');
+        headers.set('Expires', '0');
+        headers.set('X-Content-Type-Options', 'nosniff');
+        headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        return new Response(assetRes.body, { status: assetRes.status, headers });
+      };
+
       let targetPath = path;
       if (targetPath === '/' || targetPath === '') {
         targetPath = '/index.html';
@@ -181,31 +191,19 @@ export default {
         assetUrl.pathname = `${targetPath}.html`;
         const htmlRes = await env.ASSETS.fetch(new Request(assetUrl.toString(), request));
         if (htmlRes.status !== 404) {
-          const headers = new Headers(htmlRes.headers);
-          headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-          headers.set('Pragma', 'no-cache');
-          headers.set('Expires', '0');
-          return new Response(htmlRes.body, { status: htmlRes.status, headers });
+          return withHtmlHeaders(htmlRes);
         }
 
         assetUrl.pathname = `${targetPath}/index.html`;
         const dirIndexRes = await env.ASSETS.fetch(new Request(assetUrl.toString(), request));
         if (dirIndexRes.status !== 404) {
-          const headers = new Headers(dirIndexRes.headers);
-          headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-          headers.set('Pragma', 'no-cache');
-          headers.set('Expires', '0');
-          return new Response(dirIndexRes.body, { status: dirIndexRes.status, headers });
+          return withHtmlHeaders(dirIndexRes);
         }
       }
 
-      // If serving an HTML file, prevent stale browser caching
+      // If serving an HTML file, prevent stale browser caching & set standard SEO/security headers
       if (res.headers.get('content-type')?.includes('text/html')) {
-        const headers = new Headers(res.headers);
-        headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-        headers.set('Pragma', 'no-cache');
-        headers.set('Expires', '0');
-        return new Response(res.body, { status: res.status, headers });
+        return withHtmlHeaders(res);
       }
 
       return res;

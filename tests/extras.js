@@ -262,6 +262,38 @@ export async function runExtrasVerificationTests({ worker, mockEnv, adminToken, 
   ];
   const metaEverywhere = publicPages.every(p => fs.readFileSync(p, 'utf8').includes(expectedMeta));
 
+  const allHtmlFiles = [
+    ...publicPages,
+    './client/admin/index.html',
+    './client/teacher/index.html',
+    './client/dashboard/index.html',
+    './client/dashboard/lessons.html',
+    './client/dashboard/homework.html',
+    './client/dashboard/notes.html',
+    './client/dashboard/exams.html',
+    './client/dashboard/qa.html',
+    './client/dashboard/polls.html',
+    './client/dashboard/chat.html',
+    './client/dashboard/students.html',
+  ];
+  const allHaveFullHeadSeo = allHtmlFiles.every(file => {
+    const html = fs.readFileSync(file, 'utf8');
+    return (
+      /<title>[^<]+<\/title>/i.test(html) &&
+      /<meta\s+name="description"\s+content="[^"]{25,}"/i.test(html) &&
+      /<meta\s+name="robots"\s+content="[^"]+"/i.test(html) &&
+      /<meta\s+property="og:title"\s+content="[^"]+"/i.test(html) &&
+      /<link\s+rel="icon"\s+/i.test(html) &&
+      !html.includes('user-scalable=no')
+    );
+  });
+  const jsonLdValid = ['./client/index.html', './client/guide.html'].every(file => {
+    const html = fs.readFileSync(file, 'utf8');
+    const m = html.match(/<script\s+type="application\/ld\+json">([\s\S]*?)<\/script>/i);
+    if (!m) return false;
+    try { JSON.parse(m[1]); return true; } catch { return false; }
+  });
+
   const rMainRobots = await worker.fetch(new Request('https://vidyasphere.ziprecovery2024-dbc.workers.dev/robots.txt'), mockEnv);
   const tMainRobots = await rMainRobots.text();
   const rPrevSitemap = await worker.fetch(new Request('https://vidyasphere-preview.ziprecovery2024-dbc.workers.dev/sitemap.xml'), mockEnv);
@@ -270,6 +302,8 @@ export async function runExtrasVerificationTests({ worker, mockEnv, adminToken, 
   assertCheck(
     'Google Search Verification Meta, Dynamic Robots.txt & Sitemap.xml',
     metaEverywhere &&
+    allHaveFullHeadSeo &&
+    jsonLdValid &&
     rMainRobots.status === 200 &&
     tMainRobots.includes('Sitemap: https://vidyasphere.ziprecovery2024-dbc.workers.dev/sitemap.xml') &&
     tMainRobots.includes('Disallow: /api/') &&
