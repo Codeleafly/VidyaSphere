@@ -29,6 +29,61 @@ export default {
     const path = url.pathname;
     const method = request.method;
 
+    // SEO: Dynamic robots.txt and sitemap.xml aligned to active host (Main or Preview)
+    if (path === '/robots.txt' && (method === 'GET' || method === 'HEAD')) {
+      const robots = [
+        'User-agent: *',
+        'Allow: /',
+        'Allow: /guide',
+        'Allow: /auth/login',
+        'Allow: /auth/register',
+        'Allow: /auth/status',
+        'Disallow: /api/',
+        'Disallow: /admin/',
+        'Disallow: /teacher/',
+        'Disallow: /dashboard/',
+        '',
+        `Sitemap: ${url.origin}/sitemap.xml`,
+        '',
+      ].join('\n');
+      return new Response(method === 'HEAD' ? null : robots, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
+    }
+
+    if (path === '/sitemap.xml' && (method === 'GET' || method === 'HEAD')) {
+      const origin = url.origin;
+      const lastmod = new Date().toISOString().slice(0, 10);
+      const entries = [
+        { loc: `${origin}/`, changefreq: 'daily', priority: '1.0' },
+        { loc: `${origin}/guide`, changefreq: 'weekly', priority: '0.9' },
+        { loc: `${origin}/auth/login`, changefreq: 'monthly', priority: '0.8' },
+        { loc: `${origin}/auth/register`, changefreq: 'monthly', priority: '0.8' },
+        { loc: `${origin}/auth/status`, changefreq: 'monthly', priority: '0.6' },
+      ];
+      const xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ...entries.map(
+          (e) =>
+            `  <url><loc>${e.loc}</loc><lastmod>${lastmod}</lastmod><changefreq>${e.changefreq}</changefreq><priority>${e.priority}</priority></url>`
+        ),
+        '</urlset>',
+        '',
+      ].join('\n');
+      return new Response(method === 'HEAD' ? null : xml, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
+    }
+
     // API Router
     if (path.startsWith('/api/')) {
       try {

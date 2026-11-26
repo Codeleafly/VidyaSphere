@@ -116,8 +116,8 @@ const MIME_TYPES = {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost:8787'}`);
 
-  // Handle API Requests via Worker
-  if (url.pathname.startsWith('/api/')) {
+  // Handle API & Dynamic SEO Routes via Worker
+  if (url.pathname.startsWith('/api/') || url.pathname === '/sitemap.xml' || url.pathname === '/robots.txt') {
     const headers = new Headers();
     for (const [k, v] of Object.entries(req.headers)) {
       if (v) headers.set(k, Array.isArray(v) ? v.join(', ') : v);
@@ -157,6 +157,8 @@ const server = http.createServer(async (req, res) => {
   // If directory, look for index.html
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, 'index.html');
+  } else if (!fs.existsSync(filePath) && !path.extname(filePath) && fs.existsSync(`${filePath}.html`)) {
+    filePath = `${filePath}.html`;
   }
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {

@@ -1,12 +1,15 @@
 /**
- * Verification Modules 63-70:
+ * Verification Modules 63-71:
  * - Lead Root Admin (@admin) clean profile (no className, division, rollNumber)
  * - Lead Admin & Secondary Admin access to Teacher Studio (/api/teacher/*)
  * - Teacher Designation & Extra Info on Registration + Audit Logs
  * - Self-service password change & profile update
  * - Rebuilt Chat replyToId quotes, emoji reactions, and search
  * - Polls close/delete, Q&A search/delete, and Notes verified/uploader filters
+ * - Google Search Console verification tag, dynamic /sitemap.xml & /robots.txt
  */
+
+import fs from 'node:fs';
 
 function assertCheck(label, condition) {
   console.log(`✓ [${label}]:`, condition ? 'PASS' : 'FAIL');
@@ -245,5 +248,34 @@ export async function runExtrasVerificationTests({ worker, mockEnv, adminToken, 
     'Notes Verified-Only & UploaderId Queries',
     rVerifiedNotes.status === 200 && allVerifiedOk &&
     rAdminNotes.status === 200 && allAdminOwned
+  );
+
+  // 71. Google Site Verification Meta Tag + Dynamic Sitemap.xml & Robots.txt
+  const expectedMeta = '<meta name="google-site-verification" content="3XYEbXoLsICQETuhAq5vufhJyrxTf3h_AjqzEMpNzbs" />';
+  const publicPages = [
+    './client/index.html',
+    './client/guide.html',
+    './client/auth/login.html',
+    './client/auth/register.html',
+    './client/auth/status.html',
+    './client/auth/pending.html',
+  ];
+  const metaEverywhere = publicPages.every(p => fs.readFileSync(p, 'utf8').includes(expectedMeta));
+
+  const rMainRobots = await worker.fetch(new Request('https://vidyasphere.ziprecovery2024-dbc.workers.dev/robots.txt'), mockEnv);
+  const tMainRobots = await rMainRobots.text();
+  const rPrevSitemap = await worker.fetch(new Request('https://vidyasphere-preview.ziprecovery2024-dbc.workers.dev/sitemap.xml'), mockEnv);
+  const tPrevSitemap = await rPrevSitemap.text();
+
+  assertCheck(
+    'Google Search Verification Meta, Dynamic Robots.txt & Sitemap.xml',
+    metaEverywhere &&
+    rMainRobots.status === 200 &&
+    tMainRobots.includes('Sitemap: https://vidyasphere.ziprecovery2024-dbc.workers.dev/sitemap.xml') &&
+    tMainRobots.includes('Disallow: /api/') &&
+    rPrevSitemap.status === 200 &&
+    (rPrevSitemap.headers.get('content-type') || '').includes('application/xml') &&
+    tPrevSitemap.includes('<loc>https://vidyasphere-preview.ziprecovery2024-dbc.workers.dev/</loc>') &&
+    tPrevSitemap.includes('<loc>https://vidyasphere-preview.ziprecovery2024-dbc.workers.dev/guide</loc>')
   );
 }
