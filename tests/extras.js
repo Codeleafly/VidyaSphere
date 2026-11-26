@@ -276,6 +276,13 @@ export async function runExtrasVerificationTests({ worker, mockEnv, adminToken, 
     './client/dashboard/chat.html',
     './client/dashboard/students.html',
   ];
+  const pngIconOk = fs.existsSync('./client/icon.png') &&
+    fs.readFileSync('./client/icon.png').subarray(0, 8).toString('hex') === '89504e470d0a1a0a';
+  const manifestJson = JSON.parse(fs.readFileSync('./client/manifest.json', 'utf8'));
+  const manifestUsesPng = !fs.readFileSync('./client/manifest.json', 'utf8').includes('svg+xml') &&
+    Array.isArray(manifestJson.icons) &&
+    manifestJson.icons.some(i => i.src === '/icon.png' && i.type === 'image/png');
+
   const allHaveFullHeadSeo = allHtmlFiles.every(file => {
     const html = fs.readFileSync(file, 'utf8');
     return (
@@ -283,7 +290,8 @@ export async function runExtrasVerificationTests({ worker, mockEnv, adminToken, 
       /<meta\s+name="description"\s+content="[^"]{25,}"/i.test(html) &&
       /<meta\s+name="robots"\s+content="[^"]+"/i.test(html) &&
       /<meta\s+property="og:title"\s+content="[^"]+"/i.test(html) &&
-      /<link\s+rel="icon"\s+/i.test(html) &&
+      /<link\s+rel="icon"\s+type="image\/png"[^>]+href="\/icon\.png"/i.test(html) &&
+      !html.includes('data:image/svg+xml') &&
       !html.includes('user-scalable=no')
     );
   });
@@ -300,8 +308,10 @@ export async function runExtrasVerificationTests({ worker, mockEnv, adminToken, 
   const tPrevSitemap = await rPrevSitemap.text();
 
   assertCheck(
-    'Google Search Verification Meta, Dynamic Robots.txt & Sitemap.xml',
+    'Google Search Verification Meta, PNG Icon, Dynamic Robots.txt & Sitemap.xml',
     metaEverywhere &&
+    pngIconOk &&
+    manifestUsesPng &&
     allHaveFullHeadSeo &&
     jsonLdValid &&
     rMainRobots.status === 200 &&

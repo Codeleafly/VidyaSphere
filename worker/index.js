@@ -179,12 +179,22 @@ export default {
       let targetPath = path;
       if (targetPath === '/' || targetPath === '') {
         targetPath = '/index.html';
+      } else if (targetPath === '/favicon.ico') {
+        targetPath = '/icon.png';
       }
 
       // Try fetching requested path
       const assetUrl = new URL(request.url);
       assetUrl.pathname = targetPath;
       let res = await env.ASSETS.fetch(new Request(assetUrl.toString(), request));
+
+      // Cache PNG app icon aggressively on browsers to conserve mobile data
+      if (res.status === 200 && targetPath === '/icon.png') {
+        const headers = new Headers(res.headers);
+        headers.set('Cache-Control', 'public, max-age=604800');
+        headers.set('X-Content-Type-Options', 'nosniff');
+        return new Response(res.body, { status: 200, headers });
+      }
 
       // If 404 and path has no extension, try resolving to .html or /index.html
       if (res.status === 404 && !targetPath.includes('.')) {

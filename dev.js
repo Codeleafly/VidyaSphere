@@ -151,6 +151,7 @@ const server = http.createServer(async (req, res) => {
   // Handle Static Files (from ./client/)
   let cleanPath = decodeURIComponent(url.pathname);
   if (cleanPath === '/') cleanPath = '/index.html';
+  if (cleanPath === '/favicon.ico') cleanPath = '/icon.png';
 
   let filePath = path.join('./client', cleanPath);
 
